@@ -1,12 +1,12 @@
 import React from 'react';
 import { TextInput, Text, View } from 'react-native';
 
-const Input = ({ label, value, onChangeText, placeholder, secureTextEntry }) => {
+const Input = ({ label, value, onChangeText, placeholder, secureTextEntry, additionalInputStyles, autoFocus }) => {
   return (
-    <View style={styles.containerStyle}>
-      <Text style={styles.labelStyle}>
+    <View style={[additionalInputStyles, styles.containerStyle]}>
+      {/* <Text style={styles.labelStyle}>
         {label}
-      </Text>
+      </Text> */}
       <TextInput
         secureTextEntry={secureTextEntry}
         placeholder={placeholder}
@@ -14,6 +14,7 @@ const Input = ({ label, value, onChangeText, placeholder, secureTextEntry }) => 
         style={styles.inputStyle}
         value={value}
         onChangeText={onChangeText}
+        autoFocus={autoFocus}
       />
     </View>
   )
@@ -21,23 +22,25 @@ const Input = ({ label, value, onChangeText, placeholder, secureTextEntry }) => 
 
 const styles = {
   inputStyle: {
-    color: '#000',
-    paddingRight: 5,
-    paddingLeft: 5,
-    fontSize: 18,
-    lineHeight: 23,
-    flex: 2
+    color: '#05004e',
+    paddingRight: 10,
+    paddingLeft: 10,
+    fontSize: 20,
+    backgroundColor: 'rgb(256,256,256)',
+    // borderRadius: 13,
+    borderBottomWidth: 2,
+    borderColor: '#a9eec2',
+    alignItems: 'center',
+    height: 40,
   },
   labelStyle: {
     fontSize: 18,
     paddingLeft: 20,
-    flex: 1
+    flex: -1
   },
   containerStyle: {
-    height: 40,
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center'
+    margin: 5,
+    marginTop: 20,
   }
 };
 

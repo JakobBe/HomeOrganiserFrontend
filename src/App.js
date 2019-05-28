@@ -1,14 +1,35 @@
 import React, { Component } from 'react';
-import { View, Text } from 'react-native';
+import Router from './Router';
+import UserContextHolder from './contexts/UserContextHolder';
+import HomeContextHolder from './contexts/HomeContextHolder';
+import { createSession } from './Client';
 
 class App extends Component {
+  state = {
+    user: undefined
+  }
+
+  setUser = (user) => {
+    this.setState({
+      user
+    });
+  };
+
   render() {
+    console.log('rerender with user', this.state);
     return (
-      <View style={{width: 200, marginTop: 200}}>
-        <Text> Hello World </Text>
-      </View>
+      <UserContextHolder
+        user={this.state.user}
+        setUser={this.setUser}
+      >
+        <HomeContextHolder
+          user={this.state.user}
+        >
+          <Router />
+        </HomeContextHolder>
+      </UserContextHolder>
     );
   }
 }
 
-export default App;
+export default App

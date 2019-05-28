@@ -5,3 +5,7 @@ export * from './Header';
 export * from './Input';
 export * from './Spinner';
 export * from './Confirm';
+export * from './HorizontalSeperater';
+export * from './Footer';
+export * from './Modal';
+export * from './ListItem';
