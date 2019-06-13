@@ -1,12 +1,21 @@
 import React, { Component } from 'react';
-import { ListView, View, RefreshControl, FlatList } from 'react-native';
+import { View, RefreshControl, FlatList, Text, Alert, Image, TouchableOpacity } from 'react-native';
 import { Input, CardSection, Button, Footer, ListItem } from '../common';
 import { fetchShoppingItems, createShoppingItem, updateShoppingItem } from '../Client';
 import { UserContext } from '../contexts/UserContextHolder';
 import ShoppingItemModal from './ShoppingItemModal';
 
 class ShoppingList extends Component {
-  state = { shoppingItems: [], refreshing: false, newShoppingItem: '', modalPresented: false, pressedItem: '', pressedItemId: undefined };
+  state = { 
+    shoppingItems: [], 
+    refreshing: false, 
+    newShoppingItem: '', 
+    modalPresented: false, 
+    pressedItem: undefined, 
+    pressedItemId: undefined,
+    shoppingCart: [],
+    isShoppingCartActive: false
+  };
 
   componentWillMount() {
     this.fetchShoppingItems();
@@ -42,6 +51,10 @@ class ShoppingList extends Component {
   }
 
   renderItem = ({ item }) => {
+    if (this.state.shoppingCart.filter(cartItem => { return cartItem === item }).length > 0) {
+      return
+    }
+
     return (
       <ListItem
         id={item.id}
@@ -49,9 +62,20 @@ class ShoppingList extends Component {
         refreshList={this._onRefresh}
         isShoppingItem={true}
         onItemPressed={this.onItemPressed}
+        addToShoppingCart={this.addToShoppingCart}
       />
     );
   };
+
+  renderShoppingCartItem = ({ item }) => {
+    return(
+      <View style={styles.shoppingCartItem}>
+        <Text>
+          {item.name}
+        </Text>
+      </View>
+    );
+  }
 
   saveModalInput = (text, price, id) => {
     updateShoppingItem(id, text, price, this.props.userContext.user.id);
@@ -68,16 +92,70 @@ class ShoppingList extends Component {
     });
   };
 
+  onCartButtonPress = () => {
+    this.setState({
+      modalPresented: true
+    });
+  }
+
+  onShoppingBagPress = () => {
+    // console.log('Inside shopping Bag');
+    this.setState({
+      isShoppingCartActive: !this.state.isShoppingCartActive
+    });
+  };
+
   onModalCose = () => {
     if (this.state.modalPresented) {
       this.setState({
-        modalPresented: false
+        modalPresented: false,
+        pressedItem: undefined,
+        pressedItemId: undefined,
+        isShoppingCartActive: false
       });
     };
   };
 
+  getShoppingCart = () => {
+    const extractKey = ({ id }) => id
+    if (this.state.isShoppingCartActive) {
+      return (
+        <View style={styles.shoppingCartWrapper}>
+          <FlatList
+            style={styles.listWrapper}
+            data={this.state.shoppingCart}
+            renderItem={this.renderShoppingCartItem}
+            keyExtractor={extractKey}
+          />
+          <Button onPress={this.onCartButtonPress} additionalButtonStyles={styles.additionalCartButtonStyle}>
+            Complete Shopping
+          </Button>
+        </View>
+      )
+    };
+    return undefined;
+  }
+
+  addToShoppingCart = (id) => {
+    if (this.state.shoppingCart.filter(item => {return item.id === id}).length > 0) {
+      Alert.alert("This item is already in your Shopping Cart");
+      return 
+    }
+
+    let shoppingItem = this.state.shoppingItems.filter(item => {
+      return item.id === id;
+    });
+
+    const newShoppingCart = this.state.shoppingCart.concat(shoppingItem[0])
+    this.setState({
+      shoppingCart: newShoppingCart
+    });
+  }
+
   render() {
     const extractKey = ({ id }) => id
+    const shoppingCart = this.getShoppingCart()
+    // console.log('The Cart', shoppingCart);
     return (
       <View style={styles.shoppingListContainer}>
         <View style={styles.inputWrapper}>
@@ -86,30 +164,39 @@ class ShoppingList extends Component {
             onChangeText={value => this.setState({ newShoppingItem: value })}
             placeholder={'Shopping Item'}
             additionalInputStyles={styles.additionalInputStyles}
-            autoFocus={true}
+            autoFocus={false}
           />
           <Button onPress={this.onButtonPress} additionalButtonStyles={styles.additionalButtonStyle}>
             +
           </Button>
         </View>
-        <FlatList
-          style={styles.listWrapper}
-          data={this.state.shoppingItems}
-          renderItem={this.renderItem}
-          keyExtractor={extractKey}
-          refreshControl={
-            <RefreshControl
-              refreshing={this.state.refreshing}
-              onRefresh={this._onRefresh}
+        <View style={styles.shoppingContentWrapper}>
+          <View style={styles.shoppingItemListWrapper}>
+            <FlatList
+              style={styles.listWrapper}
+              data={this.state.shoppingItems}
+              renderItem={this.renderItem}
+              keyExtractor={extractKey}
+              refreshControl={
+                <RefreshControl
+                  refreshing={this.state.refreshing}
+                  onRefresh={this._onRefresh}
+                />
+              }
             />
-          }
-        />
+          </View>
+          <TouchableOpacity onPress={this.onShoppingBagPress}>
+            <Image source={require('../../assets/images/shopping-bag.png')} style={styles.imageStyle} />
+          </TouchableOpacity>
+          {shoppingCart}
+        </View>
         <ShoppingItemModal
           showModal={this.state.modalPresented}
           saveInput={this.saveModalInput}
           onModalClose={this.onModalCose}
           item={this.state.pressedItem}
           id={this.state.pressedItemId}
+          cartItems={this.state.shoppingCart}
         />
         <Footer />
       </View>
@@ -134,6 +221,12 @@ const styles = {
     width: 40,
     borderRadius: 20
   },
+
+  additionalCartButtonStyle: {
+    backgroundColor: '#05004e',
+    marginBottom: 5,
+  },
+
   inputWrapper: {
     flex: 0,
     flexDirection: 'row',
@@ -147,6 +240,37 @@ const styles = {
 
   additionalInputStyles: {
     width: 300
+  },
+
+  shoppingContentWrapper: {
+    flex: 2,
+    flexDirection: 'row',
+    justifyContent: 'space-evenly'
+  },
+
+  shoppingCartWrapper: {
+    borderLeftWidth: 0.5,
+    borderLeftColor: '#05004e',
+    flex: 1,
+    padding: 5
+  },
+
+  shoppingItemListWrapper: {
+    flex: 2
+  },
+
+  imageStyle: {
+    height: 30,
+    width: 30,
+    padding: 10,
+    position: 'absolute',
+    top: 25,
+    right: 25 
+  },
+
+  shoppingCartItem: {
+    borderBottomWidth: 0.5,
+    padding: 5,
   }
 }
 

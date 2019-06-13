@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Modal, Text, TouchableHighlight, View, numeric } from 'react-native';
 import { Button, Input } from '../common';
+import { createExpense } from '../Client';
 
 class ShoppingItemModal extends Component {
   state = {
@@ -15,13 +16,40 @@ class ShoppingItemModal extends Component {
   };
 
   onButtonPress = () => {
+    if (!this.state.item && !this.props.item) {
+      createExpense(2 , this.state.price, this.props.cartItems);
+      this.props.onModalClose();
+      return
+    };
+
     this.props.saveInput((this.state.item || this.props.item), this.state.price, this.props.id);
     this.setState({
       price: ''
     });
   };
- 
+
+  getLabelOrInput = () => {
+    if (this.state.item || this.props.item) {
+      return (
+        <Input
+          value={this.state.item || this.props.item || 'How much did you spend for the flat?'}
+          onChangeText={value => this.setState({ item: value })}
+        />
+      );
+    };
+
+    if (!this.state.item && !this.props.item) 
+      return (
+        <Text>
+          How much did you spend for the flat?
+        </Text>
+      );
+    };
+
   render() {
+    const labelOrInput = this.getLabelOrInput();
+    const buttonLabel = !this.state.item && !this.props.item ? 'Save expenses' : 'Mark as bought';
+    const isCart = this.state.item && this.props.item
     return (
       <Modal
         animationType="slide"
@@ -35,10 +63,7 @@ class ShoppingItemModal extends Component {
           >
             <Text style={{ color: '#a9eec2', fontWeight: 'bold' }}>Close</Text>
           </TouchableHighlight>
-          <Input
-            value={this.state.item || this.props.item}
-            onChangeText={value => this.setState({ item: value })}
-          />
+          {labelOrInput}
           <View style={styles.priceInputWrapper}>
             <Text style={styles.priceLable}>
               Price:
@@ -56,7 +81,7 @@ class ShoppingItemModal extends Component {
             onPress={() => this.onButtonPress()}
             additionalButtonStyles={styles.buttonStyle}
           >
-            Mark as bought
+            {buttonLabel}
           </Button>
         </View>
       </Modal>

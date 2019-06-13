@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, Animated, View, TouchableOpacity, TouchableWithoutFeedback } from 'react-native';
+import { Text, Animated, View, TouchableOpacity, TouchableWithoutFeedback, Alert } from 'react-native';
 import { CheckBox } from 'react-native-elements';
 import  { CardSection }  from './CardSection';
 import GestureRecognizer from 'react-native-swipe-gestures';
@@ -23,7 +23,13 @@ class ListItem extends Component {
   }
 
   onSwipeRight(gestureState) {
-    this.setState({ isSwipedLeft: false });
+    if (this.state.isSwipedLeft) {
+      this.setState({ isSwipedLeft: false });
+    };
+
+    if (!this.state.isSwipedLeft && this.props.isShoppingItem) {
+      this.props.addToShoppingCart(this.props.id)
+    };
   }
 
   onDeletePress = () => {
@@ -31,8 +37,12 @@ class ListItem extends Component {
       deleteToDo(this.props.id);
     }
 
-    if (!this.props.isToDo) {
+    if (this.props.isCalendarEntry && this.props.itemUserId === this.props.currentUserId) {
       deleteEvent(this.props.id);
+    }
+
+    if (this.props.isCalendarEntry && this.props.itemUserId !== this.props.currentUserId) {
+      Alert.alert("You can not delete this entry");
     }
 
     if(this.props.isShoppingItem) {
@@ -59,7 +69,7 @@ class ListItem extends Component {
   getUserMark = () => {
     if (this.props.userName) {
       return (
-        <View style={styles.userLetterStyleContainer(this.props.color || 'green')}>
+        <View style={styles.userLetterStyleContainer(this.props.userColor || 'green')}>
           <Text style={styles.userLetterStyle}>
             {this.props.userName.charAt(0).toUpperCase()}
           </Text>
@@ -72,12 +82,36 @@ class ListItem extends Component {
     if (this.props.isToDo) {
       return (
         <View style={styles.toDoAddOnWrapper}>
-          <Text style={styles.descriptionStyle}>
+          {/* <Text style={styles.descriptionStyle}>
             {this.props.appointee}, {this.props.date}
-          </Text>
+          </Text> */}
           { this.getCheckbox() }
         </View>
       )   
+    }
+  }
+
+  getExtraInfo = () => {
+    if (this.props.isToDo && this.props.description !== this.props.userName) {
+      return (
+        <Text style={styles.descriptionStyle(this.props.appointerColor)}>
+          {"\n"} Appointed by {this.props.description} {this.props.date}
+        </Text>
+      );
+    };
+    if (this.props.isCalendarEntry) {
+      return (
+        <Text style={styles.descriptionStyle(this.props.appointerColor)}>
+          {"\n"} At {this.props.description}
+        </Text>
+      );
+    };
+    if (this.props.isExpense) {
+      return (
+        <Text style={styles.descriptionStyle(this.props.appointerColor)}>
+          {"\n"} {this.props.date}
+        </Text>
+      );
     }
   }
 
@@ -117,6 +151,7 @@ class ListItem extends Component {
             <TouchableWithoutFeedback onPress={() => this.props.onItemPressed(this.props.text, this.props.id)}>
               <Text style={styles.titleStyle}>
                 {this.props.text}
+                {this.getExtraInfo()}
               </Text>
             </TouchableWithoutFeedback>
             {this.getToDoListAddOn()}
@@ -133,13 +168,13 @@ const styles = {
     fontSize: 18,
     paddingLeft: 15,
     width: 250,
-    color: '#05004e'
+    color: '#05004e',
   }, 
 
-  descriptionStyle: {
+  descriptionStyle: (color) => ({
     fontSize: 10,
-    color: '#a9eec2'
-  },
+    color
+  }),
 
   checkBox: {
     height: 30,

@@ -3,30 +3,36 @@ import { Text, Animated, View, TouchableOpacity, Image } from 'react-native';
 import { UserContext } from './contexts/UserContextHolder';
 import { HomeContext } from './contexts/HomeContextHolder';
 import { Input, Button } from './common';
-import { updateUser } from './Client';
+import { updateUserColor, updateUserPayPalMeLink } from './Client';
 
 class Profile extends Component {
   state = {
     name: '',
     color: '',
-    email: ''
+    email: '',
+    payPalMeLink: ''
   }
 
   componentDidMount() {
-    const { name, color, email } = this.props.userContext.user;
+    const { name, color, email, pay_pal_me_link } = this.props.userContext.user;
     this.setState({
       name,
       color,
-      email
+      email,
+      payPalMeLink: pay_pal_me_link
     });
   };
 
   onButtonPress = () => {
-    updateUser(this.props.userContext.user.id, this.state.color.toLowerCase());
+    updateUserColor(this.props.userContext.user.id, this.state.color.toLowerCase());
+  }
+
+  onPayButtonPress = () => {
+    updateUserPayPalMeLink(this.props.userContext.user.id, this.state.payPalMeLink.toLowerCase());
   }
 
   render() {
-    const { name, color, email } = this.state;
+    const { name, color, email, payPalMeLink } = this.state;
     return (
       <View style={styles.profileContainer}>
         <View style={styles.profileImageWrapper}>
@@ -49,6 +55,13 @@ class Profile extends Component {
           value={email}
           onChangeText={value => this.setState({ email: value })}
         />
+        <Input
+          value={payPalMeLink}
+          onChangeText={value => this.setState({ payPalMeLink: value })}
+        />
+        <Button onPress={this.onPayButtonPress}>
+          Change PayPal
+        </Button>
         <Button onPress={this.onButtonPress}>
           Change Color
         </Button>

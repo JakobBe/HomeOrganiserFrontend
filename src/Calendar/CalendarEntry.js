@@ -47,13 +47,13 @@ class CalendarEntry extends Component {
       }));
   }
 
-  saveModalInput = (text, id) => {
+  saveModalInput = (text, hour, minute, id) => {
     if (text.length > 0) {
       if (id) {
         updateEvent(text, id);
       }
       if (!id) {
-        createNewEvent(this.state.selectedDate, text, this.props.userContext.user.id);
+        createNewEvent(this.state.selectedDate, text, this.props.userContext.user.id, `${hour}:${minute}`);
       }
       this.setState({
         modalPresented: false
@@ -81,15 +81,21 @@ class CalendarEntry extends Component {
     const itemUserId = item.user_id
     const homeUsers = this.props.homeContext.users
     const itemUser = homeUsers.filter(user => user.id === itemUserId)
-    const color = itemUser[0].color
+    const userColor = itemUser[0].color
+    const time = item.time ? item.time.substr(11,5) : 'All Day'
+
     return (
       <ListItem
         userName={item.user_name}
         id={item.id}
         text={item.text}
         refreshList={this._onRefresh}
-        color={color}
+        userColor={userColor}
         onItemPressed={this.onItemPressed}
+        description={time}
+        isCalendarEntry={true}
+        itemUserId={itemUser[0].id}
+        currentUserId={this.props.userContext.user.id}
       />
     )
   }

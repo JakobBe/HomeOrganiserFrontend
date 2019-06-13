@@ -16,7 +16,6 @@ class App extends Component {
   };
 
   render() {
-    console.log('rerender with user', this.state);
     return (
       <UserContextHolder
         user={this.state.user}

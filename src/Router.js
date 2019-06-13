@@ -19,6 +19,8 @@ const RouterComponent = () => {
           title='Welcome'
           initial
           duration={0}
+          leftTitle='Test'
+          onLeft={() => Actions.calendar({ type: ActionConst.REPLACE })}
           rightTitle='Profile'
           onRight={() => Actions.profile({ type: ActionConst.REPLACE })}
           rightButtonTextStyle={{ color: '#a9eec2' }}

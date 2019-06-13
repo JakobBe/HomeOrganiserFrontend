@@ -1,4 +1,5 @@
 const baseUrl = 'http://localhost:3001/'
+// https://home-organiser.herokuapp.com/
 
 export const createToDo = async (newToDo, appointee, selectedDate, userId) => {
   return fetch(`${baseUrl}to_dos?task=${newToDo}&appointee=${appointee}&date=${selectedDate}&user_id=${userId}`, {
@@ -17,6 +18,12 @@ export const fetchToDos = async (userId) => {
     method: 'get'
   });
 };
+
+export const fetchUserToDos = async (userId) => {
+  return fetch(`${baseUrl}to_dos/user/${userId}`, {
+    method: 'get'
+  });
+}
 
 export const updateToDo = async (id) => {
   return fetch(`${baseUrl}to_dos/${id}`, {
@@ -42,8 +49,8 @@ export const fetchEvents = async (userId) => {
   });
 };
 
-export const createNewEvent = async (selectedDate, text, userId) => {
-  return fetch(`${baseUrl}events?date=${selectedDate}&text=${text}&user_id=${userId}`, {
+export const createNewEvent = async (selectedDate, text, userId, time) => {
+  return fetch(`${baseUrl}events?date=${selectedDate}&text=${text}&user_id=${userId}&time=${time}`, {
     method: 'post'
   });
 };
@@ -96,8 +103,29 @@ export const getHome = async (id) => {
   });
 }
 
-export const updateUser = async (id, color) => {
+export const updateUserColor = async (id, color) => {
   return fetch(`${baseUrl}users/${id}?color=${color}`, {
     method: 'put'
+  });
+}
+
+export const updateUserPayPalMeLink = async (id, link) => {
+  return fetch(`${baseUrl}users/${id}?link=${link}`, {
+    method: 'put'
+  });
+}
+
+export const createExpense = async (id, amount, items) => {
+  return fetch(`${baseUrl}expenses/?user_id=${id}&amount=${amount}`, {
+    method: 'post',
+    body: JSON.stringify({
+      items
+    })
+  });
+}
+
+export const fetchExpenses = async (home_id) => {
+  return fetch(`${baseUrl}expenses?home_id=${home_id}`, {
+    method: 'get'
   });
 }

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { FlatList, View, RefreshControl, Text, TouchableWithoutFeedback, Image } from 'react-native';
 import { Input, CardSection, Button, Footer, ListItem } from '../common';
-import { fetchToDos, filterToDos } from '../Client';
+import { fetchUserToDos, filterToDos } from '../Client';
 import { UserContext } from '../contexts/UserContextHolder';
 import ToDoFilterModal from './ToDoFilterModal';
 import { HomeContext } from '../contexts/HomeContextHolder';
@@ -10,11 +10,11 @@ class ToDoList extends Component {
   state = { toDos: [], refreshing: false, modalPresented: false };
 
   componentWillMount() {
-    this.fetchToDos();
+    this.fetchUserToDos();
   }
 
-  fetchToDos = async () => {
-    await fetchToDos(this.props.userContext.user.id).then((response) => response.json())
+  fetchUserToDos = async () => {
+    await fetchUserToDos(this.props.userContext.user.id).then((response) => response.json())
       .then((res) => { if (res.length !== this.state.toDos.length) {
         this.setState({
           toDos: res
@@ -24,7 +24,7 @@ class ToDoList extends Component {
 
   _onRefresh = () => {
     this.setState({ refreshing: true });
-    this.fetchToDos().then(() => {
+    this.fetchUserToDos().then(() => {
       this.setState({ refreshing: false });
     });
   };
@@ -73,22 +73,42 @@ class ToDoList extends Component {
   };
 
   renderItem = ({ item }) => {
-    const itemUserId = item.user_id
-    const homeUsers = this.props.homeContext.users
-    const itemUser = homeUsers.filter(user => user.id === itemUserId)
-    const color = itemUser[0].color
+    let homeUsers = undefined;
+    let itemUser = undefined;
+    let appointerUser = undefined;
+    let userColor = undefined;
+    let appointerColor = undefined;
+    let userName = undefined;
+
+    if (item.appointee !== 'all') {
+      homeUsers = this.props.homeContext.users
+      itemUser = homeUsers.filter(user => user.id === Number.parseInt(item.appointee))
+      appointerUser = homeUsers.filter(user => user.id === item.user_id)[0]
+      userColor = itemUser[0].color
+      appointerColor = appointerUser.color
+      userName = itemUser[0].name
+    }
+
+    if (item.appointee === 'all') {
+      homeUsers = this.props.homeContext.users
+      appointerUser = homeUsers.filter(user => user.id === item.user_id)[0]
+      userColor = 'green'
+      userName = 'A'
+      appointerColor = appointerUser.color
+    }
     
     return (
       <ListItem
         id={item.id}
-        appointee={item.appointee}
+        description={item.user_name}
         date={item.due_date}
         text={item.task}
         refreshList={this._onRefresh}
         isToDo={true}
-        userName={item.user_name}
+        userName={userName}
         done={item.done}
-        color={color}
+        userColor={userColor}
+        appointerColor={appointerColor}
       />
     );
   };

@@ -1,23 +1,48 @@
 import React, { Component } from 'react';
-import { Modal, Text, TouchableHighlight, View, Alert } from 'react-native';
+import { Modal, Text, TouchableHighlight, View, Alert, Picker } from 'react-native';
 import { Button } from './Button';
 import { Input } from './Input';
 
 class CommonModal extends Component {  
   state = {
-    newEvent: ''
+    newEvent: '',
+    hour: undefined,
+    minute: undefined
   };
   
   onSaveButtonPress = () => {
+  const { newEvent, hour, minute } = this.state;
     if (this.props.singleEventId) {
-      this.props.saveInput(this.state.newEvent, this.props.singleEventId), this.setState({ newEvent: '' })
+      this.props.saveInput(newEvent, hour, minute, this.props.singleEventId), this.setState({ newEvent: '' })
       return
     }
-    this.props.saveInput(this.state.newEvent), this.setState({ newEvent: '' })
+    this.props.saveInput(newEvent, hour, minute), this.setState({ newEvent: '' }, )
+  }
+
+  getHourPickerItems = () => {
+    const hours = Array.from({ length: 24 }, (v, k) => (k).toString()); 
+
+    return hours.map(hour => {
+      return (
+        <Picker.Item label={hour} value={hour} style={{ color: '#05004e' }}/>
+      );
+    });
+  }
+
+  getMinutePickerItems = () => {
+    const minutes = Array.from({ length: 60}, (v, k) => (k).toString()); 
+
+    return minutes.map(minute => {
+      return (
+        <Picker.Item label={minute} value={minute} style={{ color: '#05004e' }} />
+      );
+    });
   }
 
   render() {
     const value = this.state.newEvent || this.props.modalValue
+    const hourPickerItems = this.getHourPickerItems()
+    const minutePickerItems = this.getMinutePickerItems()
     return (
       <Modal
         animationType="slide"
@@ -37,6 +62,25 @@ class CommonModal extends Component {
             placeholder={'Enter a new event'}
             autoFocus={true}
           />
+          <View style={styles.timePickerWrapper}>
+            <Picker
+              selectedValue={this.state.hour}
+              onValueChange={value => this.setState({ hour: value })}
+              style={{ height: 200, backgroundColor: 'white', width: 80, color: '#05004e' }}
+              itemStyle={{ height: 200 }}
+            >
+              {hourPickerItems}
+            </Picker>
+            <Text style={{ fontSize: 30, color: '#05004e'}}>:</Text>
+            <Picker
+              selectedValue={this.state.minute}
+              onValueChange={value => this.setState({ minute: value })}
+              style={{ height: 200, backgroundColor: 'white', width: 80, color: '#05004e' }}
+              itemStyle={{ height: 200 }}
+            >
+              {minutePickerItems}
+            </Picker>
+          </View>
           <Button 
             onPress={() => this.onSaveButtonPress()}
             additionalButtonStyles={styles.buttonStyle}
@@ -69,6 +113,14 @@ const styles = {
   buttonStyle: {
     backgroundColor: '#05004e',
     marginTop: 5
+  },
+
+  timePickerWrapper: {
+    flex: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 20
   }
 }
 

@@ -17,7 +17,6 @@ class HomeContextHolder extends Component {
     const res = await getHome(this.props.user.home_id)
       .then((response) => response.json())
       .then((res) => {
-        console.log('log the user', res.users);
         this.setState({
           users: res.users,
           toDos: res.to_dos,
