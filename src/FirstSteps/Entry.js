@@ -7,20 +7,13 @@ import GestureRecognizer, { swipeDirections } from 'react-native-swipe-gestures'
 import HomeSelector from './HomeSelector';
 import { colorPalette } from '../Style';
 import ProfileModal from './ProfileModal';
+import ImagePicker from 'react-native-image-picker';
+import { getPreSignedUrl } from '../AWSClient';
 
 class Entry extends Component {
   state = {
-    newUser: false,
     imageUp: false,
     profileModalActive: false
-  }
-
-  componentDidMount() {
-    if (this.props.homeContext.currentUser.home_id === 42) {
-      this.setState({
-        newUser: true
-      })
-    }
   }
 
   onSwipeUp = (gestureState) => {
@@ -35,9 +28,38 @@ class Entry extends Component {
     })
   }
 
-  onProfilePress = () => {
-    this.setState({
-      profileModalActive: true
+  onProfilePress = async () => {
+    const options = {
+      title: 'Select Profile Picture',
+      customButtons: [{ name: 'random', title: 'Get a random picture :)' }],
+    };
+    const preSignedUrl = await getPreSignedUrl();
+
+    ImagePicker.showImagePicker(options, (response) => {
+      console.log('Response = ', response);
+
+      if (response.didCancel) {
+        console.log('User cancelled image picker');
+      } else if (response.error) {
+        console.log('ImagePicker Error: ', response.error);
+      } else if (response.customButton) {
+        console.log('User tapped custom button: ', response.customButton);
+      } else {
+        console.log('preSignedUrl', preSignedUrl);
+        const xhr = new XMLHttpRequest();
+        xhr.open('PUT', preSignedUrl);
+        xhr.onreadystatechange = function() {
+          if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+              console.log('Image successfully uploaded to S3', xhr);
+            }
+          } else {
+            console.log('Error while sending the image to S3', xhr);
+          }
+        }
+        xhr.setRequestHeader('Content-Type', 'image/jpeg');
+        xhr.send({ uri: response.uri, type: 'image/jpeg', name: 'test.jpg' });
+      }
     });
   }
 
@@ -47,20 +69,19 @@ class Entry extends Component {
     });
   }
 
-  renderHomeSelector = () => {
-    if (this.state.newUser) {
+  renderHomeSelector = (isNewUser) => {
+    if (isNewUser) {
       return (
         <HomeSelector />
       );
     }
   }
 
-  renderMainContent = () => {
+  renderMainContent = (isNewUser, currentUser) => {
     const images = ['https://picsum.photos/id/100/1000/1000', 'https://picsum.photos/id/253/1000/1000', 'https://picsum.photos/id/137/1000/1000', 'https://picsum.photos/id/25/1000/1000', 'https://picsum.photos/id/431/1000/1000', 'https://picsum.photos/id/311/1000/1000'];
-    const currentUser = this.props.homeContext.currentUser
     const profileColor = currentUser.color
     const users = this.props.homeContext.users;
-    if (!this.state.newUser) {
+    if (!isNewUser) {
       return (
         <View>
           <View style={styles.carouselWrapper}>
@@ -105,8 +126,8 @@ class Entry extends Component {
     }
   }
 
-  renderFooter = () => {
-    if (!this.state.newUser) {
+  renderFooter = (isNewUser) => {
+    if (!isNewUser) {
       return (
         <Footer isHomeActive={true}/>
       );
@@ -114,11 +135,14 @@ class Entry extends Component {
   }
 
   render() {
+    const currentUser = this.props.homeContext.currentUser
+    const isNewUser = currentUser.home_id === 42 ? true : false;
+
     return (
       <View style={styles.entryContainer}>
-        {this.renderHomeSelector()}
-        {this.renderMainContent()}
-        {this.renderFooter()}
+        {this.renderHomeSelector(isNewUser)}
+        {this.renderMainContent(isNewUser, currentUser)}
+        {this.renderFooter(isNewUser)}
       </View>
     )
   }

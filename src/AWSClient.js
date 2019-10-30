@@ -1,5 +1,6 @@
 import Amplify, { Auth } from 'aws-amplify';
-import awsConfig from './aws-exports';
+import AWS from 'aws-sdk';
+import { awsCognitoConfig, awsS3DevUser } from './aws-exports';
 
 export const RejectionErros = {
   UsernameExistsException: 'UsernameExistsException',
@@ -9,7 +10,7 @@ export const RejectionErros = {
   NotAuthorizedException: 'NotAuthorizedException'
 }
 
-Amplify.configure(awsConfig);
+Amplify.configure(awsCognitoConfig);
 
 export const signUp = async (email, password) => {
   try {
@@ -37,4 +38,23 @@ export const signIn = async (email, password) => {
     return { status: 400, res: error }
   }
 };
+
+
+export const getPreSignedUrl = async () => {
+  const s3Access = new AWS.S3({
+    accessKeyId: awsS3DevUser.accessKeyId,
+    secretAccessKey: awsS3DevUser.secretAccessKeyId,
+    region: awsS3DevUser.region
+  });
+  
+  const s3Params = {
+    Bucket: awsS3DevUser.bucket,
+    Key: 'helloWorld/test.jpg',
+    ContentType: 'image/jpeg'
+  }
+
+  const url = await s3Access.getSignedUrl('putObject', s3Params);
+  console.log('Hello from AWS client', url);
+  return url;
+}
 

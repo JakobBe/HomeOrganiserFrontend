@@ -142,7 +142,7 @@ const styles = {
   }),
 
   additionalTextFieldStyle: {
-    backgroundColor: 'none'
+    backgroundColor: 'transparent'
   },
 
   errorTextStyle: {

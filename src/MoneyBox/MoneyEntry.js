@@ -120,7 +120,7 @@ const styles = {
     flex: 0,
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: 'none',
+    backgroundColor: 'transparent',
     margin: 20,
     marginTop: 70,
     paddingBottom: 20,
@@ -147,7 +147,7 @@ const styles = {
   payPalWrapper: {
     flex: 0,
     alignItems: 'center',
-    backgroundColor: 'none',
+    backgroundColor: 'transparent',
     margin: 20,
     paddingBottom: 20,
     borderBottomWidth: 1,

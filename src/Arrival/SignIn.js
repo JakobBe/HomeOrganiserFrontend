@@ -53,10 +53,10 @@ class SignIn extends Component {
 
     if (signInRes.status === 200) {
       await this.props.homeContext.createUserSession(signInRes.res.attributes.sub);
-      this.props.hasSignedIn();
       this.setState({
         loading: false
       });
+      this.props.hasSignedIn();
     }
   }
 
@@ -128,7 +128,7 @@ const styles = {
   },
 
   additionalTextFieldStyle: {
-    backgroundColor: 'none'
+    backgroundColor: 'transparent'
   },
 
   createAccounTextStyle: {
