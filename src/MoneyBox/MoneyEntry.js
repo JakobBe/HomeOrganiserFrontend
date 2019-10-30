@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
-import { TextInput, Text, View, FlatList, Linking } from 'react-native';
-import { Card, Button, HorizontalSeperater, Input, CardSection, Footer, ListItem } from '../common';
-import { fetchExpenses } from '../Client';
+import { Text, View, FlatList, Linking, TouchableOpacity, Image } from 'react-native';
+import { Button, HorizontalSeperater, CardSection, Footer, ListItem } from '../Common';
+import { fetchExpenses, updateExpense } from '../RailsClient';
 import { UserContext } from '../contexts/UserContextHolder';
+import { HomeContext } from '../contexts/HomeContextHolder';
+import { colorPalette } from '../Style/Colors';
 
 class MoneyEntry extends Component {
   state = {
@@ -23,6 +25,12 @@ class MoneyEntry extends Component {
       })
   }
 
+  onResetAllPress = async () => {
+    this.state.expenses.map(expense => {
+      updateExpense(expense.id)
+    })
+  }
+
   getUserExpenseBalacne = () => {
     let balance = 0;
     this.state.expenses.map(expense => {
@@ -37,12 +45,32 @@ class MoneyEntry extends Component {
     return balance;
   }
 
-  renderItem = ({ item }) => {
+  onPiggybankPress = () => {
+    Linking.openURL('https://paypal.me/pools/c/8fwKiG9XxM')
+  }
 
+  getPayPalLinks = () => {
+   return this.props.homeContext.users.map(user => {
+     return (
+        <TouchableOpacity onPress={() => this.onPayPalPress(user)}>
+          <Text style={styles.paypalText}>
+            {`PayPal ${user.name}`}
+          </Text>
+        </TouchableOpacity>
+     )
+    })
+  }
+
+  onPayPalPress = (user) => {
+    Linking.openURL(`https://${user.pay_pal_me_link}`)
+  }
+
+  renderItem = ({ item }) => {
+    const user = this.props.homeContext.users.find(user => user.id === item.user_id);
     return (
       <ListItem
         id={item.id}
-        text={`${item.user_id} paid ${item.amount}.00$`}
+        text={`${user.name} paid ${item.amount}.00$`}
         date={item.created_at}
         isExpense={true}
       />
@@ -50,110 +78,100 @@ class MoneyEntry extends Component {
   };
 
   render() {
-    console.log(this.props.userContext.user.pay_pal_me_link);
     const extractKey = ({ id }) => id
     return (
       <View style={styles.moneyBoxContainer}>
-        <CardSection additionalCardSectionStyles={styles.inputWrapper}>
-          <Text style={styles.balanceTextStyle}>
+        <View style={styles.balanceWrapper}>
+          <Text style={styles.balanceTextStyle(colorPalette.primary)}>
             Your Balance is {this.getUserExpenseBalacne()}$
           </Text>
-          {/* <Input
-            value={this.state.newSaving}
-            onChangeText={value => this.setState({ newSaving: value })}
-            placeholder={'xxx,xx$'}
-          /> */}
-          <Button additionalButtonStyles={styles.button}>
+          <Button 
+            additionalButtonStyles={styles.additionalButtonStyles} 
+            additionalButtonTextStyles={styles.additionalButtonTextStyles}
+            onPress={this.onResetAllPress}
+          >
             Reset Balance
           </Button>
-        </CardSection>
-        <View style={styles.moneyBoxBox}>
-          <Text style={styles.moneyBoxAmount}
-            onPress={() => Linking.openURL('https://paypal.me/pools/c/8fwKiG9XxM')}
-          >
-            Here is the MoneyPool
-          </Text>
         </View>
-        <Text style={{ color: 'blue' }}
-          onPress={() => Linking.openURL(`https://${this.props.userContext.user.pay_pal_me_link}`)}>
-          PayPal Jakob
-        </Text>
-        <HorizontalSeperater />
+        <View style={styles.payPalWrapper}>
+          <Image source={require('../../assets/images/PayPalLogo.png')} style={styles.paypalImageStyle}/>
+          {this.getPayPalLinks()}
+        </View>
         <FlatList
           data={this.state.expenses}
           renderRow={this.renderRow}
           renderItem={this.renderItem}
           keyExtractor={extractKey}
         />
-        <Footer />
+        <Footer isMoneyboxActive={true}/>
       </View>
     );
   }
 }
 
 const styles = {
-  button: {
-    height: 40,
-    backgroundColor: '#05004e',
-    marginTop: 10,
-    alignItems: 'center',
-    padding: 10
+  moneyBoxContainer: {
+    flex: 1,
+    justifyContent: 'space-between',
+    backgroundColor: colorPalette.secondary
   },
 
-  moneyBoxAmount: {
-    fontSize: 50,
-    color: '#fd5f00'
-  },
-
-  moneyBoxBox: {
-    borderWidth: 2,
-    borderRadius: 10000,
-    borderColor: '#05004e',
-    shadowColor: '#05004e',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 1,
-    marginLeft: 10,
-    marginRight: 10,
-    marginTop: 15,
-    height: 250,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-
-  moneyBoxInput: {
-    height: 35,
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    marginTop: 10,
-  },
-
-  inputWrapper: {
+  balanceWrapper: {
+    flex: 0,
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 30,
+    backgroundColor: 'none',
+    margin: 20,
+    marginTop: 70,
+    paddingBottom: 20,
+    borderBottomWidth: 1,
+    borderColor: colorPalette.primary
   },
-
-  moneyBoxContainer: {
-    backgroundColor: '#a9eec2',
-    flex: 1,
-    justifyContent: 'space-between'
-  },
-
-  balanceTextStyle: {
-    width: 120,
-    backgroundColor: '#c40018',
+  
+  balanceTextStyle: (color) => ({
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 5,
-    color: 'white',
+    color,
     fontWeight: 'bold' 
+  }),
+
+  additionalButtonStyles: {
+    backgroundColor: colorPalette.primary,
+    marginTop: 20
   },
+
+  additionalButtonTextStyles: {
+    color: colorPalette.secondary
+  },
+
+  payPalWrapper: {
+    flex: 0,
+    alignItems: 'center',
+    backgroundColor: 'none',
+    margin: 20,
+    paddingBottom: 20,
+    borderBottomWidth: 1,
+    borderColor: colorPalette.primary
+  },
+
+  paypalImageStyle: {
+    width: 200,
+    height: 50
+  },
+
+  paypalText: {
+    color: 'blue',
+    textDecorationLine: 'underline' ,
+    padding: 10
+  }
 };
 
 export default (props) => (
   <UserContext.Consumer>
-    {userContext => <MoneyEntry {...props} userContext={userContext} />}
+    {userContext => 
+      <HomeContext.Consumer>
+        {homeContext => <MoneyEntry {...props} homeContext={homeContext} userContext={userContext} />}
+      </HomeContext.Consumer>
+    }
   </UserContext.Consumer>
 );

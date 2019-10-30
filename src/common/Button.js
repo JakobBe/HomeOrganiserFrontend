@@ -1,10 +1,11 @@
 import React from 'react';
 import { Text, TouchableOpacity } from 'react-native';
+import { colorPalette } from '../Style/Colors';
 
 const Button = (props) => {
   return (
-    <TouchableOpacity onPress={props.onPress} style={[props.additionalButtonStyles, styles.buttonStyle]}>
-      <Text style={styles.textStyle}>
+    <TouchableOpacity onPress={props.onPress} style={[styles.buttonStyle, props.additionalButtonStyles]}>
+      <Text style={[styles.textStyle, props.additionalButtonTextStyles]}>
         {props.children}
       </Text>
     </TouchableOpacity>
@@ -14,14 +15,14 @@ const Button = (props) => {
 const styles = {
   buttonStyle: {
     borderRadius: 13,
-    borderWidth: 1.3,
-    borderColor: '#a9eec2',
     marginLeft: 5,
     marginRight: 5,
+    backgroundColor: colorPalette.secondary,
+    width: 200,
   },
 
   textStyle: {
-    color: '#a9eec2',
+    color: colorPalette.primary,
     alignSelf: 'center',
     fontSize: 16,
     fontWeight: '600',

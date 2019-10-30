@@ -1,20 +1,22 @@
 import React from 'react';
 import { TextInput, Text, View } from 'react-native';
+import { colorPalette } from '../Style/Colors';
 
-const Input = ({ label, value, onChangeText, placeholder, secureTextEntry, additionalInputStyles, autoFocus }) => {
+const Input = ({ label, value, onChangeText, placeholder, secureTextEntry, additionalInputStyles, autoFocus, onBlur, additionalTextFieldStyle }) => {
   return (
-    <View style={[additionalInputStyles, styles.containerStyle]}>
-      {/* <Text style={styles.labelStyle}>
+    <View style={[styles.containerStyle, additionalInputStyles]}>
+      <Text style={styles.labelStyle}>
         {label}
-      </Text> */}
+      </Text>
       <TextInput
         secureTextEntry={secureTextEntry}
         placeholder={placeholder}
         autoCorrect={false}
-        style={styles.inputStyle}
+        style={[styles.inputStyle, additionalTextFieldStyle]}
         value={value}
         onChangeText={onChangeText}
         autoFocus={autoFocus}
+        onBlur={onBlur}
       />
     </View>
   )
@@ -22,21 +24,21 @@ const Input = ({ label, value, onChangeText, placeholder, secureTextEntry, addit
 
 const styles = {
   inputStyle: {
-    color: '#05004e',
+    color: colorPalette.secondary,
     paddingRight: 10,
     paddingLeft: 10,
     fontSize: 20,
     backgroundColor: 'rgb(256,256,256)',
-    // borderRadius: 13,
     borderBottomWidth: 2,
-    borderColor: '#a9eec2',
+    borderColor: colorPalette.primary,
     alignItems: 'center',
     height: 40,
   },
   labelStyle: {
-    fontSize: 18,
-    paddingLeft: 20,
-    flex: -1
+    fontSize: 12,
+    flex: -1,
+    color: 'rgba(100,100,100,.7)',
+    paddingBottom: 5
   },
   containerStyle: {
     margin: 5,

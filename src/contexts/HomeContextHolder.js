@@ -1,11 +1,13 @@
 import React, { Component } from 'react';
-import { getHome } from '../Client';
+import { getHome, createSession } from '../RailsClient';
+import { UserContext } from './UserContextHolder';
 
 const defaultValue = {};
 export const HomeContext = React.createContext(defaultValue);
 
 class HomeContextHolder extends Component {
   state = {
+    currentUser: undefined,
     users: undefined,
     toDos: undefined,
     events: undefined,
@@ -13,8 +15,22 @@ class HomeContextHolder extends Component {
     home: undefined
   }
 
-  buildHomeContext = async () => {
-    const res = await getHome(this.props.user.home_id)
+  createUserSession = async (sub) => {
+    const res = await createSession(sub)
+      .then((response) => response.json())
+      .then((res) => {
+        this.setState({
+          currentUser: res.user
+        });
+        return res
+      });
+    
+    await this.buildHomeContext(res.user.home_id)
+    return res
+  };
+
+  buildHomeContext = async (homeId) => {
+    await getHome(homeId)
       .then((response) => response.json())
       .then((res) => {
         this.setState({
@@ -24,23 +40,38 @@ class HomeContextHolder extends Component {
           shoppingItems: res.shopping_items,
           home: res.home
         })
+        this.props.updateApp()
       });
-    return res;
   };
 
-  render() {
-    if (this.props.user !== undefined && this.state.home === undefined) {
-      this.buildHomeContext();
+  updateCurrentUser = async (currentUser) => {
+    let users = this.state.users;
+    const userIndex = users.indexOf(users.filter(user => user.id === currentUser.id)[0]);
+
+    if (userIndex !== -1) {
+      users[userIndex] = currentUser
     };
+
+    this.setState({
+      currentUser,
+      users
+    });
+    this.props.updateApp();
+  }
+
+  render() {
 
     return (
       <HomeContext.Provider
         value={
           {
+            currentUser: this.state.currentUser,
             users: this.state.users,
             toDos: this.state.toDos,
             events: this.state.events,
-            shoppingItems: this.state.shoppingItems
+            shoppingItems: this.state.shoppingItems,
+            createUserSession: this.createUserSession,
+            updateCurrentUser: this.updateCurrentUser
           }
         }
       >
@@ -50,4 +81,8 @@ class HomeContextHolder extends Component {
   };
 };
 
-export default HomeContextHolder;
+export default (props) => (
+  <UserContext.Consumer>
+    {userContext => <HomeContextHolder {...props} userContext={userContext} />}
+  </UserContext.Consumer>
+);

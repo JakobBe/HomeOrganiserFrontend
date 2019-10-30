@@ -1,9 +1,11 @@
 import React from 'react';
 import { View } from 'react-native';
+import { colorPalette } from '../Style/Colors';
 
 const Card = (props) => {
+  console.log(props);
   return (
-    <View style={styles.containerStyle}>
+    <View style={[props.additionalCardStyle, styles.containerStyle]}>
       {props.children}
     </View>
   );
@@ -18,7 +20,7 @@ const styles = {
     elevation: 1,
     marginTop: 15,
     height: 250,
-    color: '#05004e'
+    color: colorPalette.secondary
   }
 };
 

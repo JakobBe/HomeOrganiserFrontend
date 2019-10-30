@@ -9,3 +9,6 @@ export * from './HorizontalSeperater';
 export * from './Footer';
 export * from './Modal';
 export * from './ListItem';
+export * from './AddButton';
+export * from './BackgroundCarousel';
+export * from './TouchableTextHighlight';

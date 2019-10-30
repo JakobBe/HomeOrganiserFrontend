@@ -1,30 +1,51 @@
 import React, { Component } from 'react';
-import { Modal, Text, TouchableHighlight, View, Alert, Picker } from 'react-native';
+import { Modal, Text, TouchableHighlight, View, Alert, Picker, Switch, Keyboard } from 'react-native';
 import { Button } from './Button';
 import { Input } from './Input';
+import { TouchableTextHighlight } from './TouchableTextHighlight'
+import { colorPalette } from '../Style/Colors';
 
 class CommonModal extends Component {  
   state = {
     newEvent: '',
-    hour: undefined,
-    minute: undefined
+    allDay: false,
+    timeInformationPresented: true,
+    timePickerPresented: false,
+    hour: new Date().getHours().toString(),
+    minute: new Date().getMinutes().toString()
   };
   
   onSaveButtonPress = () => {
-  const { newEvent, hour, minute } = this.state;
+    let { newEvent, hour, minute, allDay } = this.state;
+    if (allDay) {
+      hour = undefined;
+      minute = undefined;
+    }
+
     if (this.props.singleEventId) {
       this.props.saveInput(newEvent, hour, minute, this.props.singleEventId), this.setState({ newEvent: '' })
       return
     }
+
     this.props.saveInput(newEvent, hour, minute), this.setState({ newEvent: '' }, )
+  }
+
+  onAllDayToggle = () => {
+    Keyboard.dismiss();
+    this.setState({
+      allDay: !this.state.allDay,
+      timeInformationPresented: this.state.allDay,
+      timePickerPresented: this.state.allDay && this.state.timeInformationPresented
+    });
   }
 
   getHourPickerItems = () => {
     const hours = Array.from({ length: 24 }, (v, k) => (k).toString()); 
 
     return hours.map(hour => {
+      let visibleHour = hour.length === 1 ? `0${hour}` : hour
       return (
-        <Picker.Item label={hour} value={hour} style={{ color: '#05004e' }}/>
+        <Picker.Item label={visibleHour} value={visibleHour} style={{ color: colorPalette.secondary }}/>
       );
     });
   }
@@ -33,60 +54,101 @@ class CommonModal extends Component {
     const minutes = Array.from({ length: 60}, (v, k) => (k).toString()); 
 
     return minutes.map(minute => {
+      let visibleMinute = minute.length === 1 ? `0${minute}` : minute
       return (
-        <Picker.Item label={minute} value={minute} style={{ color: '#05004e' }} />
+        <Picker.Item label={visibleMinute} value={visibleMinute} style={{ color: colorPalette.secondary }} />
       );
     });
   }
 
-  render() {
-    const value = this.state.newEvent || this.props.modalValue
+  getTimePicker = () => {
     const hourPickerItems = this.getHourPickerItems()
     const minutePickerItems = this.getMinutePickerItems()
+
+    return this.state.timePickerPresented ? (
+      <View style={styles.timePickerWrapper}>
+        <Picker
+          selectedValue={this.state.hour}
+          onValueChange={value => this.setState({ hour: value })}
+          style={{ height: 200, backgroundColor: 'white', width: 80, color: colorPalette.secondary }}
+          itemStyle={{ height: 200 }}
+        >
+          {hourPickerItems}
+        </Picker>
+        <Text style={{ fontSize: 30, color: colorPalette.secondary }}>:</Text>
+        <Picker
+          selectedValue={this.state.minute}
+          onValueChange={value => this.setState({ minute: value })}
+          style={{ height: 200, backgroundColor: 'white', width: 80, color: colorPalette.secondary }}
+          itemStyle={{ height: 200 }}
+        >
+          {minutePickerItems}
+        </Picker>
+      </View>
+    ) : undefined;
+  }
+
+  getTimeInformation = () => {
+    return this.state.timeInformationPresented ? (
+      <TouchableTextHighlight
+        onPress={() => this.setState({ timePickerPresented: !this.state.timePickerPresented })}
+        feedbackColor={colorPalette.primary}
+      >
+        <View style={styles.timeWrapper}>
+          <Text>
+            Starting
+          </Text>
+          <Text>
+            {this.state.hour}:{this.state.minute}
+          </Text>
+        </View>
+      </TouchableTextHighlight>
+    ) : undefined;
+  }
+
+  render() {
+    const value = this.state.newEvent || this.props.modalValue
+    const timePicker = this.getTimePicker();
+    const timeInformation = this.getTimeInformation();
+
     return (
       <Modal
         animationType="slide"
         transparent={true}
         visible={this.props.showModal}
       >
-        <View style={styles.modalContainer}>
-          <TouchableHighlight
-            onPress={() => { this.props.onModalClose(), this.setState({newEvent: '' })} }
-            style={{ top: 3, left: '85%'}}
-          >
-            <Text style={{ color: '#a9eec2', fontWeight: 'bold' }}>Close</Text>
-          </TouchableHighlight>
-          <Input
-            value={value}
-            onChangeText={value => this.setState({ newEvent: value })}
-            placeholder={'Enter a new event'}
-            autoFocus={true}
-          />
-          <View style={styles.timePickerWrapper}>
-            <Picker
-              selectedValue={this.state.hour}
-              onValueChange={value => this.setState({ hour: value })}
-              style={{ height: 200, backgroundColor: 'white', width: 80, color: '#05004e' }}
-              itemStyle={{ height: 200 }}
+        <View style={styles.transparentBackground}>
+          <View style={styles.modalContainer}>
+            <TouchableHighlight
+              onPress={() => { this.props.onModalClose(), this.setState({newEvent: '' })} }
+              style={{ top: 3, left: '85%'}}
             >
-              {hourPickerItems}
-            </Picker>
-            <Text style={{ fontSize: 30, color: '#05004e'}}>:</Text>
-            <Picker
-              selectedValue={this.state.minute}
-              onValueChange={value => this.setState({ minute: value })}
-              style={{ height: 200, backgroundColor: 'white', width: 80, color: '#05004e' }}
-              itemStyle={{ height: 200 }}
+              <Text style={{ color: colorPalette.primary, fontWeight: 'bold' }}>Close</Text>
+            </TouchableHighlight>
+            <Input
+              value={value}
+              onChangeText={value => this.setState({ newEvent: value })}
+              placeholder={'Enter a new event'}
+              autoFocus={true}
+            />
+            <View style={styles.allDayWrapper}>
+              <Text>
+                All-day
+              </Text>
+              <Switch 
+                value={this.state.allDay}
+                onValueChange={() => this.onAllDayToggle()}
+              />
+            </View>
+            {timeInformation}
+            {timePicker}
+            <Button 
+              onPress={() => this.onSaveButtonPress()}
+              additionalButtonStyles={styles.buttonStyle}
             >
-              {minutePickerItems}
-            </Picker>
+              Save
+            </Button>
           </View>
-          <Button 
-            onPress={() => this.onSaveButtonPress()}
-            additionalButtonStyles={styles.buttonStyle}
-          >
-            Save
-          </Button>
         </View>
       </Modal>
     );
@@ -94,6 +156,11 @@ class CommonModal extends Component {
 }
 
 const styles = {
+  transparentBackground: {
+    height: '100%',
+    backgroundColor: 'rgba(100,100,100,.5)'
+  },
+
   modalContainer: {
     margin: 30, 
     marginTop: 110, 
@@ -101,17 +168,18 @@ const styles = {
     backgroundColor: 'rgb(255,255,255)', 
     widht: '100%', 
     borderRadius: 10, 
-    borderColor: '#a9eec2', 
+    borderColor: colorPalette.primary, 
     borderStyle: 'solid', 
-    borderWidth: 1.5, 
+    borderWidth: .5, 
     padding: 20, 
     position: 'relative', 
     flex: 0, 
-    justifyContent: 'space-between'
+    justifyContent: 'space-between',
+    // minHeight: 350
   },
 
   buttonStyle: {
-    backgroundColor: '#05004e',
+    backgroundColor: colorPalette.secondary,
     marginTop: 5
   },
 
@@ -121,7 +189,31 @@ const styles = {
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 20
-  }
+  },
+
+  allDayWrapper: {
+    flex: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderBottomColor: '',
+    borderBottomStyle: 'solid',
+    borderBottomWidth: .2,
+    paddingBottom: 10
+  },
+  
+  timeWrapper: {
+    flex: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderBottomColor: '',
+    borderBottomStyle: 'solid',
+    borderBottomWidth: .2,
+    paddingBottom: 10,
+    paddingTop: 10,
+    marginBottom: 20
+  },
 }
 
 export { CommonModal };

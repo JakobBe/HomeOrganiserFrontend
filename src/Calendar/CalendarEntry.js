@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
-import { TextInput, Text, View, FlatList, RefreshControl } from 'react-native';
-import { Calendar, CalendarList, Agenda, Arrow } from 'react-native-calendars';
-import { Footer, CommonModal, Button, ListItem } from '../common';
-import { fetchEvents, createNewEvent, updateEvent } from '../Client';
+import { View, FlatList, RefreshControl } from 'react-native';
+import { Calendar } from 'react-native-calendars';
+import { Footer, ListItem, AddButton } from '../Common';
+import { fetchEvents, createNewEvent, updateEvent } from '../RailsClient';
 import { UserContext } from '../contexts/UserContextHolder';
 import { HomeContext } from '../contexts/HomeContextHolder';
+import { colorPalette, layouts } from '../Style';
+import { CalendarModal } from './CalendarModal';
 
 class CalendarEntry extends Component {
   state = { 
@@ -41,7 +43,7 @@ class CalendarEntry extends Component {
   }
 
   fetchEvents = async () => {
-    await fetchEvents(this.props.userContext.user.id).then((response) => response.json())
+    await fetchEvents(this.props.homeContext.currentUser.id).then((response) => response.json())
       .then((res) => this.setState({
         events: res
       }));
@@ -53,7 +55,7 @@ class CalendarEntry extends Component {
         updateEvent(text, id);
       }
       if (!id) {
-        createNewEvent(this.state.selectedDate, text, this.props.userContext.user.id, `${hour}:${minute}`);
+        createNewEvent(this.state.selectedDate, text, this.props.homeContext.currentUser.id, `${hour}:${minute}`);
       }
       this.setState({
         modalPresented: false
@@ -80,8 +82,9 @@ class CalendarEntry extends Component {
   renderItem = ({ item }) => {
     const itemUserId = item.user_id
     const homeUsers = this.props.homeContext.users
-    const itemUser = homeUsers.filter(user => user.id === itemUserId)
-    const userColor = itemUser[0].color
+    const currentUser = this.props.homeContext.currentUser
+    const itemUser = currentUser.id === itemUserId ? this.props.homeContext.currentUser : homeUsers.filter(user => user.id === itemUserId)[0];
+    const userColor = itemUser.color
     const time = item.time ? item.time.substr(11,5) : 'All Day'
 
     return (
@@ -94,8 +97,8 @@ class CalendarEntry extends Component {
         onItemPressed={this.onItemPressed}
         description={time}
         isCalendarEntry={true}
-        itemUserId={itemUser[0].id}
-        currentUserId={this.props.userContext.user.id}
+        itemUserId={itemUser.id}
+        currentUserId={this.props.homeContext.currentUser.id}
       />
     )
   }
@@ -111,25 +114,31 @@ class CalendarEntry extends Component {
   }
 
   getDayMarkerDots = (marks, event) => {
-    let dots = undefined;
+    let dots = [];
     const dotMarkers = this.props.homeContext.users.map(user => {
       return { key: user.name, color: user.color };
     });
 
     this.props.homeContext.users.map(user => {
       if (event.user_id === user.id) {
+        if (dots.length === 0) {
+          dots = dotMarkers.filter(marker => marker.key === user.name);
+        }
         if (marks[event.date] && marks[event.date]['dots']) {
           marks[event.date]['dots'].map(dot => {
-            if (dot['key'] !== user.name && marks[event.date]['dots'].length === 1) {
-              dots = dotMarkers;
+            if (dot['key'] !== user.name && marks[event.date]['dots'].length !== this.props.homeContext.users.length) {
+              let newDot = dotMarkers.filter(marker => marker.key === user.name)[0];
+              if (!dots.includes(newDot)) {
+                dots.push(newDot)
+              }
+              if (!dots.includes(dot)) {
+                dots.push(dot);
+              }
             };
-            if (marks[event.date]['dots'].length > 1) {
+            if (marks[event.date]['dots'].length >= this.props.homeContext.users.length) {
               dots = marks[event.date]['dots']
             };
           })
-        }
-        if (!dots) {
-          dots = dotMarkers.filter(marker => marker.key === user.name);
         }
       };
     })
@@ -165,7 +174,7 @@ class CalendarEntry extends Component {
   render() {
     const selectedDayEventsList = this.getSelectedDayEventList()
 
-    let marks = { [this.state.selectedDate]: { selected: true, marked: true, selectedColor: '#a9eec2' } }
+    let marks = { [this.state.selectedDate]: { selected: true, marked: true, selectedColor: colorPalette.primary } }
 
     if (this.state.events.length > 0) {
       this.state.events.map(event => {
@@ -180,23 +189,24 @@ class CalendarEntry extends Component {
           markingType='multi-dot'
           theme={{
             textSectionTitleColor: '#b6c1cd',
-            selectedDayBackgroundColor: '#a9eec2',
-            todayTextColor: '#a9eec2',
-            arrowColor: '#a9eec2',
+            selectedDayBackgroundColor: colorPalette.primary,
+            todayTextColor: colorPalette.primary,
+            arrowColor: colorPalette.primary,
+            width: '100%'
           }}
         />
-        <Button onPress={() => this.setState({ modalPresented: true })} additionalButtonStyles={styles.buttonStyle}>
-          New Event
-        </Button>
+        <View style={layouts.centerWrapper}>
+          <AddButton onPress={() => this.setState({ modalPresented: true })}/>
+        </View>
         {selectedDayEventsList}
-        <CommonModal 
+        <CalendarModal 
           showModal={this.state.modalPresented} 
           saveInput={this.saveModalInput} 
           onModalClose={this.onModalCose}
           modalValue={this.state.modalValue}
           singleEventId={this.state.singleEventId}
         />
-        <Footer />
+        <Footer isCalendarActive={true}/>
       </View>  
     );
   }
@@ -206,20 +216,18 @@ const styles = {
   calendarContainer: {
     flex: 1,
     justifyContent: 'space-between',
-    backgroundColor: 'rgb(255,255,255)'
+    backgroundColor: 'rgb(255,255,255)',
   },
+
   container: {
     marginTop: 5,
     flex: 1,
   },
+
   row: {
     padding: 15,
     marginBottom: 5,
     backgroundColor: 'white',
-  },
-  buttonStyle: {
-    backgroundColor: '#05004e',
-    marginTop: 5
   }
 };
 

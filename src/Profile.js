@@ -1,100 +1,101 @@
 import React, { Component } from 'react';
-import { Text, Animated, View, TouchableOpacity, Image } from 'react-native';
+import { Text, Animated, View, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { UserContext } from './contexts/UserContextHolder';
 import { HomeContext } from './contexts/HomeContextHolder';
-import { Input, Button } from './common';
-import { updateUserColor, updateUserPayPalMeLink } from './Client';
+import { Input, Button, Footer } from './Common';
+import { updateUser } from './RailsClient';
+import { Actions, ActionConst } from 'react-native-router-flux';
 
 class Profile extends Component {
   state = {
     name: '',
     color: '',
     email: '',
-    payPalMeLink: ''
+    payPalMeLink: '',
+    home_id: ''
   }
 
   componentDidMount() {
-    const { name, color, email, pay_pal_me_link } = this.props.userContext.user;
+    const { name, color, email, pay_pal_me_link, home_id } = this.props.homeContext.currentUser;
     this.setState({
-      name,
-      color,
-      email,
-      payPalMeLink: pay_pal_me_link
+      name: name || '',
+      color: color || '',
+      email: email || '',
+      payPalMeLink: pay_pal_me_link || '',
+      homeId: home_id || ''
     });
   };
-
+f
   onButtonPress = () => {
-    updateUserColor(this.props.userContext.user.id, this.state.color.toLowerCase());
-  }
-
-  onPayButtonPress = () => {
-    updateUserPayPalMeLink(this.props.userContext.user.id, this.state.payPalMeLink.toLowerCase());
+    updateUser(this.props.homeContext.currentUser.id,
+      this.state.color.toLowerCase(),
+      this.state.payPalMeLink.toLowerCase(),
+      this.state.homeId
+    ).then((response) => response.json())
+        .then((res) => {
+          if (res.status === '200') {
+            this.props.homeContext.updateCurrentUser(res.user);
+            Actions.profile({ type: ActionConst.REPLACE })
+          }
+        })
   }
 
   render() {
     const { name, color, email, payPalMeLink } = this.state;
     return (
-      <View style={styles.profileContainer}>
-        <View style={styles.profileImageWrapper}>
-          <View style={styles.userLetterStyleContainer(color)}>
-            <Text style={styles.userLetterStyle}>
-              {name.charAt(0).toUpperCase()}
-            </Text>
-          </View>
+      <View style={styles.profileContainer(color)}>
+        <View style={styles.profileWrapper}>
+          <ScrollView style={styles.inputWrapper}>
+            <Input
+              value={name}
+              onChangeText={value => this.setState({ name: value })}
+              label='Name'
+            />
+            <Input
+              value={color}
+              onChangeText={value => this.setState({ color: value.toLowerCase() })}
+              label='Your Color'
+            />
+            <Input
+              value={email}
+              onChangeText={value => this.setState({ email: value })}
+              label='E-Mail'
+            />
+            <Input
+              value={payPalMeLink}
+              onChangeText={value => this.setState({ payPalMeLink: value })}
+              label='PayPal Link'
+            />
+          </ScrollView>
+          <Button onPress={this.onButtonPress} additionalButtonStyles={styles.buttonStyle}>
+            Update
+          </Button>
         </View>
-        <Input
-          value={name}
-          onChangeText={value => this.setState({ name: value })}
-          autoFocus={true}
-        />
-        <Input
-          value={color}
-          onChangeText={value => this.setState({ color: value })}
-        />
-        <Input
-          value={email}
-          onChangeText={value => this.setState({ email: value })}
-        />
-        <Input
-          value={payPalMeLink}
-          onChangeText={value => this.setState({ payPalMeLink: value })}
-        />
-        <Button onPress={this.onPayButtonPress}>
-          Change PayPal
-        </Button>
-        <Button onPress={this.onButtonPress}>
-          Change Color
-        </Button>
+        <Footer />
       </View>
     );
   };
 };
 
 const styles = {
-  profileContainer: {
+  profileContainer: (color) => ({
     flex: 1,
     justifyContent: 'space-between',
-    backgroundColor: 'rgb(255,255,255)',
-  },
-  profileImageWrapper: {
-    flex: 0,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    margin: 20,
-    paddingBottom: 20,
-    borderBottomWidth: 1
-  },
-  userLetterStyleContainer: (color) => ({
-    width: 180,
-    height: 180,
-    borderRadius: 180 / 2,
     backgroundColor: color,
-    justifyContent: 'center'
   }),
-  userLetterStyle: {
-    color: 'white',
-    textAlign: 'center',
-    fontSize: 40
+
+  profileWrapper: {
+    backgroundColor: 'rgb(255,255,255)',
+    margin: 20,
+    padding: 20,
+    borderRadius: 20,
+    height: 400
+  },
+
+  inputWrapper: {},
+
+  buttonStyle: {
+     marginTop: 20
   }
 };
 

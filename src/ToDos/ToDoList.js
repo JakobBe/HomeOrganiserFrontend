@@ -1,20 +1,26 @@
 import React, { Component } from 'react';
 import { FlatList, View, RefreshControl, Text, TouchableWithoutFeedback, Image } from 'react-native';
-import { Input, CardSection, Button, Footer, ListItem } from '../common';
-import { fetchUserToDos, filterToDos } from '../Client';
+import { AddButton, Footer, ListItem } from '../Common';
+import { fetchUserToDos, filterToDos } from '../RailsClient';
 import { UserContext } from '../contexts/UserContextHolder';
 import ToDoFilterModal from './ToDoFilterModal';
+import ToDoModal from './ToDoModal';
 import { HomeContext } from '../contexts/HomeContextHolder';
 
 class ToDoList extends Component {
-  state = { toDos: [], refreshing: false, modalPresented: false };
+  state = { 
+    toDos: [], 
+    refreshing: false, 
+    filterModalPresented: false,
+    toDoModalPresented: false
+  };
 
   componentWillMount() {
     this.fetchUserToDos();
   }
 
   fetchUserToDos = async () => {
-    await fetchUserToDos(this.props.userContext.user.id).then((response) => response.json())
+    await fetchUserToDos(this.props.homeContext.currentUser.id).then((response) => response.json())
       .then((res) => { if (res.length !== this.state.toDos.length) {
         this.setState({
           toDos: res
@@ -31,43 +37,55 @@ class ToDoList extends Component {
 
   onFilterMenuPress = () => {
     this.setState({
-      modalPresented: true
+      filterModalPresented: true
     });
   };
 
+  onAddToDoPress = () => {
+    this.setState({
+      toDoModalPresented: true
+    });
+  }
+
   onModalCose = () => {
-    if (this.state.modalPresented) {
+    if (this.state.filterModalPresented) {
       this.setState({
-        modalPresented: false
+        filterModalPresented: false
+      });
+    };
+
+    if (this.state.toDoModalPresented) {
+      this.setState({
+        toDoModalPresented: false
       });
     };
   };
 
   onFilterToDosPress = async (info) => {
     if (info === 'undone') {
-      await filterToDos(info, this.props.userContext.user.id)
+      await filterToDos(info, this.props.homeContext.currentUser.id)
         .then((response) => response.json())
         .then((res) => {
           this.setState({
             toDos: res,
-            modalPresented: false
+            filterModalPresented: false
           });
         });
     };
     if (info === 'done') {
-      await filterToDos(info, this.props.userContext.user.id)
+      await filterToDos(info, this.props.homeContext.currentUser.id)
         .then((response) => response.json())
         .then((res) => {
           this.setState({
             toDos: res,
-            modalPresented: false
+            filterModalPresented: false
           });
         });
     };
     if (info === 'all') {
       this._onRefresh();
       this.setState({
-        modalPresented: false
+        filterModalPresented: false
       });
     };
   };
@@ -117,12 +135,12 @@ class ToDoList extends Component {
     const extractKey = ({ id }) => id
     return (
       <View style={styles.toDoContainer}>
+        <AddButton onPress={this.onAddToDoPress} additionalButtonStyles={styles.additionalAddButtonStyle}/>
         <TouchableWithoutFeedback onPress={() => this.onFilterMenuPress()}>
-          <View style={styles.subHeader}>
-            <Image source={require('../../assets/images/filter-outline.png')} style={styles.jarImageStyle} />
-          </View>
+          <Image source={require('../../assets/images/filter-outline.png')} style={styles.jarImageStyle} />
         </TouchableWithoutFeedback>
         <FlatList
+          style={styles.flatList}
           data={this.state.toDos}
           renderRow={this.renderRow}
           renderItem={this.renderItem}
@@ -135,11 +153,15 @@ class ToDoList extends Component {
           }
         />
         <ToDoFilterModal
-          showModal={this.state.modalPresented}
+          showFilterModal={this.state.filterModalPresented}
           onModalClose={this.onModalCose}
           onFilterToDosPress={this.onFilterToDosPress}
         />
-        <Footer />
+        <ToDoModal 
+          showModal={this.state.toDoModalPresented}
+          onModalClose={this.onModalCose}
+        />
+        <Footer isCleaningActive={true}/>
       </View>
     );
   }
@@ -149,19 +171,28 @@ const styles = {
   toDoContainer: {
     flex: 1,
     justifiyContent: 'space-between',
-    backgroundColor: 'rgb(255,255,255)'
+    backgroundColor: 'rgb(255,255,255)',
+    position: 'relative'
   },
 
-  subHeader: {
-    felx: 0,
-    justifiyContent: 'center',
-    alignItems: 'flex-end',
-    margin: 10
+  flatList: {
+    marginTop: 15
   },
 
   jarImageStyle: {
-    height: 15,
-    width: 15,
+    position: 'absolute',
+    top: 7,
+    right: 10,
+    zIndex: 2,
+    height: 28,
+    width: 28,
+  },
+
+  additionalAddButtonStyle: {
+    position: 'absolute',
+    top: 1.5,
+    right: 47,
+    zIndex: 2
   }
 }
 

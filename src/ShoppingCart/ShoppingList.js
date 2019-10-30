@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
 import { View, RefreshControl, FlatList, Text, Alert, Image, TouchableOpacity } from 'react-native';
-import { Input, CardSection, Button, Footer, ListItem } from '../common';
-import { fetchShoppingItems, createShoppingItem, updateShoppingItem } from '../Client';
-import { UserContext } from '../contexts/UserContextHolder';
+import { Input, AddButton, Button, Footer, ListItem } from '../Common';
+import { fetchShoppingItems, createShoppingItem, updateShoppingItem } from '../RailsClient';
+import { HomeContext } from '../contexts/HomeContextHolder';
 import ShoppingItemModal from './ShoppingItemModal';
+import GestureRecognizer from 'react-native-swipe-gestures';
+import { colorPalette } from '../Style/Colors';
 
 class ShoppingList extends Component {
   state = { 
@@ -22,7 +24,7 @@ class ShoppingList extends Component {
   }
 
   fetchShoppingItems = async () => {
-    await fetchShoppingItems(this.props.userContext.user.id).then((response) => response.json())
+    await fetchShoppingItems(this.props.homeContext.currentUser.id).then((response) => response.json())
       .then((res) => {
         if (res.length !== this.state.shoppingItems.length) {
           this.setState({
@@ -38,7 +40,7 @@ class ShoppingList extends Component {
         newShoppingItem: ''
       }));
 
-      createShoppingItem(this.state.newShoppingItem, this.props.userContext.user.id);
+      createShoppingItem(this.state.newShoppingItem, this.props.homeContext.currentUser.id);
       this._onRefresh()
     };
   }
@@ -51,7 +53,7 @@ class ShoppingList extends Component {
   }
 
   renderItem = ({ item }) => {
-    if (this.state.shoppingCart.filter(cartItem => { return cartItem === item }).length > 0) {
+    if (this.state.shoppingCart.filter(cartItem => { return cartItem.id === item.id }).length > 0) {
       return
     }
 
@@ -59,6 +61,7 @@ class ShoppingList extends Component {
       <ListItem
         id={item.id}
         text={item.name}
+        item={item}
         refreshList={this._onRefresh}
         isShoppingItem={true}
         onItemPressed={this.onItemPressed}
@@ -69,16 +72,24 @@ class ShoppingList extends Component {
 
   renderShoppingCartItem = ({ item }) => {
     return(
-      <View style={styles.shoppingCartItem}>
-        <Text>
-          {item.name}
-        </Text>
+      <View>
+        <GestureRecognizer onSwipeLeft={(state) => this.onCartItemSwipeLeft(state, item)}>
+          <View style={styles.shoppingCartItem}>
+            <Text style={styles.cartItemTextStyle}>
+              {item.name}
+            </Text>
+          </View>
+        </GestureRecognizer>
       </View>
     );
   }
 
+  onCartItemSwipeLeft = (state, item) => {
+    this.removeFromShoppingCart(item)
+  }
+
   saveModalInput = (text, price, id) => {
-    updateShoppingItem(id, text, price, this.props.userContext.user.id);
+    updateShoppingItem(id, text, price, this.props.homeContext.currentUser.id);
     this.setState({
       modalPresented: false
     });
@@ -99,7 +110,6 @@ class ShoppingList extends Component {
   }
 
   onShoppingBagPress = () => {
-    // console.log('Inside shopping Bag');
     this.setState({
       isShoppingCartActive: !this.state.isShoppingCartActive
     });
@@ -136,12 +146,23 @@ class ShoppingList extends Component {
     return undefined;
   }
 
+  getNotificationNumber = () => {
+    if (this.state.shoppingCart.length > 0) {
+      return (
+        <View style={styles.notificationWrapper}>
+          <Text style={styles.notificationNumberStyle}>
+            {this.state.shoppingCart.length}
+          </Text>
+        </View>
+      );
+    };
+  }
+
   addToShoppingCart = (id) => {
     if (this.state.shoppingCart.filter(item => {return item.id === id}).length > 0) {
       Alert.alert("This item is already in your Shopping Cart");
       return 
     }
-
     let shoppingItem = this.state.shoppingItems.filter(item => {
       return item.id === id;
     });
@@ -152,10 +173,18 @@ class ShoppingList extends Component {
     });
   }
 
+  removeFromShoppingCart = (item) => {
+    const newShoppingCart = [...this.state.shoppingCart]
+    let index = newShoppingCart.indexOf(item)
+    newShoppingCart.splice(index, 1);
+    this.setState({
+      shoppingCart: newShoppingCart
+    });
+  }
+
   render() {
     const extractKey = ({ id }) => id
     const shoppingCart = this.getShoppingCart()
-    // console.log('The Cart', shoppingCart);
     return (
       <View style={styles.shoppingListContainer}>
         <View style={styles.inputWrapper}>
@@ -166,9 +195,13 @@ class ShoppingList extends Component {
             additionalInputStyles={styles.additionalInputStyles}
             autoFocus={false}
           />
-          <Button onPress={this.onButtonPress} additionalButtonStyles={styles.additionalButtonStyle}>
-            +
-          </Button>
+          <AddButton onPress={this.onButtonPress}/>
+          <View style={styles.shoppingBasketWrapper}>
+            {this.getNotificationNumber()}
+            <TouchableOpacity onPress={this.onShoppingBagPress}>
+              <Image source={require('../../assets/images/shopping-basket.png')} style={styles.shoppingCartImageStyle} />
+            </TouchableOpacity>
+          </View>
         </View>
         <View style={styles.shoppingContentWrapper}>
           <View style={styles.shoppingItemListWrapper}>
@@ -185,9 +218,6 @@ class ShoppingList extends Component {
               }
             />
           </View>
-          <TouchableOpacity onPress={this.onShoppingBagPress}>
-            <Image source={require('../../assets/images/shopping-bag.png')} style={styles.imageStyle} />
-          </TouchableOpacity>
           {shoppingCart}
         </View>
         <ShoppingItemModal
@@ -197,8 +227,9 @@ class ShoppingList extends Component {
           item={this.state.pressedItem}
           id={this.state.pressedItemId}
           cartItems={this.state.shoppingCart}
+          currentUser={this.props.homeContext.currentUser}
         />
-        <Footer />
+        <Footer isShoppingCartActive={true}/>
       </View>
     );
   }
@@ -209,21 +240,14 @@ const styles = {
     backgroundColor: 'rgb(255,255,255)',
     height: '100%'
   },
+
   listWrapper: {
     marginTop: 5,
-    // flex: 1,
     height: 300
-  },
-  additionalButtonStyle: {
-    backgroundColor: '#05004e',
-    marginTop: 5,
-    height: 40,
-    width: 40,
-    borderRadius: 20
   },
 
   additionalCartButtonStyle: {
-    backgroundColor: '#05004e',
+    backgroundColor: 'black',
     marginBottom: 5,
   },
 
@@ -231,15 +255,16 @@ const styles = {
     flex: 0,
     flexDirection: 'row',
     alignItems: 'center',
-    borderBottomWidth: 0.5,
-    borderBottomColor: '#05004e',
     marginRight: 5,
     marginLeft: 5,
-    padding: 5
+    padding: 5,
+    marginTop: -15.5
   },
 
   additionalInputStyles: {
-    width: 300
+    flexGrow: 1,
+    marginTop: 0,
+    maxWidth: '75%'
   },
 
   shoppingContentWrapper: {
@@ -250,32 +275,64 @@ const styles = {
 
   shoppingCartWrapper: {
     borderLeftWidth: 0.5,
-    borderLeftColor: '#05004e',
+    borderLeftColor: colorPalette.secondary,
     flex: 1,
-    padding: 5
+    padding: 5,
+  },
+
+  shoppingBasketWrapper: {
+    position: 'relative',
   },
 
   shoppingItemListWrapper: {
-    flex: 2
+    flex: 1
   },
 
-  imageStyle: {
-    height: 30,
-    width: 30,
-    padding: 10,
-    position: 'absolute',
-    top: 25,
-    right: 25 
+  shoppingCartImageStyle: {
+    height: 35,
+    width: 35,
+    padding: 2,
+    marginLeft: 2
   },
 
   shoppingCartItem: {
     borderBottomWidth: 0.5,
     padding: 5,
+    height: 60
+  },
+
+  cartItemDeleteButton: {
+
+  },
+
+  cartItemTextStyle: {
+    textDecorationLine: 'line-through',
+    paddingLeft: 10,
+    fontSize: 18,
+    width: 250,
+    color: colorPalette.secondary,
+  },
+
+  notificationWrapper: {
+    position: 'absolute',
+    top: -5,
+    right: -5,
+    width: 20,
+    height: 20,
+    borderRadius: 20 / 2,
+    backgroundColor: 'orangered',
+    justifyContent: 'center',
+    zIndex: -1
+  },
+
+  notificationNumberStyle: {
+    color: 'white',
+    textAlign: 'center'
   }
 }
 
 export default (props) => (
-  <UserContext.Consumer>
-    {userContext => <ShoppingList {...props} userContext={userContext} />}
-  </UserContext.Consumer>
+  <HomeContext.Consumer>
+    {homeContext => <ShoppingList {...props} homeContext={homeContext} />}
+  </HomeContext.Consumer>
 );

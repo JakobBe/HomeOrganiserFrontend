@@ -2,27 +2,26 @@ import React, { Component } from 'react';
 import Router from './Router';
 import UserContextHolder from './contexts/UserContextHolder';
 import HomeContextHolder from './contexts/HomeContextHolder';
-import { createSession } from './Client';
-
+console.disableYellowBox = true;
 class App extends Component {
   state = {
-    user: undefined
+    update: false
   }
 
-  setUser = (user) => {
+  updateApp = () => {
     this.setState({
-      user
-    });
-  };
+      update: !this.state.update
+    })
+  } 
 
   render() {
+    console.log('RENDER');
     return (
       <UserContextHolder
-        user={this.state.user}
-        setUser={this.setUser}
+        updateApp={this.updateApp}
       >
         <HomeContextHolder
-          user={this.state.user}
+          updateApp={this.updateApp}
         >
           <Router />
         </HomeContextHolder>
@@ -31,4 +30,5 @@ class App extends Component {
   }
 }
 
-export default App
+
+export default App;

@@ -1,5 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
+import { colorPalette } from '../Style/Colors';
 
 const HorizontalSeperater = () => {
   return (
@@ -11,7 +12,7 @@ const styles = {
   seperater: {
     height: 2,
     alignSelf: "stretch",
-    backgroundColor: '#05004e',
+    backgroundColor: colorPalette.secondary,
     margin: 5,
     marginTop: 20,
   }

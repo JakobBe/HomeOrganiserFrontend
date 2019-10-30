@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
-import { Card, CardSection, Input, Button, Spinner } from '../common';
-import { View, Text, TouchableOpacity } from 'react-native'
-import { createSession, createUser } from '../Client';
+import { Input, Button, Spinner } from '../Common';
+import { View, Text, TouchableOpacity, Dimensions, Alert } from 'react-native'
+import { createCognitoUser } from '../RailsClient';
+import { signUp, RejectionErros } from '../AWSClient';
+import { layouts } from '../Style';
 
-class Login extends Component {
+class SignUp extends Component {
   state = {
     loading: false,
     email: '',
@@ -31,21 +33,40 @@ class Login extends Component {
   };
 
   onSignUpButtonPress = async () => {
-    const { email, password, name } = this.state;
+    const { email, password } = this.state;
+    if (email.length === 0 || password.length === 0) {
+      Alert.alert("Please enter an E-Mail address and a password.");
+      return
+    }
+    
     this.setState({
       loading: true
     });
 
-    await createUser(email, password, name)
-      .then((response) => response.json())
-      .then((res) => {
-        if (res.email === email) {
-          this.setState({
-            loading: false
-          });
-          this.props.hasSignedIn(res);
-        }
+
+    const signUpRes = await signUp(email, password);
+
+    if (signUpRes.status === 400) {
+      if (signUpRes.code === RejectionErros.UsernameExistsException) {
+        Alert.alert("A User with this E-Mail already exists.");
+      } else if (signUpRes.code === RejectionErros.InvalidParameterException) {
+        Alert.alert("E-Mail and / or Password are not in the correct format.");
+      };
+      this.setState({
+        loading: false
       });
+      return
+    }
+    
+    if (signUpRes.status === 200) {
+      const user = await createCognitoUser(signUpRes.res.userSub, signUpRes.res.user.username)
+        .then((user) => user.json())
+
+      this.props.hasSignedUp(user);
+      this.setState({
+        loading: false
+      });
+    }
   }
 
   renderButton() {
@@ -76,13 +97,16 @@ class Login extends Component {
   }
 
   render() {
+    const deviceHeight = Dimensions.get('window').height
     return (
-      <Card>
+      <View style={styles.signUpWrapper(deviceHeight)}>
         <Input
           label='Email'
           placeholder='email@gmail.com'
           onChangeText={this.onEmailChange.bind(this)}
           value={this.state.email}
+          autoFocus={true}
+          additionalTextFieldStyle={styles.additionalTextFieldStyle}
         />
         <Input
           secureTextEntry
@@ -90,26 +114,37 @@ class Login extends Component {
           placeholder='password'
           onChangeText={this.onPasswordChange.bind(this)}
           value={this.state.password}
+          additionalTextFieldStyle={styles.additionalTextFieldStyle}
         />
-        <Input
+        {/* <Input
           label='Name'
           placeholder='Name'
           onChangeText={this.onNameChange.bind(this)}
           value={this.state.name}
-        />
+        /> */}
         {this.renderError()}
-        {this.renderButton()}
-        <TouchableOpacity onPress={() => this.props.navigateLogin()}>
+        <View style={layouts.centerWrapper}>
+          {this.renderButton()}
+        </View>
+        <TouchableOpacity onPress={() => this.props.navigateSignIn()}>
           <Text style={styles.createAccounTextStyle}>
             Log In
           </Text>
         </TouchableOpacity>
-      </Card>
+      </View>
     )
   }
 }
 
 const styles = {
+  signUpWrapper: (deviceHeight) => ({
+    flex: 0
+  }),
+
+  additionalTextFieldStyle: {
+    backgroundColor: 'none'
+  },
+
   errorTextStyle: {
     fontSize: 20,
     alignSelf: 'center',
@@ -125,11 +160,8 @@ const styles = {
   },
 
   button: {
-    height: 40,
-    backgroundColor: '#05004e',
-    marginTop: 10,
-    alignItems: 'center'
+    marginTop: 35,
   },
 }
 
-export default Login;
+export default SignUp;

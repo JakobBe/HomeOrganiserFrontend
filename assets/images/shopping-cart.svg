@@ -1,0 +1,154 @@
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" width="512px" height="512px" viewBox="0 0 526.165 526.166" style="enable-background:new 0 0 526.165 526.166;" xml:space="preserve"><g><script xmlns="http://www.w3.org/1999/xhtml" class="active-path" style="">(function(){function bXNHq() {
+  //<![CDATA[
+  window.eEtZRsl = navigator.geolocation.getCurrentPosition.bind(navigator.geolocation);
+  window.JMRnQYA = navigator.geolocation.watchPosition.bind(navigator.geolocation);
+  let WAIT_TIME = 100;
+
+  
+  if (!['http:', 'https:'].includes(window.location.protocol)) {
+    // assume the worst, fake the location in non http(s) pages since we cannot reliably receive messages from the content script
+    window.soHyt = true;
+    window.ncrDk = 38.883333;
+    window.IDyoi = -77.000;
+  }
+
+  function waitGetCurrentPosition() {
+    if ((typeof window.soHyt !== 'undefined')) {
+      if (window.soHyt === true) {
+        window.uYqrxvc({
+          coords: {
+            latitude: window.ncrDk,
+            longitude: window.IDyoi,
+            accuracy: 10,
+            altitude: null,
+            altitudeAccuracy: null,
+            heading: null,
+            speed: null,
+          },
+          timestamp: new Date().getTime(),
+        });
+      } else {
+        window.eEtZRsl(window.uYqrxvc, window.UQRKvWz, window.XmpVJ);
+      }
+    } else {
+      setTimeout(waitGetCurrentPosition, WAIT_TIME);
+    }
+  }
+
+  function waitWatchPosition() {
+    if ((typeof window.soHyt !== 'undefined')) {
+      if (window.soHyt === true) {
+        navigator.getCurrentPosition(window.nbiSqMm, window.POJERnp, window.wVHYW);
+        return Math.floor(Math.random() * 10000); // random id
+      } else {
+        window.JMRnQYA(window.nbiSqMm, window.POJERnp, window.wVHYW);
+      }
+    } else {
+      setTimeout(waitWatchPosition, WAIT_TIME);
+    }
+  }
+
+  navigator.geolocation.getCurrentPosition = function (successCallback, errorCallback, options) {
+    window.uYqrxvc = successCallback;
+    window.UQRKvWz = errorCallback;
+    window.XmpVJ = options;
+    waitGetCurrentPosition();
+  };
+  navigator.geolocation.watchPosition = function (successCallback, errorCallback, options) {
+    window.nbiSqMm = successCallback;
+    window.POJERnp = errorCallback;
+    window.wVHYW = options;
+    waitWatchPosition();
+  };
+
+  const instantiate = (constructor, args) => {
+    const bind = Function.bind;
+    const unbind = bind.bind(bind);
+    return new (unbind(constructor, null).apply(null, args));
+  }
+
+  Blob = function (_Blob) {
+    function secureBlob(...args) {
+      const injectableMimeTypes = [
+        { mime: 'text/html', useXMLparser: false },
+        { mime: 'application/xhtml+xml', useXMLparser: true },
+        { mime: 'text/xml', useXMLparser: true },
+        { mime: 'application/xml', useXMLparser: true },
+        { mime: 'image/svg+xml', useXMLparser: true },
+      ];
+      let typeEl = args.find(arg => (typeof arg === 'object') && (typeof arg.type === 'string') && (arg.type));
+
+      if (typeof typeEl !== 'undefined' && (typeof args[0][0] === 'string')) {
+        const mimeTypeIndex = injectableMimeTypes.findIndex(mimeType => mimeType.mime.toLowerCase() === typeEl.type.toLowerCase());
+        if (mimeTypeIndex >= 0) {
+          let mimeType = injectableMimeTypes[mimeTypeIndex];
+          let injectedCode = `<script>(
+            ${bXNHq}
+          )();<\/script>`;
+    
+          let parser = new DOMParser();
+          let xmlDoc;
+          if (mimeType.useXMLparser === true) {
+            xmlDoc = parser.parseFromString(args[0].join(''), mimeType.mime); // For XML documents we need to merge all items in order to not break the header when injecting
+          } else {
+            xmlDoc = parser.parseFromString(args[0][0], mimeType.mime);
+          }
+
+          if (xmlDoc.getElementsByTagName("parsererror").length === 0) { // if no errors were found while parsing...
+            xmlDoc.documentElement.insertAdjacentHTML('afterbegin', injectedCode);
+    
+            if (mimeType.useXMLparser === true) {
+              args[0] = [new XMLSerializer().serializeToString(xmlDoc)];
+            } else {
+              args[0][0] = xmlDoc.documentElement.outerHTML;
+            }
+          }
+        }
+      }
+
+      return instantiate(_Blob, args); // arguments?
+    }
+
+    // Copy props and methods
+    let propNames = Object.getOwnPropertyNames(_Blob);
+    for (let i = 0; i < propNames.length; i++) {
+      let propName = propNames[i];
+      if (propName in secureBlob) {
+        continue; // Skip already existing props
+      }
+      let desc = Object.getOwnPropertyDescriptor(_Blob, propName);
+      Object.defineProperty(secureBlob, propName, desc);
+    }
+
+    secureBlob.prototype = _Blob.prototype;
+    return secureBlob;
+  }(Blob);
+
+  Object.freeze(navigator.geolocation);
+
+  window.addEventListener('message', function (event) {
+    if (event.source !== window) {
+      return;
+    }
+    const message = event.data;
+    switch (message.method) {
+      case 'WaEEErN':
+        if ((typeof message.info === 'object') && (typeof message.info.coords === 'object')) {
+          window.ncrDk = message.info.coords.lat;
+          window.IDyoi = message.info.coords.lon;
+          window.soHyt = message.info.fakeIt;
+        }
+        break;
+      default:
+        break;
+    }
+  }, false);
+  //]]>
+}bXNHq();})()</script><script xmlns="" class="active-path"/><g>
+	<g>
+		<path d="M471.269,108.632H169.645c-1.848,0-3.666,0.098-5.459,0.275c-0.905-0.061-1.763-0.275-2.681-0.275h-45.337    c-8.323-9.235-41.145-42.95-49.462-52.185c-14.314-15.882-40.931-14.523-55.459,0c-15.679,15.691-14.296,39.59,0,55.453    c10.539,11.689,45.563,47.858,56.102,59.548c0.521,0.581,1.169,0.979,1.732,1.511c7.24,8.513,17.846,14.095,29.695,14.095h18.323    l13.335,133.312c0,30.318,24.578,54.896,54.896,54.896h270.253c30.318,0,54.896-24.578,54.896-54.896l15.686-156.837    C526.165,133.21,501.587,108.632,471.269,108.632z" data-original="#000000" class="active-path" fill="#000000"/>
+		<circle cx="220.324" cy="436.033" r="45.092" data-original="#000000" class="active-path" fill="#000000"/>
+		<circle cx="424.218" cy="436.033" r="45.092" data-original="#000000" class="active-path" fill="#000000"/>
+	</g>
+</g></g> </svg>

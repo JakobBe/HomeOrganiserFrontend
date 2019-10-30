@@ -3,7 +3,8 @@ import { Text, Animated, View, TouchableOpacity, TouchableWithoutFeedback, Alert
 import { CheckBox } from 'react-native-elements';
 import  { CardSection }  from './CardSection';
 import GestureRecognizer from 'react-native-swipe-gestures';
-import { deleteToDo, deleteEvent, deleteShoppingItem, updateToDo } from '../Client';
+import { deleteToDo, deleteEvent, deleteShoppingItem, updateToDo, updateExpense } from '../RailsClient';
+import { colorPalette } from '../Style/Colors';
 
 class ListItem extends Component {
   state = { 
@@ -53,14 +54,20 @@ class ListItem extends Component {
     this.setState({ isSwipedLeft: false });
   }
 
+  onResetPress = () => {
+    updateExpense(this.props.id);
+    this.setState({ isSwipedLeft: false });
+  }
+
   getCheckbox = () => {
-    if (this.props.isToDo) {
+    if (this.props.isToDo && !this.state.isSwipedLeft) {
       return (
         <CheckBox
+          style={styles.checkBox}
           onIconPress={this.onCheckBoxPress}
           checked={this.state.checked}
           center
-          checkedColor={'#a9eec2'}
+          checkedColor={colorPalette.primary}
         />
       );
     };
@@ -69,13 +76,15 @@ class ListItem extends Component {
   getUserMark = () => {
     if (this.props.userName) {
       return (
-        <View style={styles.userLetterStyleContainer(this.props.userColor || 'green')}>
+        <View style={styles.userLetterStyleContainer(this.props.userColor || 'black')}>
           <Text style={styles.userLetterStyle}>
             {this.props.userName.charAt(0).toUpperCase()}
           </Text>
         </View>
       );
     };
+
+    return null;
   };
 
   getToDoListAddOn = () => {
@@ -124,11 +133,30 @@ class ListItem extends Component {
     let deleteField = undefined;
     if (this.state.isSwipedLeft) {
       deleteField = (
+      <View style={styles.itemActions}>
         <TouchableOpacity onPress={this.onDeletePress} style={styles.deleteStyle}>
           <Text style={styles.deleteTextStyle}>
             Delete
           </Text>
         </TouchableOpacity>
+      </View>
+      );
+    }
+
+    if (this.state.isSwipedLeft && this.props.isExpense) {
+      deleteField = (
+        <View style={styles.itemActions}>
+          <TouchableOpacity onPress={this.onResetPress} style={styles.resetStyle}>
+            <Text style={styles.resetTextStyle}>
+              Settle
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={this.onDeletePress} style={styles.deleteStyle}>
+            <Text style={styles.deleteTextStyle}>
+              Delete
+            </Text>
+          </TouchableOpacity>
+        </View>
       );
     }
 
@@ -138,23 +166,16 @@ class ListItem extends Component {
           onSwipeLeft={(state) => this.onSwipeLeft(state)}
           onSwipeRight={(state) => this.onSwipeRight(state)}
           config={config}
-          style={{
-            flex: 1,
-            backgroundColor: this.state.backgroundColor,
-            justifyContent: 'space-between',
-            position: 'relative',
-            right: 2
-          }}
         >
           <CardSection additionalCardSectionStyles={styles.listItemContainer}>
-            {this.getUserMark()}
-            <TouchableWithoutFeedback onPress={() => this.props.onItemPressed(this.props.text, this.props.id)}>
+            {this.getUserMark()}   
+            <TouchableWithoutFeedback onPress={() => this.props.onItemPressed(this.props.item, this.props.id)}>
               <Text style={styles.titleStyle}>
                 {this.props.text}
                 {this.getExtraInfo()}
               </Text>
             </TouchableWithoutFeedback>
-            {this.getToDoListAddOn()}
+            {this.getCheckbox()}
             {deleteField}
           </CardSection>
         </GestureRecognizer>
@@ -165,10 +186,10 @@ class ListItem extends Component {
 
 const styles = {
   titleStyle: {
+    paddingLeft: 10,
     fontSize: 18,
-    paddingLeft: 15,
     width: 250,
-    color: '#05004e',
+    color: colorPalette.secondary,
   }, 
 
   descriptionStyle: (color) => ({
@@ -181,12 +202,19 @@ const styles = {
     width: 30
   },
 
-  deleteStyle: {
+  itemActions: {
     position: 'absolute',
     right: 2,
     top: 2,
     bottom: 2,
     width: 120,
+    flex: 0,
+    flexDirection: 'row',
+    width: 120
+  },
+
+  deleteStyle: {
+    flex: 1,
     backgroundColor: '#c40018',
     justifyContent: 'center',
     alignItems: 'center',
@@ -198,9 +226,21 @@ const styles = {
     fontWeight: 'bold' 
   },
 
+  resetStyle: {
+    flex: 1,
+    backgroundColor: 'darkgreen',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 5
+  },
+
+  resetTextStyle: {
+    color: 'white',
+    fontWeight: 'bold'
+  },
+
   listItemContainer: {
-    height: 70,
-    padding: 5,
+    height: 100,
   },
 
   userLetterStyleContainer: (color) => ({

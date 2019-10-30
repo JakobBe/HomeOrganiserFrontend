@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
-import { Card, CardSection, Input, Button, Spinner } from '../common';
-import { View, Text, TouchableOpacity } from 'react-native'
-import { UserContext } from '../contexts/UserContextHolder';
+import { Input, Button, Spinner } from '../Common';
+import { View, Text, TouchableOpacity, Alert } from 'react-native'
+import { HomeContext } from '../contexts/HomeContextHolder';
+import { signIn, RejectionErros } from '../AWSClient';
+import { layouts } from '../Style';
 
-class Login extends Component {
+class SignIn extends Component {
   state = {
     loading: false,
     email: '',
@@ -25,22 +27,35 @@ class Login extends Component {
 
   onLoginButtonPress = async () => {
     const { email, password } = this.state;
+    if (email.length === 0 || password.length === 0) {
+      Alert.alert("Please enter an E-Mail address and a password.");
+      return
+    }
+
     this.setState({
       loading: true,
       error: ''
     });
 
-    const result = await this.props.userContext.onLoginButtonPress(email, password)
-
-    if (result.status === 'Logged In') {
+    const signInRes = await signIn(email, password);
+    if (signInRes.status === 400) {
+      if (signInRes.res.code === RejectionErros.UserNotFoundException) {
+        Alert.alert("Incorrect email or password.");
+      }
+      if (signInRes.res.code === RejectionErros.NotAuthorizedException) {
+        Alert.alert("Incorrect email or password.");
+      }
       this.setState({
         loading: false
       });
-      this.props.hasSignedIn(result.user);
-    } else if (result.status === 'Email or password is invalid') {
+      return
+    }
+
+    if (signInRes.status === 200) {
+      await this.props.homeContext.createUserSession(signInRes.res.attributes.sub);
+      this.props.hasSignedIn();
       this.setState({
-        loading: false,
-        error: result.status
+        loading: false
       });
     }
   }
@@ -74,13 +89,14 @@ class Login extends Component {
 
   render() {
     return (
-      <Card>
+      <View style={styles.loginWrapper}>
         <Input
           label='Email'
           placeholder='email@gmail.com'
           onChangeText={this.onEmailChange.bind(this)}
           value={this.state.email}
           autoFocus={true}
+          additionalTextFieldStyle={styles.additionalTextFieldStyle}
         />
         <Input
           secureTextEntry
@@ -88,15 +104,18 @@ class Login extends Component {
           placeholder='password'
           onChangeText={this.onPasswordChange.bind(this)}
           value={this.state.password}
+          additionalTextFieldStyle={styles.additionalTextFieldStyle}
         />
         {this.renderError()}
-        {this.renderButton()}
-        <TouchableOpacity onPress={() => this.props.navigateLogin()}>
+        <View style={layouts.centerWrapper}>
+          {this.renderButton()}
+        </View>
+        <TouchableOpacity onPress={() => this.props.navigateSignIn()}>
           <Text style={styles.createAccounTextStyle}>
             Create a new account
           </Text>
         </TouchableOpacity>
-      </Card>
+      </View>
     )
   }
 }
@@ -108,6 +127,10 @@ const styles = {
     color: 'red'
   },
 
+  additionalTextFieldStyle: {
+    backgroundColor: 'none'
+  },
+
   createAccounTextStyle: {
     marginTop: 20,
     fontSize: 15,
@@ -117,15 +140,16 @@ const styles = {
   },
 
   button: {
-    height: 40,
-    backgroundColor: '#05004e',
-    marginTop: 10,
-    alignItems: 'center'
+    marginTop: 35,
+  },
+  
+  loginWrapper: {
+    flex: 0
   },
 }
 
 export default (props) => (
-  <UserContext.Consumer>
-    {userContext => <Login {...props} userContext={userContext} />}
-  </UserContext.Consumer>
+  <HomeContext.Consumer>
+    {homeContext => <SignIn {...props} homeContext={homeContext} />}
+  </HomeContext.Consumer>
 );

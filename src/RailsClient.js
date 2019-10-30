@@ -1,5 +1,9 @@
 const baseUrl = 'http://localhost:3001/'
 // https://home-organiser.herokuapp.com/
+// http://localhost:3001/
+export const fetchHomes = async () => {
+  return fetch(`${baseUrl}homes`)
+};
 
 export const createToDo = async (newToDo, appointee, selectedDate, userId) => {
   return fetch(`${baseUrl}to_dos?task=${newToDo}&appointee=${appointee}&date=${selectedDate}&user_id=${userId}`, {
@@ -55,14 +59,20 @@ export const createNewEvent = async (selectedDate, text, userId, time) => {
   });
 };
 
-export const createSession = async (email, password) => {
-  return fetch(`${baseUrl}login?email=${email}&password=${password}`, {
+export const createSession = async (sub) => {
+  return fetch(`${baseUrl}login?sub=${sub}`, {
     method: 'get'
   });
 };
 
-export const createUser = async (email, password, name) => {
-  return fetch(`${baseUrl}signup?email=${email}&password=${password}&name=${name}`, {
+export const createCognitoUser = async (sub, email) => {
+  return fetch(`${baseUrl}signup?sub=${sub}&email=${email}`, {
+    method: 'post'
+  });
+};
+
+export const getUser = async (sub) => {
+  return fetch(`${baseUrl}signup?sub=${sub}`, {
     method: 'get'
   });
 };
@@ -103,8 +113,14 @@ export const getHome = async (id) => {
   });
 }
 
-export const updateUserColor = async (id, color) => {
-  return fetch(`${baseUrl}users/${id}?color=${color}`, {
+export const createHome = async (homeName) => {
+  return fetch(`${baseUrl}homes/?name=${homeName}`, {
+    method: 'post'
+  });
+} 
+
+export const updateUser = async (id, color, link, homeId) => {
+  return fetch(`${baseUrl}users/${id}?color=${color}&link=${link}&home_id=${homeId}`, {
     method: 'put'
   });
 }
@@ -127,5 +143,11 @@ export const createExpense = async (id, amount, items) => {
 export const fetchExpenses = async (home_id) => {
   return fetch(`${baseUrl}expenses?home_id=${home_id}`, {
     method: 'get'
+  });
+}
+
+export const updateExpense = async (id) => {
+  return fetch(`${baseUrl}expenses/${id}`, {
+    method: 'put'
   });
 }

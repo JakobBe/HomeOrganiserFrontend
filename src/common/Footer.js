@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Text, TouchableOpacity, View, Image } from 'react-native';
 import { Actions, ActionConst } from 'react-native-router-flux';
+import { colorPalette } from '../Style/Colors';
 
 class Footer extends Component {
   onMoneyboxPress = () => {
@@ -24,31 +25,53 @@ class Footer extends Component {
   }
 
   render() {
+    const baseImagePath = '../../assets/images/';
+    const moneyBoxImage = this.props.isMoneyboxActive ? require(`${baseImagePath}/euro-c.png`) : require(`${baseImagePath}/euro.png`);
+    const calendarImage = this.props.isCalendarActive ? require(`${baseImagePath}/calendar-c.png`) : require(`${baseImagePath}/calendar.png`);
+    const homeImage = this.props.isHomeActive ? require(`${baseImagePath}/home-black-c.png`) : require(`${baseImagePath}/home-black.png`);
+    const cleaningImage = this.props.isCleaningActive ? require(`${baseImagePath}/list-c.png`) : require(`${baseImagePath}/list.png`);
+    const shoppingCartImage = this.props.isShoppingCartActive ? require(`${baseImagePath}/shopping-cart-c.png`) : require(`${baseImagePath}/shopping-cart.png`);
+
     return (
       <View style={styles.footerContainer}>
         <TouchableOpacity onPress={this.onMoneyboxPress} >
-          <View>
-            <Image source={require('../../assets/images/piggy-bank.png')} style={styles.imageStyle} />
+          <View style={styles.navigationWrapper}>
+            <Image source={moneyBoxImage} style={styles.imageStyle} />
+            <Text style={styles.navigationText}>
+              Money
+            </Text>
           </View>
         </TouchableOpacity>
         <TouchableOpacity onPress={this.onClanedarPress} >
-          <View>
-            <Image source={require('../../assets/images/smartphone.png')} style={styles.imageStyle} />
+          <View style={styles.navigationWrapper}>
+            <Image source={calendarImage} style={styles.imageStyle} />
+            <Text style={styles.navigationText}>
+              Calendar
+            </Text>
           </View>
         </TouchableOpacity>
         <TouchableOpacity onPress={this.onHomePress} >
-          <View>
-            <Image source={require('../../assets/images/home-color.png')} style={styles.homeImageStyle} />
+          <View style={styles.navigationWrapper}>
+            <Image source={homeImage} style={styles.homeImageStyle} />
+            <Text style={styles.navigationText}>
+              Home
+            </Text>
           </View>
         </TouchableOpacity>
         <TouchableOpacity onPress={this.onCleaningPress} >
-          <View>
-            <Image source={require('../../assets/images/laundry.png')} style={styles.imageStyle} />
+          <View style={styles.navigationWrapper}>
+            <Image source={cleaningImage} style={styles.imageStyle} />
+            <Text style={styles.navigationText}>
+              ToDo's
+            </Text>
           </View>
         </TouchableOpacity>
         <TouchableOpacity onPress={this.onShoppingcartPress} >
-          <View>
-            <Image source={require('../../assets/images/pear.png')} style={styles.imageStyle} />
+          <View style={styles.navigationWrapper}>
+            <Image source={shoppingCartImage} style={styles.imageStyle} />
+            <Text style={styles.navigationText}>
+              Shopping
+            </Text>
           </View>
         </TouchableOpacity>
       </View>
@@ -59,7 +82,7 @@ class Footer extends Component {
 const styles = {
   footerContainer: {
     display: 'flex',
-    felx: 1,
+    felx: 2,
     justifyContent: 'space-around',
     alignItems: 'center',
     flexDirection: 'row',
@@ -67,8 +90,9 @@ const styles = {
     padding: 10,
     paddingBottom: 20,
     borderRadius: 5,
-    borderTopColor: '#05004e',
-    borderTopWidth: 1
+    borderTopColor: colorPalette.secondary,
+    borderTopWidth: 1,
+    minHeight: 80
   },
 
   iconWrapperStyle: {
@@ -76,24 +100,31 @@ const styles = {
   },
 
   imageStyle: {
-    height: 50,
-    width: 50,
-    // backgroundColor: '#f38181',
-    // borderRadius: 25,
-    padding: 10
+    height: 25,
+    width: 25,
+    padding: 10,
+    marginBottom: 8
   },
 
   homeImageStyle: {
-    height: 30,
-    width: 30,
-    // backgroundColor: '#f38181',
-    // borderRadius: 25,
-    padding: 10
+    height: 20,
+    width: 20,
+    padding: 10,
+    marginBottom: 13
   },
 
   titleStyle: {
     fontSize: 18,
     paddingLeft: 15
+  },
+
+  navigationWrapper: {
+    flex: 0,
+    alignItems: 'center'
+  },
+
+  navigationText: {
+    fontSize: 8,
   }
 };
 

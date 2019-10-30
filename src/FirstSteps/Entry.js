@@ -1,52 +1,27 @@
 import React, { Component } from 'react';
-import { Text, View, Image } from 'react-native';
-import { Footer } from '../common';
-import Login from './Login';
-import SignUp from './SignUp';
+import { Text, View, Image, TouchableOpacity } from 'react-native';
+import { Footer, BackgroundCarousel } from '../Common';
 import { UserContext } from '../contexts/UserContextHolder';
+import { HomeContext } from '../contexts/HomeContextHolder';
 import GestureRecognizer, { swipeDirections } from 'react-native-swipe-gestures';
+import HomeSelector from './HomeSelector';
+import { colorPalette } from '../Style';
+import ProfileModal from './ProfileModal';
 
 class Entry extends Component {
   state = {
-    user: this.props.userContext.user || {},
-    isSignUpActive: false,
-    imageUp: false
+    newUser: false,
+    imageUp: false,
+    profileModalActive: false
   }
 
-  hasSignedIn = (user) => {
-    this.setState({
-      user,
-      isSignUpActive: false
-    });
-  };
-
-  renderLogin = () => {
-    if (Object.entries(this.state.user).length === 0 && !this.state.isSignUpActive) {
-      return (
-        <Login 
-          hasSignedIn={this.hasSignedIn}
-          navigateLogin={this.navigateLogin}
-        />
-      );
-    };
-  };
-
-  renderSignUp = () => {
-    if (this.state.isSignUpActive) {
-      return (
-        <SignUp 
-          hasSignedIn={this.hasSignedIn}
-          navigateLogin={this.navigateLogin}
-        />
-      );
-    };
-  };
-
-  navigateLogin = () => {
-    this.setState({
-      isSignUpActive: !this.state.isSignUpActive
-    });
-  };
+  componentDidMount() {
+    if (this.props.homeContext.currentUser.home_id === 42) {
+      this.setState({
+        newUser: true
+      })
+    }
+  }
 
   onSwipeUp = (gestureState) => {
     this.setState({
@@ -60,38 +35,88 @@ class Entry extends Component {
     })
   }
 
+  onProfilePress = () => {
+    this.setState({
+      profileModalActive: true
+    });
+  }
+
+  onModalClose = () => {
+    this.setState({
+      profileModalActive: false
+    });
+  }
+
+  renderHomeSelector = () => {
+    if (this.state.newUser) {
+      return (
+        <HomeSelector />
+      );
+    }
+  }
+
   renderMainContent = () => {
-    if (Object.entries(this.state.user).length > 0) {
+    const images = ['https://picsum.photos/id/100/1000/1000', 'https://picsum.photos/id/253/1000/1000', 'https://picsum.photos/id/137/1000/1000', 'https://picsum.photos/id/25/1000/1000', 'https://picsum.photos/id/431/1000/1000', 'https://picsum.photos/id/311/1000/1000'];
+    const currentUser = this.props.homeContext.currentUser
+    const profileColor = currentUser.color
+    const users = this.props.homeContext.users;
+    if (!this.state.newUser) {
       return (
         <View>
-          <GestureRecognizer
+          <View style={styles.carouselWrapper}>
+            <BackgroundCarousel 
+              images={images} 
+            />
+          </View>
+          <View style={styles.guideWrapper}>
+            <TouchableOpacity style={styles.imageWrapper(profileColor)} onPress={this.onProfilePress}>
+              <Image source={require('../../assets/images/user-black.png')} style={styles.imageStyle} />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.imageWrapper('white')}>
+              <Image source={require('../../assets/images/eggplant_double.png')} style={styles.imageStyle} />
+            </TouchableOpacity>
+          </View>
+          {/* <GestureRecognizer
             onSwipeUp={(state) => this.onSwipeUp(state)}
             onSwipeDown={(state) => this.onSwipeDown(state)}
           >
-            <Image source={require('../../assets/images/koi.jpg')} style={styles.imageStyle(this.state.imageUp)} />
-          </GestureRecognizer>
-          <Text>
-            Hello {this.state.user.name}
-          </Text>
+            <Image source={require('../../assets/images/eggplant.png')} style={styles.imageStyle(this.state.imageUp)} />
+          </GestureRecognizer> */}
+          {/* <View style={styles.flatmatesContainer}>
+            <Text style={styles.greeting}>
+              Hi {this.props.homeContext.currentUser.name}, these are your flatmates.
+            </Text>
+            <View style={styles.userLetterWrapper}>
+              {users.map(user => (
+                <View style={styles.userLetterStyleContainer(user.color || 'black')}>
+                  <Text style={styles.userLetterStyle}>
+                    {user.name.charAt(0).toUpperCase()}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          </View> */}
+          <ProfileModal 
+            profileModalActive={this.state.profileModalActive}
+            onModalClose={this.onModalClose}
+          />
         </View>
       );
-    };
+    }
   }
 
   renderFooter = () => {
-    if (Object.entries(this.state.user).length > 0) {
+    if (!this.state.newUser) {
       return (
-        <Footer />
+        <Footer isHomeActive={true}/>
       );
-    };
+    }
   }
 
   render() {
-    // const toDoList = this.setToDoList()
     return (
       <View style={styles.entryContainer}>
-        {this.renderLogin()}
-        {this.renderSignUp()}
+        {this.renderHomeSelector()}
         {this.renderMainContent()}
         {this.renderFooter()}
       </View>
@@ -109,17 +134,67 @@ const styles = {
   entryContainer: {
     flex: 1,
     justifyContent: 'space-between',
-    backgroundColor: 'rgb(255,255,255)'
+    backgroundColor: 'white',
   },
 
-  imageStyle: (imageUp) => ({
-    width: 400,
-    height: imageUp ? 100 : 400
-  })
+  carouselWrapper: {
+    height: '60%'
+  },
+
+  greeting: {
+    fontSize: 18,
+    margin: 20,
+    fontWeight: '600'
+  },
+
+  imageStyle: {
+    height: 40,
+    width: 40
+  },
+
+  userLetterStyleContainer: (color) => ({
+    width: 35,
+    height: 35,
+    borderRadius: 35 / 2,
+    backgroundColor: color,
+    justifyContent: 'center'
+  }),
+
+  userLetterStyle: {
+    color: 'white',
+    textAlign: 'center',
+  },
+
+  userLetterWrapper: {
+    flex: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-around'
+  },
+
+  guideWrapper: {
+    margin: 40,
+    flex: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-between'
+  },
+
+  imageWrapper: (backgroundColor) => ({
+    flex: 0,
+    alignSelf: 'flex-start',
+    padding: 10,
+    borderRadius: 13,
+    borderWidth: 2,
+    borderColor: colorPalette.secondary,
+    backgroundColor
+  }),
 };
 
 export default (props) => (
   <UserContext.Consumer>
-    {userContext => <Entry {...props} userContext={userContext} />}
+    {userContext =>
+      <HomeContext.Consumer>
+        {homeContext => <Entry {...props} homeContext={homeContext} userContext={userContext} />}
+      </HomeContext.Consumer>
+    }
   </UserContext.Consumer>
 );
