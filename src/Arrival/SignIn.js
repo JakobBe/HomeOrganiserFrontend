@@ -37,7 +37,7 @@ class SignIn extends Component {
       error: ''
     });
 
-    const signInRes = await signIn(email, password);
+    const signInRes = await signIn(email.toLowerCase(), password);
     if (signInRes.status === 400) {
       if (signInRes.res.code === RejectionErros.UserNotFoundException) {
         Alert.alert("Incorrect email or password.");

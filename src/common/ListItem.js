@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, Animated, View, TouchableOpacity, TouchableWithoutFeedback, Alert } from 'react-native';
+import { Text, Animated, Easing, View, TouchableOpacity, TouchableWithoutFeedback, Alert } from 'react-native';
 import { CheckBox } from 'react-native-elements';
 import  { CardSection }  from './CardSection';
 import GestureRecognizer from 'react-native-swipe-gestures';
@@ -7,11 +7,28 @@ import { deleteToDo, deleteEvent, deleteShoppingItem, updateToDo, updateExpense 
 import { colorPalette } from '../Style/Colors';
 
 class ListItem extends Component {
+  animatedValue = new Animated.Value(0);
+
   state = { 
     checked: this.props.done,
     backgroundColor: '#fff',
     isSwipedLeft: false
   };
+
+  componentDidMount() {
+    
+  }
+
+  animate = () => {
+    this.animatedValue.setValue(0)
+    Animated.decay(
+      this.animatedValue,
+      {
+        toValue: 1,
+        velocity: 1
+      }
+    ).start(() => this.animate())
+  }
 
   onCheckBoxPress = () => {
     this.setState({ checked: !this.state.checked })
@@ -20,6 +37,7 @@ class ListItem extends Component {
   }
 
   onSwipeLeft(gestureState) {
+    this.animate();
     this.setState({ isSwipedLeft: true });
   }
 
@@ -130,22 +148,27 @@ class ListItem extends Component {
       directionalOffsetThreshold: 80
     };
 
+    const width = this.animatedValue.interpolate({
+      inputRange: [0, 1],
+      outputRange: [0, 120]
+    })
+
     let deleteField = undefined;
     if (this.state.isSwipedLeft) {
       deleteField = (
-      <View style={styles.itemActions}>
+      <Animated.View style={styles.itemActions(width)}>
         <TouchableOpacity onPress={this.onDeletePress} style={styles.deleteStyle}>
           <Text style={styles.deleteTextStyle}>
             Delete
           </Text>
         </TouchableOpacity>
-      </View>
+      </Animated.View>
       );
     }
 
     if (this.state.isSwipedLeft && this.props.isExpense) {
       deleteField = (
-        <View style={styles.itemActions}>
+        <Animated.View style={styles.itemActions(width)}>
           <TouchableOpacity onPress={this.onResetPress} style={styles.resetStyle}>
             <Text style={styles.resetTextStyle}>
               Settle
@@ -156,7 +179,7 @@ class ListItem extends Component {
               Delete
             </Text>
           </TouchableOpacity>
-        </View>
+        </Animated.View>
       );
     }
 
@@ -202,16 +225,15 @@ const styles = {
     width: 30
   },
 
-  itemActions: {
+  itemActions: (width) => ({
     position: 'absolute',
     right: 2,
     top: 2,
     bottom: 2,
-    width: 120,
+    width,
     flex: 0,
     flexDirection: 'row',
-    width: 120
-  },
+  }),
 
   deleteStyle: {
     flex: 1,

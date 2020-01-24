@@ -5,15 +5,15 @@ import { UserContext } from '../contexts/UserContextHolder';
 import { HomeContext } from '../contexts/HomeContextHolder';
 import GestureRecognizer, { swipeDirections } from 'react-native-swipe-gestures';
 import HomeSelector from './HomeSelector';
-import { colorPalette } from '../Style';
+import { colorPalette, deviceWidth } from '../Style';
 import ProfileModal from './ProfileModal';
-import ImagePicker from 'react-native-image-picker';
-import { getPreSignedUrl } from '../AWSClient';
+import HomeModal from './HomeModal';
 
 class Entry extends Component {
   state = {
     imageUp: false,
-    profileModalActive: false
+    profileModalActive: false,
+    homeModalActive: false
   }
 
   onSwipeUp = (gestureState) => {
@@ -29,44 +29,46 @@ class Entry extends Component {
   }
 
   onProfilePress = async () => {
-    const options = {
-      title: 'Select Profile Picture',
-      customButtons: [{ name: 'random', title: 'Get a random picture :)' }],
-    };
-    const preSignedUrl = await getPreSignedUrl();
+    this.setState({
+      profileModalActive: true
+    });
+  }
 
-    ImagePicker.showImagePicker(options, (response) => {
-      console.log('Response = ', response);
-
-      if (response.didCancel) {
-        console.log('User cancelled image picker');
-      } else if (response.error) {
-        console.log('ImagePicker Error: ', response.error);
-      } else if (response.customButton) {
-        console.log('User tapped custom button: ', response.customButton);
-      } else {
-        console.log('preSignedUrl', preSignedUrl);
-        const xhr = new XMLHttpRequest();
-        xhr.open('PUT', preSignedUrl);
-        xhr.onreadystatechange = function() {
-          if (xhr.readyState === 4) {
-            if (xhr.status === 200) {
-              console.log('Image successfully uploaded to S3', xhr);
-            }
-          } else {
-            console.log('Error while sending the image to S3', xhr);
-          }
-        }
-        xhr.setRequestHeader('Content-Type', 'image/jpeg');
-        xhr.send({ uri: response.uri, type: 'image/jpeg', name: 'test.jpg' });
-      }
+  onHomePress = () => {
+    this.setState({
+      homeModalActive: true
     });
   }
 
   onModalClose = () => {
     this.setState({
-      profileModalActive: false
+      profileModalActive: false,
+      homeModalActive: false
     });
+  }
+
+  getTodayEvents = () => {
+    let selectedDateEvents = this.props.homeContext.events.filter(event => {
+      return event.date === this.currentDate()
+    });
+    return selectedDateEvents;
+  }
+
+  currentDate = () => {
+    let day = new Date().getDate();
+    let month = new Date().getMonth() + 1;
+    const year = new Date().getFullYear();
+
+    if (month.toString().length === 1) {
+      month = `0${month}`
+    }
+
+    if (day.toString().length === 1) {
+      day = `0${day}`
+    }
+
+    const today = `${year}-${month}-${day}`;
+    return today
   }
 
   renderHomeSelector = (isNewUser) => {
@@ -84,18 +86,30 @@ class Entry extends Component {
     if (!isNewUser) {
       return (
         <View>
-          <View style={styles.carouselWrapper}>
+          {/* <View style={styles.carouselWrapper}>
             <BackgroundCarousel 
               images={images} 
             />
-          </View>
+          </View> */}
           <View style={styles.guideWrapper}>
             <TouchableOpacity style={styles.imageWrapper(profileColor)} onPress={this.onProfilePress}>
-              <Image source={require('../../assets/images/user-black.png')} style={styles.imageStyle} />
+              <Text style={{ color: colorPalette.primary }}>Profile settings</Text>
+              <Image source={require('../../assets/images/user-black-c.png')} style={styles.imageStyle} />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.imageWrapper('white')}>
-              <Image source={require('../../assets/images/eggplant_double.png')} style={styles.imageStyle} />
+            <TouchableOpacity style={styles.imageWrapper('white')} onPress={this.onHomePress}>
+              <Text style={{ color: colorPalette.primary }}>Home settings</Text>
+              <Image source={require('../../assets/images/group-c.png')} style={styles.imageStyle} />
             </TouchableOpacity>
+          </View>
+          <View style={styles.guideWrapper}>
+            <View style={styles.imageWrapper('white')}>
+              <Text style={{ color: colorPalette.primary }}>Your Balance</Text>
+              <Text style={{ color: colorPalette.primary }}>+100$</Text>
+            </View>
+            <View style={styles.imageWrapper('white')}>
+              <Text style={{ color: colorPalette.primary }}>Events today</Text>
+              {/* <Text style={{ color: colorPalette.primary, textAlign: 'center',  }}>{this.getTodayEvents()[0].text}</Text> */}
+            </View>
           </View>
           {/* <GestureRecognizer
             onSwipeUp={(state) => this.onSwipeUp(state)}
@@ -119,6 +133,10 @@ class Entry extends Component {
           </View> */}
           <ProfileModal 
             profileModalActive={this.state.profileModalActive}
+            onModalClose={this.onModalClose}
+          />
+          <HomeModal
+            homeModalActive={this.state.homeModalActive}
             onModalClose={this.onModalClose}
           />
         </View>
@@ -172,8 +190,10 @@ const styles = {
   },
 
   imageStyle: {
-    height: 40,
-    width: 40
+    height: 60,
+    width: 60,
+    alignSelf: 'center',
+    marginTop: 20
   },
 
   userLetterStyleContainer: (color) => ({
@@ -196,7 +216,8 @@ const styles = {
   },
 
   guideWrapper: {
-    margin: 40,
+    margin: 20,
+    marginBottom: 0,
     flex: 0,
     flexDirection: 'row',
     justifyContent: 'space-between'
@@ -209,7 +230,9 @@ const styles = {
     borderRadius: 13,
     borderWidth: 2,
     borderColor: colorPalette.secondary,
-    backgroundColor
+    backgroundColor: colorPalette.secondary,
+    height: deviceWidth/2.5,
+    width: deviceWidth/2.5
   }),
 };
 

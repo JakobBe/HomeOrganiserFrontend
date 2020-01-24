@@ -40,7 +40,7 @@ export const signIn = async (email, password) => {
 };
 
 
-export const getPreSignedUrl = async () => {
+export const getPreSignedUrl = async (key) => {
   const s3Access = new AWS.S3({
     accessKeyId: awsS3DevUser.accessKeyId,
     secretAccessKey: awsS3DevUser.secretAccessKeyId,
@@ -49,12 +49,11 @@ export const getPreSignedUrl = async () => {
   
   const s3Params = {
     Bucket: awsS3DevUser.bucket,
-    Key: 'helloWorld/test.jpg',
+    Key: key,
     ContentType: 'image/jpeg'
   }
 
   const url = await s3Access.getSignedUrl('putObject', s3Params);
-  console.log('Hello from AWS client', url);
   return url;
 }
 

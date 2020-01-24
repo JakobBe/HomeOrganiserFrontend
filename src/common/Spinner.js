@@ -14,7 +14,7 @@ const styles = {
     flex: 0,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 35
+    marginTop: 38
   }
 };
 

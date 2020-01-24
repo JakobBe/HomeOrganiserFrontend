@@ -5,7 +5,9 @@ import { HomeContext } from '../contexts/HomeContextHolder';
 import { Input, Button, Footer } from '../Common';
 import { updateUser } from '../RailsClient';
 import { Actions, ActionConst } from 'react-native-router-flux';
-import { colorPalette } from '../Style';
+import { colorPalette, deviceWidth, layouts } from '../Style';
+import ImagePicker from 'react-native-image-picker';
+import { getPreSignedUrl } from '../AWSClient';
 
 class ProfileModal extends Component {
   state = {
@@ -13,20 +15,65 @@ class ProfileModal extends Component {
     color: '',
     email: '',
     payPalMeLink: '',
-    home_id: ''
+    home_id: '',
+    profileImage: ''
   }
 
   componentDidMount() {
-    const { name, color, email, pay_pal_me_link, home_id } = this.props.homeContext.currentUser;
+    const { name, color, email, pay_pal_me_link, home_id, id } = this.props.homeContext.currentUser;
     this.setState({
       name: name || '',
       color: color || '',
       email: email || '',
       payPalMeLink: pay_pal_me_link || '',
-      homeId: home_id || ''
+      homeId: home_id || '',
+      profileImage: this.getProfileImageUrl(id)
     });
   };
-  f
+
+  getProfileImageUrl = (userId) => {
+    return `https://egg-planner-dev.s3.eu-central-1.amazonaws.com/${userId}/profile.jpg`;
+  }
+  
+  onCameraPress = async () => {
+    const options = {
+      title: 'Select Profile Picture',
+      customButtons: [{ name: 'random', title: 'Get a random picture :)' }],
+    };
+
+    const user = this.props.homeContext.currentUser;
+    const preSignedUrl = await getPreSignedUrl(`${user.id}/profile.jpg`);
+
+    ImagePicker.showImagePicker(options, (response) => {
+      if (response.didCancel) {
+      } else if (response.error) {
+      } else if (response.customButton) {
+        console.log('User tapped custom button: ', response.customButton);
+      } else {
+        const xhr = new XMLHttpRequest();
+        xhr.open('PUT', preSignedUrl);
+        xhr.onreadystatechange = function () {
+          if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+              console.log('Image successfully uploaded to S3', xhr);
+            }
+          } else {
+            console.log('Error while sending the image to S3', xhr);
+          }
+        }
+        xhr.setRequestHeader('Content-Type', 'image/jpeg');
+        xhr.send({ uri: response.uri, type: 'image/jpeg', name: 'test.jpg' });
+      }
+
+      const profileImageUrl = this.getProfileImageUrl(user.id);
+
+      this.setState({
+        profileImage: profileImageUrl
+      });
+    });
+
+  }
+
   onButtonPress = () => {
     updateUser(this.props.homeContext.currentUser.id,
       this.state.color.toLowerCase(),
@@ -58,7 +105,10 @@ class ProfileModal extends Component {
               <Text style={{ color: colorPalette.primary, fontWeight: 'bold' }}>Close</Text>
             </TouchableOpacity>
             <View style={styles.imageWrapper}>
-              <Image source={require('../../assets/images/user-black.png')} style={styles.imageStyle} />
+              <Image source={{ uri: this.state.profileImage}} style={styles.imageStyle} />
+              <TouchableOpacity onPress={() => this.onCameraPress()}>
+                <Image source={require('../../assets/images/photo-camera.png')} style={styles.cameraImageStyle} />
+              </TouchableOpacity>
             </View>
             <View style={styles.profileWrapper}>
               <ScrollView style={styles.inputWrapper}>
@@ -84,9 +134,11 @@ class ProfileModal extends Component {
                 />
               </ScrollView>
             </View>
-            <Button onPress={this.onButtonPress} additionalButtonStyles={styles.buttonStyle}>
-              Update
-            </Button>
+            <View style={layouts.centerWrapper}>
+              <Button onPress={this.onButtonPress} additionalButtonStyles={styles.buttonStyle}>
+                Update
+              </Button>
+            </View>
           </View>
         </View>
       </Modal>
@@ -130,18 +182,28 @@ const styles = {
   },
 
   imageStyle: {
-    height: 50,
-    width: 50
-  },
-
-  imageWrapper: {
-    flex: 0,
-    alignSelf: 'flex-start',
-    padding: 10,
-    borderRadius: 35,
+    height: 90,
+    width: 90,
+    borderRadius: 45,
     borderWidth: 2,
     borderColor: colorPalette.secondary,
   },
+
+  imageWrapper: {
+    padding: 10,
+    position: 'relative',
+    flex: 0,
+    alignItems: 'center'
+  },
+
+  cameraImageStyle: {
+    height: 30,
+    width: 30,
+    position: 'absolute',
+    bottom: -7,
+    left: 23,
+    zIndex: 2
+  }
 };
 
 export default (props) => (

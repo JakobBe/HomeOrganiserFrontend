@@ -27,7 +27,7 @@ class BackgroundCarousel extends React.Component {
     //       });
     //     }
     //   );
-    // }, 4000);
+    // }, 10000);
   };
 
   setSelectedIndex = (event) => {

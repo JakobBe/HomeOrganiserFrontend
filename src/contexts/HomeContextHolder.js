@@ -60,7 +60,7 @@ class HomeContextHolder extends Component {
   }
 
   render() {
-
+    console.log('this.state', this.state);
     return (
       <HomeContext.Provider
         value={
@@ -69,6 +69,7 @@ class HomeContextHolder extends Component {
             users: this.state.users,
             toDos: this.state.toDos,
             events: this.state.events,
+            home: this.state.home,
             shoppingItems: this.state.shoppingItems,
             createUserSession: this.createUserSession,
             updateCurrentUser: this.updateCurrentUser

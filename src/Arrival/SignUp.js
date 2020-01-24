@@ -44,12 +44,11 @@ class SignUp extends Component {
     });
 
 
-    const signUpRes = await signUp(email, password);
-
+    const signUpRes = await signUp(email.toLowerCase(), password);
     if (signUpRes.status === 400) {
-      if (signUpRes.code === RejectionErros.UsernameExistsException) {
+      if (signUpRes.res.code === RejectionErros.UsernameExistsException) {
         Alert.alert("A User with this E-Mail already exists.");
-      } else if (signUpRes.code === RejectionErros.InvalidParameterException) {
+      } else if (signUpRes.res.code === RejectionErros.InvalidParameterException) {
         Alert.alert("E-Mail and / or Password are not in the correct format.");
       };
       this.setState({
