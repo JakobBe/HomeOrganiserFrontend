@@ -1,0 +1,15 @@
+projects:
+  EggPlanner:
+    schemaPath: src/graphql/schema.json
+    includes:
+      - src/graphql/**/*.js
+    excludes:
+      - ./amplify/**
+    extensions:
+      amplify:
+        codeGenTarget: javascript
+        generatedFileName: ''
+        docsFilePath: src/graphql
+        region: eu-central-1
+        apiId: 36rik27g2nhs7dgb4pzhlefrbe
+        maxDepth: 2

@@ -1,6 +1,7 @@
-import Amplify, { Auth } from 'aws-amplify';
+import Amplify, { Auth, API, graphqlOperation } from 'aws-amplify';
 import AWS from 'aws-sdk';
 import { awsCognitoConfig, awsS3DevUser } from './aws-exports';
+import { getHome } from './graphql/queries'
 
 export const RejectionErros = {
   UsernameExistsException: 'UsernameExistsException',
@@ -11,6 +12,19 @@ export const RejectionErros = {
 }
 
 Amplify.configure(awsCognitoConfig);
+
+export const appSyncGraphQl = async (query, variables) => {
+  console.log('query, variables', query, variables);
+  try {
+    const res = await API.graphql({
+      query,
+      variables
+    });
+    return { status: 200, res: res.data }
+  } catch (error) {
+    return { status: 400, res: error }
+  }
+}
 
 export const signUp = async (email, password) => {
   try {
@@ -23,6 +37,7 @@ export const signUp = async (email, password) => {
     });
     return {status: 200, res: user}
   } catch (error) {
+    console.log('res', res);
     return {status: 400, res: error}
   } 
 };
@@ -35,6 +50,7 @@ export const signIn = async (email, password) => {
     });
     return { status: 200, res: user }
   } catch (error) {
+    console.log('res', res);
     return { status: 400, res: error }
   }
 };

@@ -1,0 +1,15 @@
+{
+    "dev": {
+        "awscloudformation": {
+            "AuthRoleName": "amplify-eggplannerapi-dev-154501-authRole",
+            "UnauthRoleArn": "arn:aws:iam::155789178947:role/amplify-eggplannerapi-dev-154501-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::155789178947:role/amplify-eggplannerapi-dev-154501-authRole",
+            "Region": "eu-central-1",
+            "DeploymentBucketName": "amplify-eggplannerapi-dev-154501-deployment",
+            "UnauthRoleName": "amplify-eggplannerapi-dev-154501-unauthRole",
+            "StackName": "amplify-eggplannerapi-dev-154501",
+            "StackId": "arn:aws:cloudformation:eu-central-1:155789178947:stack/amplify-eggplannerapi-dev-154501/fb7c6f20-411b-11ea-88dd-064768627800",
+            "AmplifyAppId": "dp4azd9yq79ao"
+        }
+    }
+}

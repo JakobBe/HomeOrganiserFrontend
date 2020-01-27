@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { getHome, createSession } from '../RailsClient';
 import { UserContext } from './UserContextHolder';
+import { getHome2 } from '../graphql/queries/GetHome';
+import { appSyncGraphQl } from '../AWSClient';
 
 const defaultValue = {};
 export const HomeContext = React.createContext(defaultValue);
@@ -25,6 +27,9 @@ class HomeContextHolder extends Component {
         return res
       });
     
+    const variables = { id: "e326d21f-704d-4542-bd44-5e8f0286e2dc" }
+    const data = await appSyncGraphQl(getHome2, variables);
+    console.log('data', data);
     await this.buildHomeContext(res.user.home_id)
     return res
   };
@@ -60,7 +65,6 @@ class HomeContextHolder extends Component {
   }
 
   render() {
-    console.log('this.state', this.state);
     return (
       <HomeContext.Provider
         value={
