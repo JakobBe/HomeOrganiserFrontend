@@ -3,6 +3,8 @@ import { getHome, createSession } from '../RailsClient';
 import { UserContext } from './UserContextHolder';
 import { getHome2 } from '../graphql/queries/GetHome';
 import { appSyncGraphQl } from '../AWSClient';
+import { createUser } from '../graphql/mutations/CreateUser';
+import moment from 'moment';
 
 const defaultValue = {};
 export const HomeContext = React.createContext(defaultValue);
@@ -17,7 +19,22 @@ class HomeContextHolder extends Component {
     home: undefined
   }
 
+
+  createUser = async (sub) => {
+    const variables = {
+      sub,
+      name: "Anna",
+      homeId: "e326d21f-704d-4542-bd44-5e8f0286e2dc",
+      color: "pink",
+      createdAt: moment.utc().format(),
+      updatedAt: moment.utc().format()
+    }
+    const newUser = await appSyncGraphQl(createUser, variables);
+    console.log('newUser', newUser);
+  }
+
   createUserSession = async (sub) => {
+    this.createUser(sub);
     const res = await createSession(sub)
       .then((response) => response.json())
       .then((res) => {
@@ -29,7 +46,6 @@ class HomeContextHolder extends Component {
     
     const variables = { id: "e326d21f-704d-4542-bd44-5e8f0286e2dc" }
     const data = await appSyncGraphQl(getHome2, variables);
-    console.log('data', data);
     await this.buildHomeContext(res.user.home_id)
     return res
   };

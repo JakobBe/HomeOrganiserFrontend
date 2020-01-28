@@ -54,3 +54,20 @@ export const getHome2 = /* GraphQL */ `
     }
   }
 `;
+export const listHomes = /* GraphQL */ `
+  query ListHomes(
+    $filter: TableHomeFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listHomes(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        name
+        createdAt
+        updatedAt
+      }
+      nextToken
+    }
+  }
+`;

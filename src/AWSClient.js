@@ -14,7 +14,6 @@ export const RejectionErros = {
 Amplify.configure(awsCognitoConfig);
 
 export const appSyncGraphQl = async (query, variables) => {
-  console.log('query, variables', query, variables);
   try {
     const res = await API.graphql({
       query,
