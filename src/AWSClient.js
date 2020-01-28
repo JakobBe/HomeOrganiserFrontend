@@ -1,7 +1,6 @@
-import Amplify, { Auth, API, graphqlOperation } from 'aws-amplify';
+import Amplify, { Auth, API } from 'aws-amplify';
 import AWS from 'aws-sdk';
 import { awsCognitoConfig, awsS3DevUser } from './aws-exports';
-import { getHome } from './graphql/queries'
 
 export const RejectionErros = {
   UsernameExistsException: 'UsernameExistsException',

@@ -16,25 +16,17 @@ class HomeContextHolder extends Component {
     toDos: undefined,
     events: undefined,
     shoppingItems: undefined,
-    home: undefined
+    home: undefined,
+    sub: undefined,
   }
 
-
-  createUser = async (sub) => {
-    const variables = {
-      sub,
-      name: "Anna",
-      homeId: "e326d21f-704d-4542-bd44-5e8f0286e2dc",
-      color: "pink",
-      createdAt: moment.utc().format(),
-      updatedAt: moment.utc().format()
-    }
-    const newUser = await appSyncGraphQl(createUser, variables);
-    console.log('newUser', newUser);
+  updateSub = (sub) => {
+    this.setState({
+      sub
+    });
   }
 
   createUserSession = async (sub) => {
-    this.createUser(sub);
     const res = await createSession(sub)
       .then((response) => response.json())
       .then((res) => {
@@ -44,8 +36,8 @@ class HomeContextHolder extends Component {
         return res
       });
     
-    const variables = { id: "e326d21f-704d-4542-bd44-5e8f0286e2dc" }
-    const data = await appSyncGraphQl(getHome2, variables);
+    // const variables = { id: "e326d21f-704d-4542-bd44-5e8f0286e2dc" }
+    // const data = await appSyncGraphQl(getHome2, variables);
     await this.buildHomeContext(res.user.home_id)
     return res
   };
@@ -92,7 +84,9 @@ class HomeContextHolder extends Component {
             home: this.state.home,
             shoppingItems: this.state.shoppingItems,
             createUserSession: this.createUserSession,
-            updateCurrentUser: this.updateCurrentUser
+            updateCurrentUser: this.updateCurrentUser,
+            updateSub: this.updateSub,
+            sub: this.state.sub
           }
         }
       >
