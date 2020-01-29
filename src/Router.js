@@ -1,14 +1,13 @@
 import React from 'react';
 import { Navigator } from 'react-native';
 import { Scene, Router, Actions, ActionConst } from 'react-native-router-flux';
-import ToDoList from './ToDos/ToDoList';
-import ToDoCreate from './ToDos/ToDoCreate';
-import MoneyEntry from './MoneyBox/MoneyEntry';
-import Entry from './FirstSteps/Entry';
-import CalendarEntry from './Calendar/CalendarEntry';
-import ShoppingList from './ShoppingCart/ShoppingList';
+import ToDoList from './components/ToDos/ToDoList';
+import MoneyEntry from './components/MoneyBox/MoneyEntry';
+import Entry from './components/FirstSteps/Entry';
+import CalendarEntry from './components/Calendar/CalendarEntry';
+import ShoppingList from './components/ShoppingCart/ShoppingList';
 import Profile from './Profile';
-import Arrival from './Arrival/Arrival';
+import Arrival from './components/Arrival/Arrival';
 import { colorPalette, deviceWidth } from './Style';
 
 const RouterComponent = () => {

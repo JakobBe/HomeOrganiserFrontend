@@ -25,7 +25,7 @@ class Footer extends Component {
   }
 
   render() {
-    const baseImagePath = '../../assets/images/';
+    const baseImagePath = '../../../assets/images/';
     const moneyBoxImage = this.props.isMoneyboxActive ? require(`${baseImagePath}/euro-c.png`) : require(`${baseImagePath}/euro.png`);
     const calendarImage = this.props.isCalendarActive ? require(`${baseImagePath}/calendar-c.png`) : require(`${baseImagePath}/calendar.png`);
     const homeImage = this.props.isHomeActive ? require(`${baseImagePath}/home-black-c.png`) : require(`${baseImagePath}/home-black.png`);

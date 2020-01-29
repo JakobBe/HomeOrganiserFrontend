@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from './Button';
-import { colorPalette } from '../Style/Colors';
+import { colorPalette } from '../../Style/Colors';
 
 const AddButton = (props) => {
   return (

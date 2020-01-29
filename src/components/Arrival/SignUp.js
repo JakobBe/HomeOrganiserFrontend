@@ -58,10 +58,10 @@ class SignUp extends Component {
     }
     
     if (signUpRes.status === 200) {
-      const user = await createCognitoUser(signUpRes.res.userSub, signUpRes.res.user.username)
-        .then((user) => user.json())
+      // const user = await createCognitoUser(signUpRes.res.userSub, signUpRes.res.user.username)
+      //   .then((user) => user.json())
 
-      this.props.hasSignedUp(user);
+      this.props.hasSignedUp(signUpRes.res.userSub);
       this.setState({
         loading: false
       });

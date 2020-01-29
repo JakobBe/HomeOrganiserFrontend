@@ -199,7 +199,7 @@ class ShoppingList extends Component {
           <View style={styles.shoppingBasketWrapper}>
             {this.getNotificationNumber()}
             <TouchableOpacity onPress={this.onShoppingBagPress}>
-              <Image source={require('../../assets/images/shopping-basket.png')} style={styles.shoppingCartImageStyle} />
+              <Image source={require('../../../assets/images/shopping-basket.png')} style={styles.shoppingCartImageStyle} />
             </TouchableOpacity>
           </View>
         </View>

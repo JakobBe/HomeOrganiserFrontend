@@ -85,11 +85,11 @@ class Entry extends Component {
         <View style={styles.guideWrapper}>
           <TouchableOpacity style={styles.imageWrapper(profileColor)} onPress={this.onProfilePress}>
             <Text style={{ color: colorPalette.primary }}>Profile settings</Text>
-            <Image source={require('../../assets/images/user-black-c.png')} style={styles.imageStyle} />
+            <Image source={require('../../../assets/images/user-black-c.png')} style={styles.imageStyle} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.imageWrapper('white')} onPress={this.onHomePress}>
             <Text style={{ color: colorPalette.primary }}>Home settings</Text>
-            <Image source={require('../../assets/images/group-c.png')} style={styles.imageStyle} />
+            <Image source={require('../../../assets/images/group-c.png')} style={styles.imageStyle} />
           </TouchableOpacity>
         </View>
         <View style={styles.guideWrapper}>

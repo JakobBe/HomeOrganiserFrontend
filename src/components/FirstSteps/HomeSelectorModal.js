@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
 import { Modal, Text, TouchableOpacity, View, Image } from 'react-native';
 import { Button, Input, Spinner } from '../Common';
-import { updateUser, createHome } from '../../RailsClient';
+import { updateUser } from '../../RailsClient';
 import { colorPalette } from '../../Style/Colors';
 import { appSyncGraphQl } from '../../AWSClient';
-import createUser from '../../graphql/Users/mutations';
+import { createHome } from '../../graphql/Homes/mutations';
+import moment from 'moment';
 
 class ToDoFilterModal extends Component {
   state = {
@@ -65,15 +66,32 @@ class ToDoFilterModal extends Component {
     }
 
     if (this.props.createModalPresented) {
-      return createHome(this.state.homeName).then((response) => response.json())
+      const variables = {
+        name: this.state.homeName,
+        createdAt: 2020,
+        updatedAt: 2020
+      }
+      console.log('can you see me?');
+      return appSyncGraphQl(createHome, variables)
         .then((res) => {
-          if (res.status === '200') {
-            return res.home_id
+          console.log(res, res.status);
+          if (res.status === 200) {
+            console.log('res from createHome GQL', res.res.createHome);
+            return res.res.createHome.id
           }
-          if (res.status === '400') {
+          if (res.status === 400) {
             return undefined;
           }
         })
+      // return createHome(this.state.homeName).then((response) => response.json())
+      //   .then((res) => {
+      //     if (res.status === '200') {
+      //       return res.home_id
+      //     }
+      //     if (res.status === '400') {
+      //       return undefined;
+      //     }
+      //   })
     }
   }
 
@@ -107,7 +125,7 @@ class ToDoFilterModal extends Component {
           <TouchableOpacity
             onPress={() => this.props.onModalClose()}
           >
-            <Image source={require('../../assets/images/close.png')} style={styles.imageStyle} />
+            <Image source={require('../../../assets/images/close.png')} style={styles.imageStyle} />
           </TouchableOpacity>
           <Text style={styles.infoText}>
             {infoText}

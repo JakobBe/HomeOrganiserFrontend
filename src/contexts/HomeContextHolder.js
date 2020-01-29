@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import { getHome, createSession } from '../RailsClient';
 import { UserContext } from './UserContextHolder';
-import { getHome2 } from '../graphql/queries/GetHome';
+import { getHome2 } from '../graphql/Homes/queries';
 import { appSyncGraphQl } from '../AWSClient';
-import { createUser } from '../graphql/mutations/CreateUser';
+import { createUser } from '../graphql/Users/mutations';
 import moment from 'moment';
 
 const defaultValue = {};

@@ -6,13 +6,15 @@ import { Input, Button, Footer } from '../Common';
 import { Actions, ActionConst } from 'react-native-router-flux';
 import { colorPalette, deviceWidth, layouts } from '../../Style';
 import ImagePicker from 'react-native-image-picker';
-import { getPreSignedUrl } from '../../AWSClient';
+import { getPreSignedUrl, appSyncGraphQl } from '../../AWSClient';
+import moment from 'moment';
+import { createUser } from '../../graphql/Users/mutations';
 
 class ProfileCompletionModal extends Component {
   state = {
     name: '',
     color: 'grey',
-    payPalMeLink: '',
+    paypalLink: '',
     profileImage: ''
   }
 
@@ -60,47 +62,42 @@ class ProfileCompletionModal extends Component {
   }
 
   onButtonPress = () => {
-    const { name, color, payPalMeLink } = this.state;
+    const { name, color, paypalLink } = this.state;
     const variables = {
       sub: this.props.sub,
       name,
       homeId: this.props.homeId,
       color,
-      payPalMeLink,
+      paypalLink,
       createdAt: moment.utc().format(),
+      updatedAt: moment.utc().format()
     }
 
     appSyncGraphQl(createUser, variables)
-      .then((response) => response.json())
       .then((res) => {
+        console.log('User creation after home selection', res);
         if (res.status === '200') {
-          console.log('User creation after home selection', res);
-          // this.props.homeContext.createUserSession(res.user);
+          this.props.homeContext.createUserSession(res.createUser);
           Actions.entry({ type: ActionConst.REPLACE })
         }
       })
   }
 
   render() {
-    const { name, color, payPalMeLink } = this.state;
+    const { name, color, paypalLink } = this.state;
     return (
       <Modal
         animationType="slide"
         transparent={true}
-        visible={this.props.ProfileCompletionModalPresented}
+        visible={this.props.profileCompletionModalPresented}
       >
         <View style={styles.transparentBackground}>
           <View style={styles.profileContainer(color)}>
-            <TouchableOpacity
-              onPress={() => this.props.onModalClose()}
-              style={{ top: 3, left: '85%' }}
-            >
-              <Text style={{ color: colorPalette.primary, fontWeight: 'bold' }}>Close</Text>
-            </TouchableOpacity>
+            <Text style={styles.mainText}>Almoste done... let your flatmates know who you are.</Text>
             <View style={styles.imageWrapper}>
               <Image source={{ uri: this.state.profileImage }} style={styles.imageStyle} />
               <TouchableOpacity onPress={() => this.onCameraPress()}>
-                <Image source={require('../../assets/images/photo-camera.png')} style={styles.cameraImageStyle} />
+                <Image source={require('../../../assets/images/photo-camera.png')} style={styles.cameraImageStyle} />
               </TouchableOpacity>
             </View>
             <View style={styles.profileWrapper}>
@@ -121,8 +118,8 @@ class ProfileCompletionModal extends Component {
                   label='E-Mail'
                 /> */}
                 <Input
-                  value={payPalMeLink}
-                  onChangeText={value => this.setState({ payPalMeLink: value })}
+                  value={paypalLink}
+                  onChangeText={value => this.setState({ paypalLink: value })}
                   label='PayPal Link'
                 />
               </ScrollView>
@@ -160,6 +157,13 @@ const styles = {
     flex: 0,
     justifyContent: 'space-between',
   }),
+
+  mainText: {
+    fontSize: 20,
+    color: colorPalette.secondary,
+    lineHeight: 35,
+    letterSpacing: 3
+  },
 
   profileWrapper: {
     backgroundColor: 'rgb(255,255,255)',
@@ -203,7 +207,7 @@ export default (props) => (
   <UserContext.Consumer>
     {userContext =>
       <HomeContext.Consumer>
-        {homeContext => <ProfileModal {...props} homeContext={homeContext} userContext={userContext} />}
+        {homeContext => <ProfileCompletionModal {...props} homeContext={homeContext} userContext={userContext} />}
       </HomeContext.Consumer>
     }
   </UserContext.Consumer>

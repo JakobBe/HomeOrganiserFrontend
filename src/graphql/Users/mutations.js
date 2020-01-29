@@ -4,11 +4,12 @@ export const createUser = /* GraphQL */ `
       $sub: String!,
       $homeId: ID!,
       $color: String!,
+      $paypalLink: String
       $createdAt: String!,
       $updatedAt: String!
     ) {
     createUser(input: {
-        name: $name, sub: $sub, homeId: $homeId, color: $color, createdAt: $createdAt, updatedAt: $updatedAt
+        name: $name, sub: $sub, homeId: $homeId, color: $color, createdAt: $createdAt, updatedAt: $updatedAt, paypalLink: $paypalLink
     })
     {
       id

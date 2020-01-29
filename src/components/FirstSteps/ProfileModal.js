@@ -107,7 +107,7 @@ class ProfileModal extends Component {
             <View style={styles.imageWrapper}>
               <Image source={{ uri: this.state.profileImage}} style={styles.imageStyle} />
               <TouchableOpacity onPress={() => this.onCameraPress()}>
-                <Image source={require('../../assets/images/photo-camera.png')} style={styles.cameraImageStyle} />
+                <Image source={require('../../../assets/images/photo-camera.png')} style={styles.cameraImageStyle} />
               </TouchableOpacity>
             </View>
             <View style={styles.profileWrapper}>

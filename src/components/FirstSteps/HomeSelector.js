@@ -47,7 +47,6 @@ class HomeSelector extends Component {
   }
 
   successfulHomeSelection = async (homeId) => {
-    console.log('HomeId after home selection', homeId);
     this.setState({
       homeId,
       createModalPresented: false,
@@ -61,7 +60,7 @@ class HomeSelector extends Component {
       <View style={styles.homeSelectorContainer}>
         <View style={styles.textWrapper}>
           <Text style={styles.mainText}>
-            Hello {this.props.homeContext.currentUser.name} & welcome to EggPlanner. {"\n"}
+            Hello & welcome to EggPlanner. {"\n"}
             <Text style={styles.mainTextBody}>
               In order to get started you have to create a new Home or join an existing one.
             </Text>
@@ -69,10 +68,10 @@ class HomeSelector extends Component {
         </View>
         <View style={styles.guideWrapper}>
           <TouchableOpacity style={styles.imageWrapper} onPress={this.onCreateHomePress}>
-            <Image source={require('../../assets/images/eggplant_single.png')} style={styles.imageStyle}/>
+            <Image source={require('../../../assets/images/eggplant_single.png')} style={styles.imageStyle}/>
           </TouchableOpacity>
           <TouchableOpacity style={styles.imageWrapper} onPress={this.onJoinHomePress}>
-            <Image source={require('../../assets/images/eggplant_double.png')} style={styles.imageStyle} />
+            <Image source={require('../../../assets/images/eggplant_double.png')} style={styles.imageStyle} />
           </TouchableOpacity>
         </View>
         <HomeSelectorModal 

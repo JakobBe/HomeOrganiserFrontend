@@ -94,7 +94,7 @@ class MoneyEntry extends Component {
           </Button>
         </View>
         <View style={styles.payPalWrapper}>
-          <Image source={require('../../assets/images/PayPalLogo.png')} style={styles.paypalImageStyle}/>
+          <Image source={require('../../../assets/images/PayPalLogo.png')} style={styles.paypalImageStyle}/>
           {this.getPayPalLinks()}
         </View>
         <FlatList

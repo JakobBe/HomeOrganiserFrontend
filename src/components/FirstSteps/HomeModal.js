@@ -4,7 +4,7 @@ import { UserContext } from '../../contexts/UserContextHolder';
 import { HomeContext } from '../../contexts/HomeContextHolder';
 import { Input, Button, Footer } from '../Common';
 import { Actions, ActionConst } from 'react-native-router-flux';
-import { colorPalette, deviceWidth, layouts } from '../Style';
+import { colorPalette, deviceWidth, layouts } from '../../Style';
 import ImagePicker from 'react-native-image-picker';
 import QRCode from 'react-native-qrcode-svg';
 

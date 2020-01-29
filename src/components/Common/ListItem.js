@@ -3,7 +3,7 @@ import { Text, Animated, Easing, View, TouchableOpacity, TouchableWithoutFeedbac
 import { CheckBox } from 'react-native-elements';
 import  { CardSection }  from './CardSection';
 import GestureRecognizer from 'react-native-swipe-gestures';
-import { deleteToDo, deleteEvent, deleteShoppingItem, updateToDo, updateExpense } from '../..RailsClient';
+import { deleteToDo, deleteEvent, deleteShoppingItem, updateToDo, updateExpense } from '../../RailsClient';
 import { colorPalette } from '../../Style/Colors';
 
 class ListItem extends Component {

@@ -137,7 +137,7 @@ class ToDoList extends Component {
       <View style={styles.toDoContainer}>
         <AddButton onPress={this.onAddToDoPress} additionalButtonStyles={styles.additionalAddButtonStyle}/>
         <TouchableWithoutFeedback onPress={() => this.onFilterMenuPress()}>
-          <Image source={require('../../assets/images/filter-outline.png')} style={styles.jarImageStyle} />
+          <Image source={require('../../../assets/images/filter-outline.png')} style={styles.jarImageStyle} />
         </TouchableWithoutFeedback>
         <FlatList
           style={styles.flatList}
