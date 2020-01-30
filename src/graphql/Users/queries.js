@@ -13,6 +13,20 @@ export const getUser = /* GraphQL */ `
     }
   }
 `;
+
+export const getUserBySub = /* GraphQL */ `
+  query getUserBySub($sub: String!) {
+    listUsers(filter: { sub: { eq: $sub } }){
+      items {
+        id
+        homeId
+        name
+        color
+        paypalLink
+      }
+    }
+  }
+`
 export const listUsers = /* GraphQL */ `
   query ListUsers(
     $filter: TableUserFilterInput

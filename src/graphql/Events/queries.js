@@ -7,6 +7,8 @@ export const listEventsWithHomeId = /* GraphQL */`
         userId
         homeId
         date
+        allDay
+        time
       }
     }
   }

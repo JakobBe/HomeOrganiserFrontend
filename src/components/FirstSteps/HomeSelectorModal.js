@@ -3,6 +3,7 @@ import { Modal, Text, TouchableOpacity, View, Image } from 'react-native';
 import { Button, Input, Spinner } from '../Common';
 import { updateUser } from '../../RailsClient';
 import { colorPalette } from '../../Style/Colors';
+import { layouts } from '../../Style';
 import { appSyncGraphQl } from '../../AWSClient';
 import { createHome } from '../../graphql/Homes/mutations';
 import moment from 'moment';
@@ -132,9 +133,11 @@ class ToDoFilterModal extends Component {
           </Text>
           <Input placeholder='White House' onChangeText={name => {this.onChangeName(name)}} value={this.state.homeName}/>
           {this.renderSpinner()}
-          <Button onPress={this.onButtonPress}>
-            {buttonLabel}
-          </Button>
+          <View style={layouts.centerWrapper}>
+            <Button onPress={this.onButtonPress}>
+              {buttonLabel}
+            </Button>
+          </View>
         </View>
       </Modal>
     );

@@ -2,11 +2,16 @@ import React, { Component } from 'react';
 import { View, FlatList, RefreshControl } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { Footer, ListItem, AddButton } from '../Common';
-import { fetchEvents, createNewEvent, updateEvent } from '../../RailsClient';
+// import { fetchEvents, createNewEvent, updateEvent } from '../../RailsClient';
+import { createEvent, deleteEvent, updateEvent } from '../../graphql/Events/mutations';
+// import {  } from '../../graphql/Events/queris';
+import { appSyncGraphQl } from '../../AWSClient';
 import { UserContext } from '../../contexts/UserContextHolder';
 import { HomeContext } from '../../contexts/HomeContextHolder';
 import { colorPalette, layouts } from '../../Style';
 import { CalendarModal } from './CalendarModal';
+import currentDate from '../../Helpers/currentDate';
+import moment from 'moment';
 
 class CalendarEntry extends Component {
   state = { 
@@ -19,49 +24,133 @@ class CalendarEntry extends Component {
   };
 
   componentWillMount() {
-    this.fetchEvents()
     this.setState({
-      selectedDate: this.currentDate()
+      events: this.props.homeContext.events,
+      selectedDate: currentDate()
     });
   }
 
-  currentDate = () => {
-    let day = new Date().getDate();
-    let month = new Date().getMonth() + 1;
-    const year = new Date().getFullYear();
+  // currentDate = () => {
+  //   let day = new Date().getDate();
+  //   let month = new Date().getMonth() + 1;
+  //   const year = new Date().getFullYear();
 
-    if (month.toString().length === 1) {
-      month = `0${month}`
-    }
+  //   if (month.toString().length === 1) {
+  //     month = `0${month}`
+  //   }
 
-    if (day.toString().length === 1) {
-      day = `0${day}`
-    }
+  //   if (day.toString().length === 1) {
+  //     day = `0${day}`
+  //   }
 
-    const today = `${year}-${month}-${day}`;
-    return today
-  }
+  //   const today = `${year}-${month}-${day}`;
+  //   return today
+  // }
 
   fetchEvents = async () => {
-    await fetchEvents(this.props.homeContext.currentUser.id).then((response) => response.json())
-      .then((res) => this.setState({
-        events: res
-      }));
+    const events = await this.props.homeContext.updateEvents();
+    this.setState({
+      events
+    })
   }
 
-  saveModalInput = (text, hour, minute, id) => {
-    if (text.length > 0) {
-      if (id) {
-        updateEvent(text, id);
+  // saveModalInput = (id, allDay, text) => {
+  //   const variables = {
+  //     input : {
+  //       id,
+  //       date: this.state.selectedDate,
+  //       text,
+  //       userId: this.props.homeContext.currentUser.id,
+  //       homeId: this.props.homeContext.id,
+  //       createdAt: moment.utc().format(),
+  //       updatedAt: moment.utc().format(),
+  //       allDay
+  //     }
+  //   };
+
+  //   if (text.length > 0) {
+  //     if (id) {
+  //       appSyncGraphQl(updateEvent, variables);
+  //     }
+  //     if (!id) {
+  //       appSyncGraphQl(createEvent, variables)
+  //         .then((res) => {
+  //           if (res.status === 200) {
+  //             this.fetchEvents();
+  //           }
+  //         })
+  //       // createNewEvent(this.state.selectedDate, text, this.props.homeContext.currentUser.id, `${hour}:${minute}`);
+  //     }
+  //     this.setState({
+  //       modalPresented: false
+  //     });  
+  //   }
+  // }
+
+  updateEvent = (id, text, allDay, time) => {
+    const variables = {
+      input: {
+        id,
+        date: this.state.selectedDate,
+        text,
+        allDay,
+        time,
+        userId: this.props.homeContext.currentUser.id,
+        homeId: this.props.homeContext.id,
+        createdAt: moment.utc().format(),
+        updatedAt: moment.utc().format()
       }
-      if (!id) {
-        createNewEvent(this.state.selectedDate, text, this.props.homeContext.currentUser.id, `${hour}:${minute}`);
+    };
+
+    appSyncGraphQl(updateEvent, variables)
+      .then((res) => {
+        if (res.status === 200) {
+          this.fetchEvents();
+        }
+      })
+    this.setState({
+      modalPresented: false
+    }); 
+  }
+
+  createEvent = (text, allDay, time) => {
+    const variables = {
+      input: {
+        date: this.state.selectedDate,
+        text,
+        allDay,
+        time,
+        userId: this.props.homeContext.currentUser.id,
+        homeId: this.props.homeContext.id,
+        createdAt: moment.utc().format(),
+        updatedAt: moment.utc().format()
       }
-      this.setState({
-        modalPresented: false
+    };
+
+    appSyncGraphQl(createEvent, variables)
+      .then((res) => {
+        if (res.status === 200) {
+          this.fetchEvents();
+        }
+      })
+    this.setState({
+      modalPresented: false
+    });  
+  }
+
+  deleteEvent = (id) => {
+    const variables = {
+      input: {
+        id
+      }
+    };
+
+    appSyncGraphQl(deleteEvent, variables)
+      .then((res) => {
+        if (res.status === 200) {
+          this.fetchEvents();
+        }
       });
-      this.fetchEvents();
-    }
   }
 
   _onRefresh = () => {
@@ -72,6 +161,7 @@ class CalendarEntry extends Component {
   }
 
   onItemPressed = (modalValue, id) => {
+    console.log('modalValue from entry', modalValue);
     this.setState({
       modalPresented: true,
       modalValue,
@@ -80,10 +170,9 @@ class CalendarEntry extends Component {
   }
 
   renderItem = ({ item }) => {
-    const itemUserId = item.user_id
-    const homeUsers = this.props.homeContext.users
-    const currentUser = this.props.homeContext.currentUser
-    const itemUser = currentUser.id === itemUserId ? this.props.homeContext.currentUser : homeUsers.filter(user => user.id === itemUserId)[0];
+    const { currentUser, users } = this.props.homeContext;
+    const itemUserId = item.userId
+    const itemUser = currentUser.id === itemUserId ? currentUser : users.filter(user => user.id === itemUserId)[0];
     const userColor = itemUser.color
     const time = item.time ? item.time.substr(11,5) : 'All Day'
 
@@ -98,7 +187,9 @@ class CalendarEntry extends Component {
         description={time}
         isCalendarEntry={true}
         itemUserId={itemUser.id}
-        currentUserId={this.props.homeContext.currentUser.id}
+        currentUserId={currentUser.id}
+        deleteItem={this.deleteEvent}
+        item={item}
       />
     )
   }
@@ -118,9 +209,8 @@ class CalendarEntry extends Component {
     const dotMarkers = this.props.homeContext.users.map(user => {
       return { key: user.name, color: user.color };
     });
-
     this.props.homeContext.users.map(user => {
-      if (event.user_id === user.id) {
+      if (event.userId === user.id) {
         if (dots.length === 0) {
           dots = dotMarkers.filter(marker => marker.key === user.name);
         }
@@ -199,9 +289,12 @@ class CalendarEntry extends Component {
           <AddButton onPress={() => this.setState({ modalPresented: true })}/>
         </View>
         {selectedDayEventsList}
+        {/* {this.renderCalenderModal()} */}
         <CalendarModal 
           showModal={this.state.modalPresented} 
-          saveInput={this.saveModalInput} 
+          saveInput={this.saveModalInput}
+          createEvent={this.createEvent}
+          updateEvent={this.updateEvent}
           onModalClose={this.onModalCose}
           modalValue={this.state.modalValue}
           singleEventId={this.state.singleEventId}

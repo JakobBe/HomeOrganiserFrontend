@@ -7,6 +7,9 @@ export const getHome2 = /* GraphQL */ `
         items {
           id
           name
+          color
+          sub
+          imageUrl
         }
         nextToken
       }

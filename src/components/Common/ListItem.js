@@ -57,7 +57,7 @@ class ListItem extends Component {
     }
 
     if (this.props.isCalendarEntry && this.props.itemUserId === this.props.currentUserId) {
-      deleteEvent(this.props.id);
+      this.props.deleteItem(this.props.id);
     }
 
     if (this.props.isCalendarEntry && this.props.itemUserId !== this.props.currentUserId) {

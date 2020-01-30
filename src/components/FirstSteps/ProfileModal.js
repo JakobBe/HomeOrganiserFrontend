@@ -14,19 +14,19 @@ class ProfileModal extends Component {
     name: '',
     color: '',
     email: '',
-    payPalMeLink: '',
+    paypalLink: '',
     home_id: '',
     profileImage: ''
   }
 
   componentDidMount() {
-    const { name, color, email, pay_pal_me_link, home_id, id } = this.props.homeContext.currentUser;
+    const { name, color, email, paypalLink, homeId, id } = this.props.homeContext.currentUser;
     this.setState({
       name: name || '',
       color: color || '',
       email: email || '',
-      payPalMeLink: pay_pal_me_link || '',
-      homeId: home_id || '',
+      paypalLink: paypalLink || '',
+      homeId: homeId || '',
       profileImage: this.getProfileImageUrl(id)
     });
   };
@@ -77,7 +77,7 @@ class ProfileModal extends Component {
   onButtonPress = () => {
     updateUser(this.props.homeContext.currentUser.id,
       this.state.color.toLowerCase(),
-      this.state.payPalMeLink.toLowerCase(),
+      this.state.paypalLink.toLowerCase(),
       this.state.homeId
     ).then((response) => response.json())
       .then((res) => {
@@ -89,7 +89,7 @@ class ProfileModal extends Component {
   }
 
   render() {
-    const { name, color, email, payPalMeLink } = this.state;
+    const { name, color, email, paypalLink } = this.state;
     return (
       <Modal
         animationType="slide"
@@ -122,14 +122,14 @@ class ProfileModal extends Component {
                   onChangeText={value => this.setState({ color: value.toLowerCase() })}
                   label='Your Color'
                 />
-                {/* <Input
+                <Input
                   value={email}
                   onChangeText={value => this.setState({ email: value })}
                   label='E-Mail'
-                /> */}
+                />
                 <Input
-                  value={payPalMeLink}
-                  onChangeText={value => this.setState({ payPalMeLink: value })}
+                  value={paypalLink}
+                  onChangeText={value => this.setState({ paypalLink: value })}
                   label='PayPal Link'
                 />
               </ScrollView>

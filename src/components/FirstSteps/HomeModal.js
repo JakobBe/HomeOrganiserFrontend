@@ -39,7 +39,7 @@ class HomeModal extends Component {
             </TouchableOpacity>
             <View>
               <Text style={{ color: colorPalette.secondary, fontWeight: 'bold'  }}>
-                {this.props.homeContext.home.name}
+                {this.props.homeContext.name}
               </Text>
               <Text style={{ color: colorPalette.secondary }}>
                 There are currently {this.props.homeContext.users.length} people registered for this flat.

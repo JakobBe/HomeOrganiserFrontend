@@ -10,8 +10,23 @@ class CalendarModal extends Component {
     timeInformationPresented: true,
     timePickerPresented: false,
     hour: new Date().getHours().toString(),
-    minute: new Date().getMinutes().toString()
+    minute: new Date().getMinutes().toString(),
+    needsUpdate: true
   };
+
+  componentDidUpdate() {
+    if (this.props.singleEventId && this.state.needsUpdate) {
+      const { text, allDay, time } = this.props.modalValue
+      this.setState({
+        newEvent: text,
+        allDay,
+        timeInformationPresented: !allDay,
+        hour: time,
+        minute: time,
+        needsUpdate: false
+      })
+    }
+  }
 
   onSaveButtonPress = () => {
     let { newEvent, hour, minute, allDay } = this.state;
@@ -21,11 +36,13 @@ class CalendarModal extends Component {
     }
 
     if (this.props.singleEventId) {
-      this.props.saveInput(newEvent, hour, minute, this.props.singleEventId), this.setState({ newEvent: '' })
-      return
+      this.props.updateEvent(this.props.singleEventId, newEvent, allDay, hour);
+      this.setState({ newEvent: '', needsUpdate: true });
+      return;
     }
 
-    this.props.saveInput(newEvent, hour, minute), this.setState({ newEvent: '' })
+    this.props.createEvent(newEvent, allDay, hour); 
+    this.setState({ newEvent: '' });
   }
 
   onAllDayToggle = () => {
@@ -105,7 +122,6 @@ class CalendarModal extends Component {
   }
 
   render() {
-    const value = this.state.newEvent || this.props.modalValue
     const timePicker = this.getTimePicker();
     const timeInformation = this.getTimeInformation();
 
@@ -118,13 +134,18 @@ class CalendarModal extends Component {
         <View style={styles.transparentBackground}>
           <View style={styles.modalContainer}>
             <TouchableHighlight
-              onPress={() => { this.props.onModalClose(), this.setState({ newEvent: '' }) }}
+              onPress={() => { this.props.onModalClose(), 
+                this.setState({ 
+                  newEvent: this.props.singleEventId ? this.state.newEvent : '',
+                  needsUpdate: this.props.singleEventId ? true : false
+                }) 
+              }}
               style={{ top: 3, left: '85%' }}
             >
               <Text style={{ color: colorPalette.primary, fontWeight: 'bold' }}>Close</Text>
             </TouchableHighlight>
             <Input
-              value={value}
+              value={this.state.newEvent}
               onChangeText={value => this.setState({ newEvent: value })}
               placeholder={'Enter a new event'}
               autoFocus={true}

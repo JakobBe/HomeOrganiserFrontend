@@ -112,11 +112,6 @@ class ProfileCompletionModal extends Component {
                   onChangeText={value => this.setState({ color: value.toLowerCase() })}
                   label='Your Color'
                 />
-                {/* <Input
-                  value={email}
-                  onChangeText={value => this.setState({ email: value })}
-                  label='E-Mail'
-                /> */}
                 <Input
                   value={paypalLink}
                   onChangeText={value => this.setState({ paypalLink: value })}
@@ -144,7 +139,7 @@ const styles = {
 
   profileContainer: (color) => ({
     margin: 30,
-    marginTop: 110,
+    marginTop: 50,
     marginBottom: 110,
     backgroundColor: color,
     widht: '100%',
@@ -159,10 +154,10 @@ const styles = {
   }),
 
   mainText: {
-    fontSize: 20,
+    fontSize: 15,
     color: colorPalette.secondary,
-    lineHeight: 35,
-    letterSpacing: 3
+    lineHeight: 20,
+    letterSpacing: 2.5
   },
 
   profileWrapper: {
