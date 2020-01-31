@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Modal, Text, TouchableHighlight, View, Picker, Switch, Keyboard } from 'react-native';
 import { Button, Input, TouchableTextHighlight } from '../Common';
 import { colorPalette, layouts } from '../../Style';
+import moment from 'moment';
 
 class CalendarModal extends Component {
   state = {
@@ -9,20 +10,22 @@ class CalendarModal extends Component {
     allDay: false,
     timeInformationPresented: true,
     timePickerPresented: false,
-    hour: new Date().getHours().toString(),
-    minute: new Date().getMinutes().toString(),
+    hour: moment.utc().format('HH'),
+    minute: moment.utc().format('MM'),
     needsUpdate: true
   };
 
-  componentDidUpdate() {
-    if (this.props.singleEventId && this.state.needsUpdate) {
+  componentDidUpdate(prevProps, prevState) {
+    // console.log('prevState, newState', prevState, newState);
+    if (this.props.singleEventId && this.props.singleEventId !== prevProps.singleEventId) {
+      console.log('this.props.modalValue', this.props.modalValue);
       const { text, allDay, time } = this.props.modalValue
       this.setState({
         newEvent: text,
         allDay,
         timeInformationPresented: !allDay,
-        hour: time,
-        minute: time,
+        hour: time.substring(0,2),
+        minute: time.substring(3, 5),
         needsUpdate: false
       })
     }
@@ -31,18 +34,18 @@ class CalendarModal extends Component {
   onSaveButtonPress = () => {
     let { newEvent, hour, minute, allDay } = this.state;
     if (allDay) {
-      hour = undefined;
-      minute = undefined;
+      hour = '00';
+      minute = '00';
     }
 
     if (this.props.singleEventId) {
-      this.props.updateEvent(this.props.singleEventId, newEvent, allDay, hour);
-      this.setState({ newEvent: '', needsUpdate: true });
+      this.props.updateEvent(this.props.singleEventId, newEvent, allDay, `${hour}:${minute}`);
+      this.setState({ newEvent: '', allDay: false, hour: moment.utc().format('HH'), minute: moment.utc().format('MM'), needsUpdate: false });
       return;
     }
 
-    this.props.createEvent(newEvent, allDay, hour); 
-    this.setState({ newEvent: '' });
+    this.props.createEvent(newEvent, allDay, `${hour}:${minute}`); 
+    this.setState({ newEvent: '', allDay: false, hour: moment.utc().format('HH'), minute: moment.utc().format('MM') });
   }
 
   onAllDayToggle = () => {

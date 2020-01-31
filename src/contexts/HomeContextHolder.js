@@ -54,6 +54,7 @@ class HomeContextHolder extends Component {
 
     await appSyncGraphQl(getHome2, variables)
       .then((res) => {
+        console.log('Home from context', res);
         if (res.status === 200) {
           const home = res.res.getHome;
           this.setState({
@@ -78,7 +79,6 @@ class HomeContextHolder extends Component {
     const events = await appSyncGraphQl(listEventsWithHomeId, variables)
       .then((res) => {
         if (res.status === 200) {
-          console.log('res', res);
           this.setState({
             events: res.res.listEvents.items
           });
@@ -87,7 +87,6 @@ class HomeContextHolder extends Component {
           return [];
         }
       })
-    console.log('events from update', events);
     return events;
   }
 

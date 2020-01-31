@@ -8,6 +8,7 @@ export const createEvent = /* GraphQL */ `
       homeId
       userName
       time
+      allDay
       createdAt
       updatedAt
     }

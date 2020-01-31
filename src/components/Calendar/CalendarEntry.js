@@ -11,6 +11,7 @@ import { HomeContext } from '../../contexts/HomeContextHolder';
 import { colorPalette, layouts } from '../../Style';
 import { CalendarModal } from './CalendarModal';
 import currentDate from '../../Helpers/currentDate';
+import getDayMarkerDots from '../../Helpers/eventDotMarkers';
 import moment from 'moment';
 
 class CalendarEntry extends Component {
@@ -30,62 +31,13 @@ class CalendarEntry extends Component {
     });
   }
 
-  // currentDate = () => {
-  //   let day = new Date().getDate();
-  //   let month = new Date().getMonth() + 1;
-  //   const year = new Date().getFullYear();
-
-  //   if (month.toString().length === 1) {
-  //     month = `0${month}`
-  //   }
-
-  //   if (day.toString().length === 1) {
-  //     day = `0${day}`
-  //   }
-
-  //   const today = `${year}-${month}-${day}`;
-  //   return today
-  // }
-
   fetchEvents = async () => {
     const events = await this.props.homeContext.updateEvents();
+    console.log('events', events);
     this.setState({
       events
     })
   }
-
-  // saveModalInput = (id, allDay, text) => {
-  //   const variables = {
-  //     input : {
-  //       id,
-  //       date: this.state.selectedDate,
-  //       text,
-  //       userId: this.props.homeContext.currentUser.id,
-  //       homeId: this.props.homeContext.id,
-  //       createdAt: moment.utc().format(),
-  //       updatedAt: moment.utc().format(),
-  //       allDay
-  //     }
-  //   };
-
-  //   if (text.length > 0) {
-  //     if (id) {
-  //       appSyncGraphQl(updateEvent, variables);
-  //     }
-  //     if (!id) {
-  //       appSyncGraphQl(createEvent, variables)
-  //         .then((res) => {
-  //           if (res.status === 200) {
-  //             this.fetchEvents();
-  //           }
-  //         })
-  //       // createNewEvent(this.state.selectedDate, text, this.props.homeContext.currentUser.id, `${hour}:${minute}`);
-  //     }
-  //     this.setState({
-  //       modalPresented: false
-  //     });  
-  //   }
-  // }
 
   updateEvent = (id, text, allDay, time) => {
     const variables = {
@@ -97,13 +49,13 @@ class CalendarEntry extends Component {
         time,
         userId: this.props.homeContext.currentUser.id,
         homeId: this.props.homeContext.id,
-        createdAt: moment.utc().format(),
-        updatedAt: moment.utc().format()
+        updatedAt: moment.utc().format('YYYY-MM-DD')
       }
     };
 
     appSyncGraphQl(updateEvent, variables)
       .then((res) => {
+        console.log('res from update event', res);
         if (res.status === 200) {
           this.fetchEvents();
         }
@@ -122,13 +74,14 @@ class CalendarEntry extends Component {
         time,
         userId: this.props.homeContext.currentUser.id,
         homeId: this.props.homeContext.id,
-        createdAt: moment.utc().format(),
-        updatedAt: moment.utc().format()
+        createdAt: moment.utc().format('YYYY-MM-DD'),
+        updatedAt: moment.utc().format('YYYY-MM-DD')
       }
     };
 
     appSyncGraphQl(createEvent, variables)
       .then((res) => {
+        console.log('res', res);
         if (res.status === 200) {
           this.fetchEvents();
         }
@@ -161,7 +114,6 @@ class CalendarEntry extends Component {
   }
 
   onItemPressed = (modalValue, id) => {
-    console.log('modalValue from entry', modalValue);
     this.setState({
       modalPresented: true,
       modalValue,
@@ -171,10 +123,10 @@ class CalendarEntry extends Component {
 
   renderItem = ({ item }) => {
     const { currentUser, users } = this.props.homeContext;
-    const itemUserId = item.userId
+    const itemUserId = item.userId;
     const itemUser = currentUser.id === itemUserId ? currentUser : users.filter(user => user.id === itemUserId)[0];
-    const userColor = itemUser.color
-    const time = item.time ? item.time.substr(11,5) : 'All Day'
+    const userColor = itemUser.color;
+    const time = item.allDay ? 'All Day' : item.time;
 
     return (
       <ListItem
@@ -202,37 +154,6 @@ class CalendarEntry extends Component {
         singleEventId: undefined
       })
     }
-  }
-
-  getDayMarkerDots = (marks, event) => {
-    let dots = [];
-    const dotMarkers = this.props.homeContext.users.map(user => {
-      return { key: user.name, color: user.color };
-    });
-    this.props.homeContext.users.map(user => {
-      if (event.userId === user.id) {
-        if (dots.length === 0) {
-          dots = dotMarkers.filter(marker => marker.key === user.name);
-        }
-        if (marks[event.date] && marks[event.date]['dots']) {
-          marks[event.date]['dots'].map(dot => {
-            if (dot['key'] !== user.name && marks[event.date]['dots'].length !== this.props.homeContext.users.length) {
-              let newDot = dotMarkers.filter(marker => marker.key === user.name)[0];
-              if (!dots.includes(newDot)) {
-                dots.push(newDot)
-              }
-              if (!dots.includes(dot)) {
-                dots.push(dot);
-              }
-            };
-            if (marks[event.date]['dots'].length >= this.props.homeContext.users.length) {
-              dots = marks[event.date]['dots']
-            };
-          })
-        }
-      };
-    })
-    return dots;
   }
 
   getSelectedDayEvents = () => {
@@ -268,7 +189,7 @@ class CalendarEntry extends Component {
 
     if (this.state.events.length > 0) {
       this.state.events.map(event => {
-        marks[event.date] = { ...marks[event.date], dots: this.getDayMarkerDots(marks, event), marked: true }
+        marks[event.date] = { ...marks[event.date], dots: getDayMarkerDots(marks, event, this.props.homeContext.users), marked: true }
       })
     }
     return (

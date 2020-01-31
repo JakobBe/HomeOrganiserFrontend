@@ -18,7 +18,11 @@ export const getHome2 = /* GraphQL */ `
           id
           text
           date
+          allDay
           userId
+          time
+          endDate
+          endTime
         }
         nextToken
       }

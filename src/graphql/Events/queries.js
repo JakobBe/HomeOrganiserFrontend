@@ -24,6 +24,7 @@ export const getEvent = /* GraphQL */ `
       homeId
       userName
       time
+      allDay
       createdAt
       updatedAt
     }
