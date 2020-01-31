@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { Input, Button, Spinner } from '../Common';
 import { View, Text, TouchableOpacity, Dimensions, Alert } from 'react-native'
-import { createCognitoUser } from '../../RailsClient';
 import { signUp, RejectionErros } from '../../AWSClient';
 import { layouts } from '../../Style';
 
@@ -16,19 +15,13 @@ class SignUp extends Component {
 
   onEmailChange(text) {
     this.setState({
-      email: text
+      email: text.toLowerCase()
     });
   };
 
   onPasswordChange(text) {
     this.setState({
       password: text
-    });
-  };
-
-  onNameChange(text) {
-    this.setState({
-      name: text
     });
   };
 
@@ -58,10 +51,7 @@ class SignUp extends Component {
     }
     
     if (signUpRes.status === 200) {
-      // const user = await createCognitoUser(signUpRes.res.userSub, signUpRes.res.user.username)
-      //   .then((user) => user.json())
-
-      this.props.hasSignedUp(signUpRes.res.userSub);
+      await this.props.hasSignedUp(signUpRes.res.userSub);
       this.setState({
         loading: false
       });
@@ -115,12 +105,6 @@ class SignUp extends Component {
           value={this.state.password}
           additionalTextFieldStyle={styles.additionalTextFieldStyle}
         />
-        {/* <Input
-          label='Name'
-          placeholder='Name'
-          onChangeText={this.onNameChange.bind(this)}
-          value={this.state.name}
-        /> */}
         {this.renderError()}
         <View style={layouts.centerWrapper}>
           {this.renderButton()}

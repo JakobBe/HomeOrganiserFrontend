@@ -2,7 +2,7 @@ import React from 'react';
 import { TextInput, Text, View } from 'react-native';
 import { colorPalette } from '../../Style/Colors';
 
-const Input = ({ label, value, onChangeText, placeholder, secureTextEntry, additionalInputStyles, autoFocus, onBlur, additionalTextFieldStyle }) => {
+const Input = ({ label, value, onChangeText, placeholder, secureTextEntry, additionalInputStyles, autoFocus, onBlur, additionalTextFieldStyle, onFocus, keyboardType }) => {
   return (
     <View style={[styles.containerStyle, additionalInputStyles]}>
       <Text style={styles.labelStyle}>
@@ -17,6 +17,8 @@ const Input = ({ label, value, onChangeText, placeholder, secureTextEntry, addit
         onChangeText={onChangeText}
         autoFocus={autoFocus}
         onBlur={onBlur}
+        onFocus={onFocus}
+        keyboardType={keyboardType}
       />
     </View>
   )

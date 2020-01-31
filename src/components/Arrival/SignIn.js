@@ -15,7 +15,7 @@ class SignIn extends Component {
 
   onEmailChange(text) {
     this.setState({
-      email: text
+      email: text.toLowerCase()
     });
   }
 
@@ -52,7 +52,7 @@ class SignIn extends Component {
     }
 
     if (signInRes.status === 200) {
-      this.props.hasSignedIn(signInRes.res.attributes.sub);
+      await this.props.hasSignedIn(signInRes.res.attributes.sub);
       this.setState({
         loading: false
       });
@@ -96,6 +96,7 @@ class SignIn extends Component {
           value={this.state.email}
           autoFocus={true}
           additionalTextFieldStyle={styles.additionalTextFieldStyle}
+          keyboardType={'email-address'}
         />
         <Input
           secureTextEntry

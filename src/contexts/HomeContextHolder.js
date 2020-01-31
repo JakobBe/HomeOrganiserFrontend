@@ -102,7 +102,6 @@ class HomeContextHolder extends Component {
       currentUser,
       users
     });
-    this.props.updateApp();
   }
 
   render() {

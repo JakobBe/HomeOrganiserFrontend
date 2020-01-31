@@ -84,15 +84,6 @@ class ToDoFilterModal extends Component {
             return undefined;
           }
         })
-      // return createHome(this.state.homeName).then((response) => response.json())
-      //   .then((res) => {
-      //     if (res.status === '200') {
-      //       return res.home_id
-      //     }
-      //     if (res.status === '400') {
-      //       return undefined;
-      //     }
-      //   })
     }
   }
 
