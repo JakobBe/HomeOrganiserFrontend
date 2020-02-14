@@ -11,6 +11,8 @@ class Arrival extends Component {
   }
 
   hasSignedIn = async (sub) => {
+    console.log('sub', sub);
+    console.log('this.props.homeContext', this.props.homeContext);
     await this.props.homeContext.createUserSession(sub);
     Actions.entry({ type: ActionConst.REPLACE })
   };

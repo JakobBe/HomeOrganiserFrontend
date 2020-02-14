@@ -35,6 +35,7 @@ class HomeContextHolder extends Component {
 
     const currentUser = await appSyncGraphQl(getUserBySub, variables)
       .then((res) => {
+        console.log('res from getting GraphQLUser', res);
         if (res.status === 200) {
           this.setState({
             currentUser: res.res.listUsers.items[0]

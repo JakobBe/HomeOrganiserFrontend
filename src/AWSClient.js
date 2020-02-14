@@ -1,6 +1,9 @@
 import Amplify, { Auth, API } from 'aws-amplify';
 import AWS from 'aws-sdk';
-import { awsCognitoConfig, awsS3DevUser } from './aws-exports';
+import { awsCognitoConfig, awsS3DevUser, awsAppSyncConfig } from './aws-exports';
+
+Amplify.Auth.configure(awsCognitoConfig);
+Amplify.API.configure(awsAppSyncConfig);
 
 export const RejectionErros = {
   UsernameExistsException: 'UsernameExistsException',
@@ -10,11 +13,9 @@ export const RejectionErros = {
   NotAuthorizedException: 'NotAuthorizedException'
 }
 
-Amplify.configure(awsCognitoConfig);
-
 export const appSyncGraphQl = async (query, variables) => {
   try {
-    const res = await API.graphql({
+    const res = await Amplify.API.graphql({
       query,
       variables
     });
@@ -35,20 +36,18 @@ export const signUp = async (email, password) => {
     });
     return {status: 200, res: user}
   } catch (error) {
-    console.log('res', res);
     return {status: 400, res: error}
   } 
 };
 
 export const signIn = async (email, password) => {
   try {
-    const user = await Auth.signIn({
+    const user = await Amplify.Auth.signIn({
       username: email,
       password
     });
     return { status: 200, res: user }
   } catch (error) {
-    console.log('res', res);
     return { status: 400, res: error }
   }
 };
