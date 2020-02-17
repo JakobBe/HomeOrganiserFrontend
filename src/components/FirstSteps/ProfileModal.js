@@ -161,7 +161,7 @@ class ProfileModal extends Component {
             <TouchableOpacity
               onPress={() => {
                 this.containerHeight = new Animated.Value(containerHeight),
-                  this.wrapperHeight = new Animated.Value(wrapperHeight),
+                this.wrapperHeight = new Animated.Value(wrapperHeight),
                 this.props.onModalClose()}
               }
             >

@@ -28,10 +28,10 @@ const RouterComponent = () => {
           duration={0}
           rightButtonImage={require('../assets/images/arrow-pointing-to-right.png')}
           onRight={() => Actions.toDoList({ type: ActionConst.REPLACE })}
-          rightButtonStyle={{ position: 'absolute', right: -deviceWidth / 1.6 }}
+          rightButtonStyle={{ position: 'absolute', right: -deviceWidth / 1.8 }}
           leftButtonImage={require('../assets/images/arrow-pointing-to-left.png')}
           onLeft={() => Actions.calendar({ type: ActionConst.REPLACE })}
-          leftButtonStyle={{ position: 'absolute', left: -deviceWidth / 1.6 }}
+          leftButtonStyle={{ position: 'absolute', left: -deviceWidth / 1.8 }}
         />
         <Scene 
           key='toDoList' 
@@ -40,10 +40,10 @@ const RouterComponent = () => {
           duration={0}
           rightButtonImage={require('../assets/images/arrow-pointing-to-right.png')}
           onRight={() => Actions.shoppingList({ type: ActionConst.REPLACE })}
-          rightButtonStyle={{ position: 'absolute', right: -deviceWidth / 1.6 }}
+          rightButtonStyle={{ position: 'absolute', right: -deviceWidth / 1.8 }}
           leftButtonImage={require('../assets/images/arrow-pointing-to-left.png')}
           onLeft={() => Actions.entry({ type: ActionConst.REPLACE })}
-          leftButtonStyle={{ position: 'absolute', left: -deviceWidth / 1.6 }}
+          leftButtonStyle={{ position: 'absolute', left: -deviceWidth / 1.8 }}
           />
         <Scene
           key='moneyBox'
@@ -58,10 +58,10 @@ const RouterComponent = () => {
           duration={0}
           rightButtonImage={require('../assets/images/arrow-pointing-to-right.png')}
           onRight={() => Actions.entry({ type: ActionConst.REPLACE })}
-          rightButtonStyle={{ position: 'absolute', right: -deviceWidth / 1.6 }}
+          rightButtonStyle={{ position: 'absolute', right: -deviceWidth / 1.8 }}
           leftButtonImage={require('../assets/images/arrow-pointing-to-left.png')}
           onLeft={() => Actions.moneyBox({ type: ActionConst.REPLACE })}
-          leftButtonStyle={{ position: 'absolute', left: -deviceWidth / 1.6 }}
+          leftButtonStyle={{ position: 'absolute', left: -deviceWidth / 1.8 }}
         />
         <Scene
           key='shoppingList'
@@ -70,7 +70,7 @@ const RouterComponent = () => {
           duration={0}
           leftButtonImage={require('../assets/images/arrow-pointing-to-left.png')}
           onLeft={() => Actions.toDoList({ type: ActionConst.REPLACE })}
-          leftButtonStyle={{ position: 'absolute', left: -deviceWidth / 1.6 }}
+          leftButtonStyle={{ position: 'absolute', left: -deviceWidth / 1.8 }}
         />
         <Scene
           key='profile'

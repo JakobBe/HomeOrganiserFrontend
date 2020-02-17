@@ -10,5 +10,6 @@ export * from './Footer';
 export * from './Modal';
 export * from './ListItem';
 export * from './AddButton';
+export * from './CloseButton';
 export * from './BackgroundCarousel';
 export * from './TouchableTextHighlight';

@@ -7,27 +7,39 @@ import { deleteToDo, deleteEvent, deleteShoppingItem, updateToDo, updateExpense 
 import { colorPalette } from '../../Style/Colors';
 
 class ListItem extends Component {
-  animatedValue = new Animated.Value(0);
-
-  state = { 
-    checked: this.props.done,
+  state = {
+    // checked: this.props.done,
     backgroundColor: '#fff',
     isSwipedLeft: false
   };
 
-  componentDidMount() {
-    
+  constructor() {
+    super();
+    this.deleteWidth = new Animated.Value(0);
   }
+  // animatedValue = new Animated.Value(0);
 
-  animate = () => {
-    this.animatedValue.setValue(0)
-    Animated.decay(
-      this.animatedValue,
+  animateDeleteButton = () => {
+    if (this.state.isSwipedLeft) {
+      console.log('this.deleteWidth', this.deleteWidth);
+      Animated.timing(
+        this.deleteWidth,
+        {
+          toValue: 0,
+          duration: 180 
+        }
+      ).start();
+      console.log('this.deleteWidth', this.deleteWidth);
+      return;
+    }
+
+    Animated.timing(
+      this.deleteWidth,
       {
-        toValue: 1,
-        velocity: 1
+        toValue: 200,
+        duration: 180
       }
-    ).start(() => this.animate())
+    ).start();
   }
 
   onCheckBoxPress = () => {
@@ -37,12 +49,13 @@ class ListItem extends Component {
   }
 
   onSwipeLeft(gestureState) {
-    this.animate();
+    this.animateDeleteButton();
     this.setState({ isSwipedLeft: true });
   }
 
   onSwipeRight(gestureState) {
     if (this.state.isSwipedLeft) {
+      this.animateDeleteButton();
       this.setState({ isSwipedLeft: false });
     };
 
@@ -148,27 +161,19 @@ class ListItem extends Component {
       directionalOffsetThreshold: 80
     };
 
-    const width = this.animatedValue.interpolate({
-      inputRange: [0, 1],
-      outputRange: [0, 120]
-    })
-
-    let deleteField = undefined;
-    if (this.state.isSwipedLeft) {
-      deleteField = (
-      <Animated.View style={styles.itemActions(width)}>
-        <TouchableOpacity onPress={this.onDeletePress} style={styles.deleteStyle}>
-          <Text style={styles.deleteTextStyle}>
-            Delete
-          </Text>
-        </TouchableOpacity>
-      </Animated.View>
-      );
-    }
+    let deleteField = (
+    <Animated.View style={styles.itemActions(this.deleteWidth)}>
+      <TouchableOpacity onPress={this.onDeletePress} style={styles.deleteStyle}>
+        <Text style={styles.deleteTextStyle}>
+          Delete
+        </Text>
+      </TouchableOpacity>
+    </Animated.View>
+    );
 
     if (this.state.isSwipedLeft && this.props.isExpense) {
       deleteField = (
-        <Animated.View style={styles.itemActions(width)}>
+        <Animated.View style={styles.itemActions(this.deleteWidth)}>
           <TouchableOpacity onPress={this.onResetPress} style={styles.resetStyle}>
             <Text style={styles.resetTextStyle}>
               Settle

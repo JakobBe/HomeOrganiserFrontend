@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Modal, Text, TouchableHighlight, View, Picker, Switch, Keyboard } from 'react-native';
-import { Button, Input, TouchableTextHighlight } from '../Common';
+import { Button, Input, TouchableTextHighlight, CloseButton } from '../Common';
 import { colorPalette, layouts } from '../../Style';
 import moment from 'moment';
 
@@ -136,7 +136,16 @@ class CalendarModal extends Component {
       >
         <View style={styles.transparentBackground}>
           <View style={styles.modalContainer}>
-            <TouchableHighlight
+            <CloseButton
+              onPress={() => {
+                this.props.onModalClose(),
+                this.setState({
+                  newEvent: this.props.singleEventId ? this.state.newEvent : '',
+                  needsUpdate: this.props.singleEventId ? true : false
+                })
+              }}
+            />
+            {/* <TouchableHighlight
               onPress={() => { this.props.onModalClose(), 
                 this.setState({ 
                   newEvent: this.props.singleEventId ? this.state.newEvent : '',
@@ -146,7 +155,7 @@ class CalendarModal extends Component {
               style={{ top: 3, left: '85%' }}
             >
               <Text style={{ color: colorPalette.primary, fontWeight: 'bold' }}>Close</Text>
-            </TouchableHighlight>
+            </TouchableHighlight> */}
             <Input
               value={this.state.newEvent}
               onChangeText={value => this.setState({ newEvent: value })}
