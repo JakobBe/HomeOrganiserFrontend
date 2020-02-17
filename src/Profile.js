@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Text, Animated, View, TouchableOpacity, Image, ScrollView } from 'react-native';
 import { UserContext } from './contexts/UserContextHolder';
 import { HomeContext } from './contexts/HomeContextHolder';
-import { Input, Button, Footer } from './Common';
+import { Input, Button, Footer } from './components/Common';
 import { updateUser } from './RailsClient';
 import { Actions, ActionConst } from 'react-native-router-flux';
 

@@ -1,14 +1,13 @@
 import React from 'react';
 import { Navigator } from 'react-native';
 import { Scene, Router, Actions, ActionConst } from 'react-native-router-flux';
-import ToDoList from './ToDos/ToDoList';
-import ToDoCreate from './ToDos/ToDoCreate';
-import MoneyEntry from './MoneyBox/MoneyEntry';
-import Entry from './FirstSteps/Entry';
-import CalendarEntry from './Calendar/CalendarEntry';
-import ShoppingList from './ShoppingCart/ShoppingList';
+import ToDoList from './components/ToDos/ToDoList';
+import MoneyEntry from './components/MoneyBox/MoneyEntry';
+import Entry from './components/FirstSteps/Entry';
+import CalendarEntry from './components/Calendar/CalendarEntry';
+import ShoppingList from './components/ShoppingCart/ShoppingList';
 import Profile from './Profile';
-import Arrival from './Arrival/Arrival';
+import Arrival from './components/Arrival/Arrival';
 import { colorPalette, deviceWidth } from './Style';
 
 const RouterComponent = () => {
@@ -29,10 +28,10 @@ const RouterComponent = () => {
           duration={0}
           rightButtonImage={require('../assets/images/arrow-pointing-to-right.png')}
           onRight={() => Actions.toDoList({ type: ActionConst.REPLACE })}
-          rightButtonStyle={{ position: 'absolute', right: -deviceWidth / 1.6 }}
+          rightButtonStyle={{ position: 'absolute', right: -deviceWidth / 1.8 }}
           leftButtonImage={require('../assets/images/arrow-pointing-to-left.png')}
           onLeft={() => Actions.calendar({ type: ActionConst.REPLACE })}
-          leftButtonStyle={{ position: 'absolute', left: -deviceWidth / 1.6 }}
+          leftButtonStyle={{ position: 'absolute', left: -deviceWidth / 1.8 }}
         />
         <Scene 
           key='toDoList' 
@@ -41,10 +40,10 @@ const RouterComponent = () => {
           duration={0}
           rightButtonImage={require('../assets/images/arrow-pointing-to-right.png')}
           onRight={() => Actions.shoppingList({ type: ActionConst.REPLACE })}
-          rightButtonStyle={{ position: 'absolute', right: -deviceWidth / 1.6 }}
+          rightButtonStyle={{ position: 'absolute', right: -deviceWidth / 1.8 }}
           leftButtonImage={require('../assets/images/arrow-pointing-to-left.png')}
           onLeft={() => Actions.entry({ type: ActionConst.REPLACE })}
-          leftButtonStyle={{ position: 'absolute', left: -deviceWidth / 1.6 }}
+          leftButtonStyle={{ position: 'absolute', left: -deviceWidth / 1.8 }}
           />
         <Scene
           key='moneyBox'
@@ -59,10 +58,10 @@ const RouterComponent = () => {
           duration={0}
           rightButtonImage={require('../assets/images/arrow-pointing-to-right.png')}
           onRight={() => Actions.entry({ type: ActionConst.REPLACE })}
-          rightButtonStyle={{ position: 'absolute', right: -deviceWidth / 1.6 }}
+          rightButtonStyle={{ position: 'absolute', right: -deviceWidth / 1.8 }}
           leftButtonImage={require('../assets/images/arrow-pointing-to-left.png')}
           onLeft={() => Actions.moneyBox({ type: ActionConst.REPLACE })}
-          leftButtonStyle={{ position: 'absolute', left: -deviceWidth / 1.6 }}
+          leftButtonStyle={{ position: 'absolute', left: -deviceWidth / 1.8 }}
         />
         <Scene
           key='shoppingList'
@@ -71,7 +70,7 @@ const RouterComponent = () => {
           duration={0}
           leftButtonImage={require('../assets/images/arrow-pointing-to-left.png')}
           onLeft={() => Actions.toDoList({ type: ActionConst.REPLACE })}
-          leftButtonStyle={{ position: 'absolute', left: -deviceWidth / 1.6 }}
+          leftButtonStyle={{ position: 'absolute', left: -deviceWidth / 1.8 }}
         />
         <Scene
           key='profile'

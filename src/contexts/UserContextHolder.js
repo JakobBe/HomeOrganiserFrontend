@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import { createSession } from '../RailsClient';
+import moment from 'moment';
+import {appSyncGraphQl} from '../AWSClient';
 
 const defaultValue = {};
 export const UserContext = React.createContext(defaultValue);
@@ -11,6 +13,7 @@ class UserContextHolder extends Component {
   }
 
   createUserSession = async (sub) => {
+    this.createUser(sub)
     const res = await createSession(sub)
       .then((response) => response.json())
       .then((res) => {
