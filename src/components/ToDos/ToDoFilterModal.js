@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { Modal, Text, TouchableHighlight, View } from 'react-native';
 import { colorPalette } from '../../Style';
+import { CloseButton } from '../Common';
+import { CheckBox } from 'react-native-elements';
 
 class ToDoFilterModal extends Component {
   state = {
@@ -30,30 +32,57 @@ class ToDoFilterModal extends Component {
       >
         <View style={styles.transparentBackground}>
           <View style={styles.modalContainer}>
-            <TouchableHighlight
-              onPress={() => this.props.onModalClose()}
-              style={{ top: 3, left: '85%' }}
-            >
-              <Text style={{ color: colorPalette.primary, fontWeight: 'bold' }}>Close</Text>
-            </TouchableHighlight>
+            <CloseButton onPress={() => this.props.onModalClose()}/>
             <View style={styles.filterWrapper}>
               {/* <Text style={styles.filterText}>
                 Filter:
               </Text> */}
-              <TouchableHighlight onPress={() => this.props.onFilterToDosPress('undone')}>
-                <Text style={styles.filterText}>
-                  Show only open ToDos
-                </Text>
+              <TouchableHighlight onPress={() => this.props.onFilterToDosPress(false)}>
+                <View style={styles.filterTextWrapper}>
+                  <Text style={styles.filterText}>
+                    Show only open ToDos
+                  </Text>
+                  <CheckBox
+                    style={styles.checkBox}
+                    checked={false}
+                    center
+                    checkedColor={colorPalette.primary}
+                  />
+                </View>
               </TouchableHighlight>
-              <TouchableHighlight onPress={() => this.props.onFilterToDosPress('done')}>
-                <Text style={styles.filterText}>
-                  Show only done ToDos
-                </Text>
+              <TouchableHighlight onPress={() => this.props.onFilterToDosPress(true)}>
+                <View style={styles.filterTextWrapper}>
+                  <Text style={styles.filterText}>
+                    Show only done ToDos
+                  </Text>
+                  <CheckBox
+                    style={styles.checkBox}
+                    checked={true}
+                    center
+                    checkedColor={colorPalette.primary}
+                  />
+                </View>
               </TouchableHighlight>
               <TouchableHighlight onPress={() => this.props.onFilterToDosPress('all')}>
-                <Text style={styles.filterText}>
-                  Show all
-                </Text>
+                <View style={styles.filterTextWrapper}>
+                  <Text style={styles.filterText}>
+                    Show all
+                  </Text>
+                  <View style={{ felx: 2, flexDirection: 'row' }}>
+                    <CheckBox
+                      style={styles.checkBox}
+                      checked={false}
+                      center
+                      checkedColor={colorPalette.primary}
+                    />
+                    <CheckBox
+                      style={styles.checkBox}
+                      checked={true}
+                      center
+                      checkedColor={colorPalette.primary}
+                    />
+                  </View>
+                </View>
               </TouchableHighlight>
             </View>
           </View>
@@ -88,14 +117,27 @@ const styles = {
   filterWrapper: {
     flex: 0,
     justifyContent: 'space-around',
-    alignItems: 'center',
+    alignItems: 'flex-start',
+  },
+
+  filterTextWrapper: {
+    marginTop: 20,
+    width: '100%',
+    flex: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-between'
   },
 
   filterText: {
     color: colorPalette.secondary,
     margin: 20,
-    fontSize: 15,
+    fontSize: 20,
     textDecorationLine: 'underline' 
+  },
+
+  checkBox: {
+    height: 30,
+    width: 30
   }
 }
 

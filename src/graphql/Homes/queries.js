@@ -46,15 +46,17 @@ export const getHome2 = /* GraphQL */ `
         updatedAt
       }
       toDos {
-        id
-        task
-        userId
-        done
-        dueDate
-        appointee
-        homeId
-        createdAt
-        updatedAt
+        items {
+          id
+          task
+          userId
+          done
+          dueDate
+          appointee
+          homeId
+          createdAt
+          updatedAt
+        }
       }
       createdAt
       updatedAt

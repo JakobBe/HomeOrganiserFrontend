@@ -193,15 +193,10 @@ class ShoppingList extends Component {
             onChangeText={value => this.setState({ newShoppingItem: value })}
             placeholder={'Shopping Item'}
             additionalInputStyles={styles.additionalInputStyles}
+            additionalTextFieldStyle={{ backgroundColor: 'transparent' }}
             autoFocus={false}
           />
           <AddButton onPress={this.onButtonPress}/>
-          <View style={styles.shoppingBasketWrapper}>
-            {this.getNotificationNumber()}
-            <TouchableOpacity onPress={this.onShoppingBagPress}>
-              <Image source={require('../../../assets/images/shopping-basket.png')} style={styles.shoppingCartImageStyle} />
-            </TouchableOpacity>
-          </View>
         </View>
         <View style={styles.shoppingContentWrapper}>
           <View style={styles.shoppingItemListWrapper}>
@@ -217,6 +212,12 @@ class ShoppingList extends Component {
                 />
               }
             />
+          </View>
+          <View style={styles.shoppingBasketWrapper}>
+            {this.getNotificationNumber()}
+            <TouchableOpacity onPress={this.onShoppingBagPress}>
+              <Image source={require('../../../assets/images/shopping-basket.png')} style={styles.shoppingCartImageStyle} />
+            </TouchableOpacity>
           </View>
           {shoppingCart}
         </View>
@@ -252,25 +253,29 @@ const styles = {
   },
 
   inputWrapper: {
+    backgroundColor: 'rgba(240,240,240,.9)',
+    borderRadius: 20,
     flex: 0,
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    marginRight: 5,
-    marginLeft: 5,
-    padding: 5,
-    marginTop: -15.5
+    padding: 15,
+    paddingTop: 2,
+    margin: 10,
+    marginTop: 5,
   },
 
   additionalInputStyles: {
     flexGrow: 1,
     marginTop: 0,
-    maxWidth: '75%'
+    maxWidth: '85%'
   },
 
   shoppingContentWrapper: {
     flex: 2,
     flexDirection: 'row',
-    justifyContent: 'space-evenly'
+    justifyContent: 'space-evenly',
+    position: 'relative'
   },
 
   shoppingCartWrapper: {
@@ -281,7 +286,9 @@ const styles = {
   },
 
   shoppingBasketWrapper: {
-    position: 'relative',
+    position: 'absolute',
+    bottom: 10,
+    right: 10
   },
 
   shoppingItemListWrapper: {

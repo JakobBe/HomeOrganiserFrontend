@@ -33,10 +33,9 @@ class CalendarEntry extends Component {
 
   fetchEvents = async () => {
     const events = await this.props.homeContext.updateEvents();
-    console.log('events', events);
     this.setState({
       events
-    })
+    });
   }
 
   updateEvent = (id, text, allDay, time) => {
@@ -55,7 +54,6 @@ class CalendarEntry extends Component {
 
     appSyncGraphQl(updateEvent, variables)
       .then((res) => {
-        console.log('res from update event', res);
         if (res.status === 200) {
           this.fetchEvents();
         }
@@ -81,7 +79,6 @@ class CalendarEntry extends Component {
 
     appSyncGraphQl(createEvent, variables)
       .then((res) => {
-        console.log('res', res);
         if (res.status === 200) {
           this.fetchEvents();
         }
@@ -113,11 +110,11 @@ class CalendarEntry extends Component {
     });
   }
 
-  onItemPressed = (modalValue, id) => {
+  onItemPressed = (item) => {
     this.setState({
       modalPresented: true,
-      modalValue,
-      singleEventId: id
+      modalValue: item,
+      singleEventId: item.id
     });
   }
 

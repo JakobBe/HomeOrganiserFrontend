@@ -5,6 +5,7 @@ import { getHome2 } from '../graphql/Homes/queries';
 import { appSyncGraphQl } from '../AWSClient';
 import { getUserBySub } from '../graphql/Users/queries';
 import { listEventsWithHomeId } from '../graphql/Events/queries';
+import { listToDosWithHomeId } from '../graphql/ToDos/queries';
 import moment from 'moment';
 
 const defaultValue = {};
@@ -60,7 +61,7 @@ class HomeContextHolder extends Component {
           const home = res.res.getHome;
           this.setState({
             users: home.users.items,
-            toDos: home.toDos,
+            toDos: home.toDos.items,
             events: home.events.items,
             shoppingItems: home.shoppingItems,
             name: home.name,
@@ -89,6 +90,25 @@ class HomeContextHolder extends Component {
         }
       })
     return events;
+  }
+
+  updateToDos = async () => {
+    const variables = {
+      homeId: this.state.id
+    };
+
+    const toDos = await appSyncGraphQl(listToDosWithHomeId, variables)
+      .then((res) => {
+        if (res.status === 200) {
+          this.setState({
+            toDos: res.res.listToDos.items
+          });
+          return res.res.listToDos.items;
+        } else if (res.status === 400) {
+          return [];
+        }
+      })
+    return toDos;
   }
 
   updateCurrentUser = async (currentUser) => {
@@ -121,7 +141,8 @@ class HomeContextHolder extends Component {
             updateCurrentUser: this.updateCurrentUser,
             updateSub: this.updateSub,
             sub: this.state.sub,
-            updateEvents: this.updateEvents
+            updateEvents: this.updateEvents,
+            updateToDos: this.updateToDos
           }
         }
       >

@@ -1,37 +1,51 @@
 import React, { Component } from 'react';
-import { View, Picker, Modal, TouchableHighlight, Text } from 'react-native';
-import { Input, AddButton, Footer, Button } from '../Common';
+import { View, Picker, Modal, TouchableHighlight, Text, Alert } from 'react-native';
+import { Input, AddButton, Footer, Button, CloseButton } from '../Common';
 import { Actions, ActionConst } from 'react-native-router-flux';
 import { Calendar } from 'react-native-calendars';
-import { createToDo } from '../../RailsClient';
 import { UserContext } from '../../contexts/UserContextHolder';
 import { HomeContext } from '../../contexts/HomeContextHolder';
 import { colorPalette, layouts } from '../../Style';
 
 class ToDoModal extends Component {
   state = {
-    newToDo: '',
-    appointee: undefined,
-    selectedDate: '',
-    isCalanderVisible: false
+    id: this.props.modalValue.id,
+    task: this.props.modalValue.task,
+    appointee: this.props.modalValue.appointee,
+    done: this.props.modalValue.done
+    // selectedDate: '',
+    // isCalanderVisible: false
   };
 
-  onButtonPress = () => {
-    if (this.state.newToDo.length > 0) {
-      this.setState(({
-        newToDo: ''
-      }));
+  componentDidUpdate(prevProps) {
+    const {id, task, appointee, done} = this.props.modalValue;
 
-      createToDo(this.state.newToDo, (this.state.appointee || this.props.homeContext.currentUser.id), this.state.selectedDate, this.props.homeContext.currentUser.id);
-      Actions.toDoList({ type: ActionConst.REPLACE });
-    };
+    if (id !== prevProps.modalValue.id || done !== prevProps.modalValue.done) {
+      this.setState({
+        id,
+        done,
+        task,
+        appointee
+      });
+    }
   }
 
-  onDateButtonPress = () => {
-    this.setState({
-      isCalanderVisible: true
-    });
+  onSaveButtonPress = () => {
+    const {id, done, task, appointee} = this.state;
+
+    if (this.state.task.length === 0) {
+      Alert.alert("That does not seem like a ToDo ;)");
+      return;
+    }
+
+    this.props.updateToDo(id, done, task, appointee);
   }
+
+  // onDateButtonPress = () => {
+  //   this.setState({
+  //     isCalanderVisible: true
+  //   });
+  // }
 
   getPickerItems = () => {
     return this.props.homeContext.users.map(user => {
@@ -43,31 +57,31 @@ class ToDoModal extends Component {
     });
   }
 
-  getCalander = () => {
-    const selectedDate = this.state.selectedDate;
-    const mark = { [selectedDate]: { selected: true, marked: true, selectedColor: '#a9eec2' } };
+  // getCalander = () => {
+  //   const selectedDate = this.state.selectedDate;
+  //   const mark = { [selectedDate]: { selected: true, marked: true, selectedColor: '#a9eec2' } };
 
-    if (this.state.isCalanderVisible) {
-      return (
-        <Calendar
-          onDayPress={(day) => this.setState({ selectedDate: day.dateString })}
-          markedDates={mark}
-          theme={{
-            textSectionTitleColor: '#b6c1cd',
-            selectedDayBackgroundColor: '#a9eec2',
-            todayTextColor: '#a9eec2',
-            arrowColor: '#a9eec2',
-          }}
-        />
-      );
-    }
+  //   if (this.state.isCalanderVisible) {
+  //     return (
+  //       <Calendar
+  //         onDayPress={(day) => this.setState({ selectedDate: day.dateString })}
+  //         markedDates={mark}
+  //         theme={{
+  //           textSectionTitleColor: '#b6c1cd',
+  //           selectedDayBackgroundColor: '#a9eec2',
+  //           todayTextColor: '#a9eec2',
+  //           arrowColor: '#a9eec2',
+  //         }}
+  //       />
+  //     );
+  //   }
 
-    return (
-      <Button onPress={this.onDateButtonPress} additionalButtonStyles={styles.additionalDateButtonStyle}>
-        Add a due date
-      </Button>
-    );
-  }
+  //   return (
+  //     <Button onPress={this.onDateButtonPress} additionalButtonStyles={styles.additionalDateButtonStyle}>
+  //       Add a due date
+  //     </Button>
+  //   );
+  // }
 
   render() {
     const pickerItems = this.getPickerItems();
@@ -80,22 +94,16 @@ class ToDoModal extends Component {
       >
         <View style={styles.transparentBackground}>
           <View style={styles.toDoContainer}>
-            <TouchableHighlight
-              onPress={() => this.props.onModalClose()}
-              style={{ top: 3, left: '85%' }}
-            >
-              <Text style={{ color: colorPalette.primary, fontWeight: 'bold' }}>Close</Text>
-            </TouchableHighlight>
+            <CloseButton onPress={this.props.onModalClose} />
             <View style={styles.inputWrapper}>
               <View style={styles.namingWrapper}>
                 <Input
-                  value={this.state.newToDo}
-                  onChangeText={value => this.setState({ newToDo: value })}
+                  value={this.state.task}
+                  onChangeText={value => this.setState({ task: value })}
                   placeholder={'Enter a new to-do'}
                   additionalInputStyles={styles.additionalInputStyles}
                   autoFocus={true}
                 />
-                <AddButton onPress={this.onButtonPress}/>
               </View>
               <Picker
                 selectedValue={this.state.appointee}
@@ -105,11 +113,19 @@ class ToDoModal extends Component {
               >
                 <Picker.Item label='Me' value={this.props.homeContext.currentUser.id} />
                 {pickerItems}
-                <Picker.Item label='For everyone' value='all' />
+                <Picker.Item label='For everyone' value='00000000-0000-0000-0000-000000000000' />
               </Picker>
               <View style={layouts.centerWrapper}>
-                {this.getCalander()}
+                <Button
+                  onPress={() => this.onSaveButtonPress()}
+                  additionalButtonStyles={styles.buttonStyle}
+                >
+                  Save
+              </Button>
               </View>
+              {/* <View style={layouts.centerWrapper}>
+                {this.getCalander()}
+              </View> */}
             </View>
           </View>
         </View>
@@ -155,6 +171,11 @@ const styles = {
     backgroundColor: 'white',
     color: '#05004e',
     borderColor: '#05004e'
+  },
+
+  buttonStyle: {
+    backgroundColor: colorPalette.secondary,
+    marginTop: 5
   },
 
   namingWrapper: {

@@ -1,14 +1,13 @@
 import React, { Component } from 'react';
-import { Text, Animated, Easing, View, TouchableOpacity, TouchableWithoutFeedback, Alert } from 'react-native';
+import { Text, Animated, Easing, View, TouchableOpacity, TouchableWithoutFeedback, Alert, Image } from 'react-native';
 import { CheckBox } from 'react-native-elements';
 import  { CardSection }  from './CardSection';
 import GestureRecognizer from 'react-native-swipe-gestures';
-import { deleteToDo, deleteEvent, deleteShoppingItem, updateToDo, updateExpense } from '../../RailsClient';
+import { deleteToDo, deleteEvent, deleteShoppingItem, updateExpense } from '../../RailsClient';
 import { colorPalette } from '../../Style/Colors';
 
 class ListItem extends Component {
   state = {
-    // checked: this.props.done,
     backgroundColor: '#fff',
     isSwipedLeft: false
   };
@@ -21,7 +20,6 @@ class ListItem extends Component {
 
   animateDeleteButton = () => {
     if (this.state.isSwipedLeft) {
-      console.log('this.deleteWidth', this.deleteWidth);
       Animated.timing(
         this.deleteWidth,
         {
@@ -29,7 +27,6 @@ class ListItem extends Component {
           duration: 180 
         }
       ).start();
-      console.log('this.deleteWidth', this.deleteWidth);
       return;
     }
 
@@ -43,9 +40,7 @@ class ListItem extends Component {
   }
 
   onCheckBoxPress = () => {
-    this.setState({ checked: !this.state.checked })
-
-    updateToDo(this.props.id)
+    this.props.updateToDo(this.props.id, !this.props.done, this.props.text, this.props.appointee);
   }
 
   onSwipeLeft(gestureState) {
@@ -65,24 +60,12 @@ class ListItem extends Component {
   }
 
   onDeletePress = () => {
-    if (this.props.isToDo) {
-      deleteToDo(this.props.id);
-    }
-
-    if (this.props.isCalendarEntry && this.props.itemUserId === this.props.currentUserId) {
-      this.props.deleteItem(this.props.id);
-    }
-
     if (this.props.isCalendarEntry && this.props.itemUserId !== this.props.currentUserId) {
       Alert.alert("You can not delete this entry");
+      return;
     }
 
-    if(this.props.isShoppingItem) {
-      deleteShoppingItem(this.props.id);
-    }
-
-    this.props.refreshList();
-    this.setState({ isSwipedLeft: false });
+    this.props.deleteItem(this.props.id);
   }
 
   onResetPress = () => {
@@ -91,12 +74,12 @@ class ListItem extends Component {
   }
 
   getCheckbox = () => {
-    if (this.props.isToDo && !this.state.isSwipedLeft) {
+    if (this.props.isToDo) {
       return (
         <CheckBox
           style={styles.checkBox}
           onIconPress={this.onCheckBoxPress}
-          checked={this.state.checked}
+          checked={this.props.done}
           center
           checkedColor={colorPalette.primary}
         />
@@ -105,6 +88,12 @@ class ListItem extends Component {
   };
 
   getUserMark = () => {
+    if (this.props.appointee === '00000000-0000-0000-0000-000000000000') {
+      return (
+        <Image source={require('../../../assets/images/rainbow.png')} style={styles.userLetterStyleContainer('black')}/>
+      );
+    };
+
     if (this.props.userName) {
       return (
         <View style={styles.userLetterStyleContainer(this.props.userColor || 'black')}>
@@ -197,15 +186,15 @@ class ListItem extends Component {
         >
           <CardSection additionalCardSectionStyles={styles.listItemContainer}>
             {this.getUserMark()}   
-            <TouchableWithoutFeedback onPress={() => this.props.onItemPressed(this.props.item, this.props.id)}>
+            <TouchableWithoutFeedback onPress={() => this.props.onItemPressed(this.props.id)}>
               <Text style={styles.titleStyle}>
                 {this.props.text}
                 {this.getExtraInfo()}
               </Text>
             </TouchableWithoutFeedback>
             {this.getCheckbox()}
-            {deleteField}
           </CardSection>
+          {deleteField}
         </GestureRecognizer>
       </View>
     );

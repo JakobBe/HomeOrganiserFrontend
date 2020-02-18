@@ -1,36 +1,76 @@
 import React, { Component } from 'react';
 import { FlatList, View, RefreshControl, Text, TouchableWithoutFeedback, Image } from 'react-native';
-import { AddButton, Footer, ListItem } from '../Common';
+import { AddButton, Footer, ListItem, Input } from '../Common';
 import { fetchUserToDos, filterToDos } from '../../RailsClient';
 import { UserContext } from '../../contexts/UserContextHolder';
 import ToDoFilterModal from './ToDoFilterModal';
 import ToDoModal from './ToDoModal';
 import { HomeContext } from '../../contexts/HomeContextHolder';
+import { createToDo, deleteToDo, updateToDo } from '../../graphql/ToDos/mutations';
+import { appSyncGraphQl } from '../../AWSClient';
+import moment from 'moment';
 
 class ToDoList extends Component {
   state = { 
     toDos: [], 
     refreshing: false, 
     filterModalPresented: false,
-    toDoModalPresented: false
+    toDoModalPresented: false,
+    newToDo: '',
+    modalValue: undefined
   };
 
   componentWillMount() {
-    this.fetchUserToDos();
+    this.setState({
+      toDos: this.props.homeContext.toDos
+    })
   }
 
-  fetchUserToDos = async () => {
-    await fetchUserToDos(this.props.homeContext.currentUser.id).then((response) => response.json())
-      .then((res) => { if (res.length !== this.state.toDos.length) {
-        this.setState({
-          toDos: res
-        });
-      }})
+  fetchToDos = async () => {
+    const toDos = await this.props.homeContext.updateToDos();
+    this.setState({
+      toDos
+    });
+  }
+
+  updateToDo = async (id, done, task, appointee) => {
+    const variables = {
+      input: {
+        id,
+        task,
+        done,
+        appointee,
+        updatedAt: moment.utc().format('YYYY-MM-DD')
+      }
+    };
+
+    appSyncGraphQl(updateToDo, variables)
+      .then((res) => {
+        if (res.status === 200) {
+          this.fetchToDos();
+        }
+      })
+    this.onModalClose();
+  }
+
+  deleteToDo = (id) => {
+    const variables = {
+      input: {
+        id
+      }
+    };
+
+    appSyncGraphQl(deleteToDo, variables)
+      .then((res) => {
+        if (res.status === 200) {
+          this.fetchToDos();
+        }
+      });
   }
 
   _onRefresh = () => {
     this.setState({ refreshing: true });
-    this.fetchUserToDos().then(() => {
+    this.fetchToDos().then(() => {
       this.setState({ refreshing: false });
     });
   };
@@ -42,12 +82,56 @@ class ToDoList extends Component {
   };
 
   onAddToDoPress = () => {
-    this.setState({
-      toDoModalPresented: true
-    });
+    if (this.state.newToDo.length > 0) {
+      this.setState(({
+        newToDo: ''
+      }));
+
+      const variables = {
+        input: {
+          task: this.state.newToDo,
+          done: false,
+          appointee: this.props.homeContext.currentUser.id,
+          userId: this.props.homeContext.currentUser.id,
+          homeId: this.props.homeContext.id,
+          createdAt: moment.utc().format('YYYY-MM-DD'),
+          updatedAt: moment.utc().format('YYYY-MM-DD')
+        }
+      };
+      appSyncGraphQl(createToDo, variables)
+        .then((res) => {
+          if (res.status === 200) {
+            this.fetchToDos();
+          }
+        })
+    };
   }
 
-  onModalCose = () => {
+  onItemPressed = (itemId) => {
+    this.setState({
+      modalValue: this.state.toDos.filter(toDo => toDo.id === itemId)[0],
+      toDoModalPresented: true
+    })
+  }
+
+  onFilterToDosPress = async (info) => {
+    this.onModalClose();
+    let toDos = this.props.homeContext.toDos
+    
+    if (info === 'all') {
+      this.setState({
+        toDos
+      });
+      return;
+    };
+    
+    toDos = toDos.filter(toDo => toDo.done === info);
+    this.setState({
+      toDos
+    });
+  };
+  
+  onModalClose = () => {
     if (this.state.filterModalPresented) {
       this.setState({
         filterModalPresented: false
@@ -61,72 +145,42 @@ class ToDoList extends Component {
     };
   };
 
-  onFilterToDosPress = async (info) => {
-    if (info === 'undone') {
-      await filterToDos(info, this.props.homeContext.currentUser.id)
-        .then((response) => response.json())
-        .then((res) => {
-          this.setState({
-            toDos: res,
-            filterModalPresented: false
-          });
-        });
-    };
-    if (info === 'done') {
-      await filterToDos(info, this.props.homeContext.currentUser.id)
-        .then((response) => response.json())
-        .then((res) => {
-          this.setState({
-            toDos: res,
-            filterModalPresented: false
-          });
-        });
-    };
-    if (info === 'all') {
-      this._onRefresh();
-      this.setState({
-        filterModalPresented: false
-      });
-    };
-  };
-
   renderItem = ({ item }) => {
-    let homeUsers = undefined;
-    let itemUser = undefined;
     let appointerUser = undefined;
     let userColor = undefined;
     let appointerColor = undefined;
     let userName = undefined;
 
-    if (item.appointee !== 'all') {
-      homeUsers = this.props.homeContext.users
-      itemUser = homeUsers.filter(user => user.id === Number.parseInt(item.appointee))
-      appointerUser = homeUsers.filter(user => user.id === item.user_id)[0]
-      userColor = itemUser[0].color
-      appointerColor = appointerUser.color
-      userName = itemUser[0].name
-    }
+    const { currentUser, users } = this.props.homeContext;
+    const itemUserId = item.userId;
+    const itemUser = currentUser.id === itemUserId ? currentUser : users.filter(user => user.id === itemUserId)[0];
+    userColor = itemUser.color
+    userName = itemUser.name
 
-    if (item.appointee === 'all') {
-      homeUsers = this.props.homeContext.users
-      appointerUser = homeUsers.filter(user => user.id === item.user_id)[0]
-      userColor = 'green'
-      userName = 'A'
-      appointerColor = appointerUser.color
-    }
+    // if (item.appointee === 'all') {
+    //   homeUsers = this.props.homeContext.users
+    //   appointerUser = homeUsers.filter(user => user.id === item.user_id)[0]
+    //   userColor = 'green'
+    //   userName = 'A'
+    //   appointerColor = appointerUser.color
+    // }
     
     return (
       <ListItem
         id={item.id}
-        description={item.user_name}
-        date={item.due_date}
+        appointee={item.appointee}
+        description={userName}
+        date={item.dueDate}
         text={item.task}
         refreshList={this._onRefresh}
         isToDo={true}
         userName={userName}
         done={item.done}
         userColor={userColor}
-        appointerColor={appointerColor}
+        appointerColor={userColor}
+        updateToDo={this.updateToDo}
+        deleteItem={this.deleteToDo}
+        onItemPressed={this.onItemPressed}
       />
     );
   };
@@ -135,32 +189,51 @@ class ToDoList extends Component {
     const extractKey = ({ id }) => id
     return (
       <View style={styles.toDoContainer}>
-        <AddButton onPress={this.onAddToDoPress} additionalButtonStyles={styles.additionalAddButtonStyle}/>
-        <TouchableWithoutFeedback onPress={() => this.onFilterMenuPress()}>
-          <Image source={require('../../../assets/images/filter-outline.png')} style={styles.jarImageStyle} />
-        </TouchableWithoutFeedback>
-        <FlatList
-          style={styles.flatList}
-          data={this.state.toDos}
-          renderRow={this.renderRow}
-          renderItem={this.renderItem}
-          keyExtractor={extractKey}
-          refreshControl={
-            <RefreshControl
-              refreshing={this.state.refreshing}
-              onRefresh={this._onRefresh}
-            />
-          }
-        />
+        <View style={styles.inputWrapper}>
+          <Input
+            value={this.state.newToDo}
+            onChangeText={value => this.setState({ newToDo: value })}
+            placeholder={'ToDo'}
+            additionalInputStyles={styles.additionalInputStyles}
+            additionalTextFieldStyle={{ backgroundColor: 'transparent' }}
+            autoFocus={false}
+          />
+          <AddButton onPress={this.onAddToDoPress} />
+        </View>
+        <View style={styles.toDoListWrapper}>
+          <FlatList
+            style={styles.flatList}
+            data={this.state.toDos}
+            renderRow={this.renderRow}
+            renderItem={this.renderItem}
+            keyExtractor={extractKey}
+            refreshControl={
+              <RefreshControl
+                refreshing={this.state.refreshing}
+                onRefresh={this._onRefresh}
+              />
+            }
+          />
+          <View style={styles.filterImageWrapper}>
+            <TouchableWithoutFeedback onPress={() => this.onFilterMenuPress()}>
+              <Image source={require('../../../assets/images/filter-outline.png')} style={styles.filterImageStyle} />
+            </TouchableWithoutFeedback>
+          </View>
+        </View>
         <ToDoFilterModal
           showFilterModal={this.state.filterModalPresented}
-          onModalClose={this.onModalCose}
+          onModalClose={this.onModalClose}
           onFilterToDosPress={this.onFilterToDosPress}
-        />
-        <ToDoModal 
-          showModal={this.state.toDoModalPresented}
-          onModalClose={this.onModalCose}
-        />
+          />
+        {
+          this.state.modalValue ? 
+          <ToDoModal 
+            showModal={this.state.toDoModalPresented}
+            onModalClose={this.onModalClose}
+            modalValue={this.state.modalValue}
+            updateToDo={this.updateToDo}
+          /> : null
+        }
         <Footer isCleaningActive={true}/>
       </View>
     );
@@ -172,27 +245,47 @@ const styles = {
     flex: 1,
     justifiyContent: 'space-between',
     backgroundColor: 'rgb(255,255,255)',
-    position: 'relative'
+  },
+
+  inputWrapper: {
+    backgroundColor: 'rgba(240,240,240,.9)',
+    borderRadius: 20,
+    flex: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 15,
+    paddingTop: 2,
+    margin: 10,
+    marginTop: 5,
+    marginBottom: -10
+  },
+
+  additionalInputStyles: {
+    flexGrow: 1,
+    marginTop: 0,
+    maxWidth: '85%'
   },
 
   flatList: {
     marginTop: 15
   },
 
-  jarImageStyle: {
-    position: 'absolute',
-    top: 7,
-    right: 10,
+  filterImageStyle: {
     zIndex: 2,
     height: 28,
     width: 28,
   },
 
-  additionalAddButtonStyle: {
+  toDoListWrapper: {
+    flex: 2,
+    position: 'relative'
+  },
+
+  filterImageWrapper: {
     position: 'absolute',
-    top: 1.5,
-    right: 47,
-    zIndex: 2
+    bottom: 10,
+    right: 10
   }
 }
 
