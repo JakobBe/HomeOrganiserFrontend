@@ -6,8 +6,10 @@ import { UserContext } from '../../contexts/UserContextHolder';
 import ToDoFilterModal from './ToDoFilterModal';
 import ToDoModal from './ToDoModal';
 import { HomeContext } from '../../contexts/HomeContextHolder';
+import { dateTimeFormat } from '../../Helpers/magicNumbers';
 import { createToDo, deleteToDo, updateToDo } from '../../graphql/ToDos/mutations';
 import { appSyncGraphQl } from '../../AWSClient';
+import { sortByCreatedAt } from '../../Helpers/sortByDate';
 import moment from 'moment';
 
 class ToDoList extends Component {
@@ -22,8 +24,9 @@ class ToDoList extends Component {
   };
 
   componentWillMount() {
+    const toDos = sortByCreatedAt(this.props.homeContext.toDos);
     this.setState({
-      toDos: this.props.homeContext.toDos
+      toDos
     });
   }
 
@@ -33,6 +36,8 @@ class ToDoList extends Component {
     if (this.state.filter !== 'all') {
       toDos = toDos.filter(toDo => toDo.done === this.state.filter);
     }
+
+    toDos = sortByCreatedAt(toDos);
 
     this.setState({
       toDos
@@ -46,7 +51,7 @@ class ToDoList extends Component {
         task,
         done,
         appointee,
-        updatedAt: moment.utc().format('YYYY-MM-DD')
+        updatedAt: moment.utc().format(dateTimeFormat)
       }
     };
 
@@ -101,8 +106,8 @@ class ToDoList extends Component {
           appointee: this.props.homeContext.currentUser.id,
           userId: this.props.homeContext.currentUser.id,
           homeId: this.props.homeContext.id,
-          createdAt: moment.utc().format('YYYY-MM-DD'),
-          updatedAt: moment.utc().format('YYYY-MM-DD')
+          createdAt: moment.utc().format(dateTimeFormat),
+          updatedAt: moment.utc().format(dateTimeFormat)
         }
       };
       appSyncGraphQl(createToDo, variables)
