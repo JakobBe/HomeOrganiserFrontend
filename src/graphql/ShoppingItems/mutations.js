@@ -6,6 +6,7 @@ export const createShoppingItem = /* GraphQL */ `
       price
       bought
       boughtBy
+      inShoppingCart
       info
       userId
       homeId
@@ -22,6 +23,7 @@ export const updateShoppingItem = /* GraphQL */ `
       price
       bought
       boughtBy
+      inShoppingCart
       info
       userId
       homeId
@@ -38,6 +40,7 @@ export const deleteShoppingItem = /* GraphQL */ `
       price
       bought
       boughtBy
+      inShoppingCart
       info
       userId
       homeId

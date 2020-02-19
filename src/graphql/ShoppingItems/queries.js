@@ -1,12 +1,13 @@
 export const listShoppingItemsWithHomeId = /* GraphQL */`
-  query listShoppingItems($homeId: ID) {
-    listShoppingItems(filter: { homeId: { eq: $homeId } }){
+  query listShoppingItems($homeId: ID, $boughtBy: ID $limit: Int) {
+    listShoppingItems(filter: { homeId: { eq: $homeId }, boughtBy: { eq: $boughtBy } }, limit: $limit){
       items {
         id
         name
         price
         bought
         boughtBy
+        inShoppingCart
         info
         userId
         homeId
@@ -25,6 +26,7 @@ export const getShoppingItem = /* GraphQL */ `
       price
       bought
       boughtBy
+      inShoppingCart
       info
       userId
       homeId
@@ -46,6 +48,7 @@ export const listShoppingItems = /* GraphQL */ `
         price
         bought
         boughtBy
+        inShoppingCart
         info
         userId
         homeId

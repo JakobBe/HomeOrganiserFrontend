@@ -13,11 +13,13 @@ export const RejectionErros = {
   NotAuthorizedException: 'NotAuthorizedException'
 }
 
-export const appSyncGraphQl = async (query, variables) => {
+export const appSyncGraphQl = async (query, variables, sort, limit) => {
   try {
     const res = await Amplify.API.graphql({
       query,
-      variables
+      variables,
+      sort,
+      limit
     });
     return { status: 200, res: res.data }
   } catch (error) {

@@ -9,6 +9,8 @@ import GestureRecognizer from 'react-native-swipe-gestures';
 import { colorPalette } from '../../Style/Colors';
 import { createShoppingItem, deleteShoppingItem, updateShoppingItem } from '../../graphql/ShoppingItems/mutations';
 import { appSyncGraphQl } from '../../AWSClient';
+import { defaultId, dateTimeFormat } from '../../Helpers/magicNumbers';
+import { sortByCreatedAt } from '../../Helpers/sortByDate';
 import moment from 'moment';
 
 class ShoppingList extends Component {
@@ -26,21 +28,23 @@ class ShoppingList extends Component {
 
   componentWillMount() {
     const shoppingItemsForFilter = this.props.homeContext.shoppingItems;
-    let shoppingItems = shoppingItemsForFilter.filter(shoppingItem => shoppingItem.boughtBy === '00000000-0000-0000-0000-000000000000');
-    let shoppingCart = shoppingItems.filter(shoppingItem => shoppingItem.bought);
+    let shoppingItems = shoppingItemsForFilter.filter(shoppingItem => shoppingItem.boughtBy === defaultId);
+    const sortedShoppingItems = sortByCreatedAt(shoppingItems);
+    let shoppingCart = sortedShoppingItems.filter(shoppingItem => shoppingItem.bought);
 
     this.setState({
-      shoppingItems,
+      shoppingItems: sortedShoppingItems,
       shoppingCart
     });
   }
 
   fetchShoppingItems = async () => {
     const shoppingItemsForFilter = await this.props.homeContext.updateShoppingItems();
-    let shoppingItems = shoppingItemsForFilter.filter(shoppingItem => shoppingItem.boughtBy === '00000000-0000-0000-0000-000000000000');
+    let shoppingItems = shoppingItemsForFilter.filter(shoppingItem => shoppingItem.boughtBy === defaultId);
+    const sortedShoppingItems = sortByCreatedAt(shoppingItems);
 
     this.setState({
-      shoppingItems
+      shoppingItems: sortedShoppingItems
     });
   }
 
@@ -57,13 +61,15 @@ class ShoppingList extends Component {
           userId: this.props.homeContext.currentUser.id,
           homeId: this.props.homeContext.id,
           bought: false,
-          boughtBy: '00000000-0000-0000-0000-000000000000',
-          createdAt: moment.utc().format('YYYY-MM-DD'),
-          updatedAt: moment.utc().format('YYYY-MM-DD')
+          inShoppingCart: false,
+          boughtBy: defaultId,
+          createdAt: moment.utc().format(dateTimeFormat),
+          updatedAt: moment.utc().format(dateTimeFormat)
         }
       };
       appSyncGraphQl(createShoppingItem, variables)
         .then((res) => {
+          console.log('res creating shopping item', res)
           if (res.status === 200) {
             this.fetchShoppingItems();
           }
@@ -77,7 +83,7 @@ class ShoppingList extends Component {
         id,
         name,
         bought,
-        updatedAt: moment.utc().format('YYYY-MM-DD')
+        updatedAt: moment.utc().format(dateTimeFormat)
       }
     };
 
@@ -120,7 +126,7 @@ class ShoppingList extends Component {
         input: {
           id: shoppingItem.id,
           boughtBy: this.props.homeContext.currentUser.id,
-          updatedAt: moment.utc().format('YYYY-MM-DD')
+          updatedAt: moment.utc().format(dateTimeFormat)
         }
       };
 

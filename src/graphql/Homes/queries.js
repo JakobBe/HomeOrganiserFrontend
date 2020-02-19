@@ -33,13 +33,14 @@ export const getHome2 = /* GraphQL */ `
         homeId
         compensated
       }
-      shoppingItems {
+      shoppingItems(limit: 100) {
         items {
           id
           userId
           homeId
           price
           bought
+          inShoppingCart
           boughtBy
           name
           info

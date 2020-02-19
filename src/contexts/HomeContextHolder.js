@@ -112,10 +112,23 @@ class HomeContextHolder extends Component {
 
   updateShoppingItems = async () => {
     const variables = {
-      homeId: this.state.id
+      homeId: this.state.id,
+      boughtBy: '00000000-0000-0000-0000-000000000000',
+      limit: 100,
+      sort: {
+        field: 'createdAt',
+        direction: 'desc'
+      }
     };
 
-    const shoppingItems = await appSyncGraphQl(listShoppingItemsWithHomeId, variables)
+    const sort = {
+      field: 'createdAt',
+      direction: 'asc'
+    };
+
+    const limit = 1;
+
+    const shoppingItems = await appSyncGraphQl(listShoppingItemsWithHomeId, variables, limit)
       .then((res) => {
         if (res.status === 200) {
           this.setState({

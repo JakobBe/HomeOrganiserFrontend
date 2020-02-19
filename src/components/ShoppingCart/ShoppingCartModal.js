@@ -11,15 +11,16 @@ class ShoppingCartModal extends Component {
   constructor() {
     super();
 
-    this.listHeight = new Animated.Value(0);
-    this.listHeight.interpolate({
-      inputRange: [0, 1],
-      outputRange: ["100%", "45%"]
-    });
+    const listHeight = deviceHeight / 2.2
+    this.listHeight = new Animated.Value(listHeight);
+    // this.listHeight = this.listHeight.interpolate({
+    //   inputRange: [0, 1],
+    //   outputRange: [100, 400]
+    // });
   }
 
   _keyboardShown = () => {
-    const listHeight = 1;
+    const listHeight = deviceHeight / 3.5;
     Animated.timing(
       this.listHeight,
       {
@@ -30,7 +31,7 @@ class ShoppingCartModal extends Component {
   }
 
   _keyboardHidden = () => {
-    const listHeight = '100%';
+    const listHeight = deviceHeight / 2.2;
     Animated.timing(
       this.listHeight,
       {
