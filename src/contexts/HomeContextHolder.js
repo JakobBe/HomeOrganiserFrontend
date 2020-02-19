@@ -6,6 +6,7 @@ import { appSyncGraphQl } from '../AWSClient';
 import { getUserBySub } from '../graphql/Users/queries';
 import { listEventsWithHomeId } from '../graphql/Events/queries';
 import { listToDosWithHomeId } from '../graphql/ToDos/queries';
+import { listShoppingItemsWithHomeId } from '../graphql/ShoppingItems/queries';
 import moment from 'moment';
 
 const defaultValue = {};
@@ -36,7 +37,6 @@ class HomeContextHolder extends Component {
 
     const currentUser = await appSyncGraphQl(getUserBySub, variables)
       .then((res) => {
-        console.log('res from getting GraphQLUser', res);
         if (res.status === 200) {
           this.setState({
             currentUser: res.res.listUsers.items[0]
@@ -56,14 +56,13 @@ class HomeContextHolder extends Component {
 
     await appSyncGraphQl(getHome2, variables)
       .then((res) => {
-        console.log('Home from context', res);
         if (res.status === 200) {
           const home = res.res.getHome;
           this.setState({
             users: home.users.items,
             toDos: home.toDos.items,
             events: home.events.items,
-            shoppingItems: home.shoppingItems,
+            shoppingItems: home.shoppingItems.items,
             name: home.name,
             id: home.id
           });
@@ -111,6 +110,25 @@ class HomeContextHolder extends Component {
     return toDos;
   }
 
+  updateShoppingItems = async () => {
+    const variables = {
+      homeId: this.state.id
+    };
+
+    const shoppingItems = await appSyncGraphQl(listShoppingItemsWithHomeId, variables)
+      .then((res) => {
+        if (res.status === 200) {
+          this.setState({
+            shoppingItems: res.res.listShoppingItems.items
+          });
+          return res.res.listShoppingItems.items;
+        } else if (res.status === 400) {
+          return [];
+        }
+      })
+    return shoppingItems;
+  }
+
   updateCurrentUser = async (currentUser) => {
     let users = this.state.users;
     const userIndex = users.indexOf(users.filter(user => user.id === currentUser.id)[0]);
@@ -142,7 +160,8 @@ class HomeContextHolder extends Component {
             updateSub: this.updateSub,
             sub: this.state.sub,
             updateEvents: this.updateEvents,
-            updateToDos: this.updateToDos
+            updateToDos: this.updateToDos,
+            updateShoppingItems: this.updateShoppingItems
           }
         }
       >

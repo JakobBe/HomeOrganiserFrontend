@@ -34,16 +34,18 @@ export const getHome2 = /* GraphQL */ `
         compensated
       }
       shoppingItems {
-        id
-        userId
-        homeId
-        price
-        bought
-        boughtBy
-        name
-        info
-        createdAt
-        updatedAt
+        items {
+          id
+          userId
+          homeId
+          price
+          bought
+          boughtBy
+          name
+          info
+          createdAt
+          updatedAt
+        }
       }
       toDos {
         items {

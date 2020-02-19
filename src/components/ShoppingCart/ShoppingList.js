@@ -1,48 +1,108 @@
 import React, { Component } from 'react';
-import { View, RefreshControl, FlatList, Text, Alert, Image, TouchableOpacity } from 'react-native';
+import { View, RefreshControl, FlatList, Text, Alert, Image, TouchableOpacity, Keyboard } from 'react-native';
 import { Input, AddButton, Button, Footer, ListItem } from '../Common';
-import { fetchShoppingItems, createShoppingItem, updateShoppingItem } from '../../RailsClient';
+// import { fetchShoppingItems, createShoppingItem, updateShoppingItem } from '../../RailsClient';
 import { HomeContext } from '../../contexts/HomeContextHolder';
 import ShoppingItemModal from './ShoppingItemModal';
+import ShoppingCartModal from './ShoppingCartModal';
 import GestureRecognizer from 'react-native-swipe-gestures';
 import { colorPalette } from '../../Style/Colors';
+import { createShoppingItem, deleteShoppingItem, updateShoppingItem } from '../../graphql/ShoppingItems/mutations';
+import { appSyncGraphQl } from '../../AWSClient';
+import moment from 'moment';
 
 class ShoppingList extends Component {
   state = { 
     shoppingItems: [], 
     refreshing: false, 
     newShoppingItem: '', 
-    modalPresented: false, 
+    itemModalPresented: false, 
     pressedItem: undefined, 
     pressedItemId: undefined,
     shoppingCart: [],
-    isShoppingCartActive: false
+    isShoppingCartActive: false,
+    cartModalPresented: false
   };
 
   componentWillMount() {
-    this.fetchShoppingItems();
+    const shoppingItemsForFilter = this.props.homeContext.shoppingItems;
+    let shoppingItems = shoppingItemsForFilter.filter(shoppingItem => shoppingItem.boughtBy === '00000000-0000-0000-0000-000000000000');
+    let shoppingCart = shoppingItems.filter(shoppingItem => shoppingItem.bought);
+
+    this.setState({
+      shoppingItems,
+      shoppingCart
+    });
   }
 
   fetchShoppingItems = async () => {
-    await fetchShoppingItems(this.props.homeContext.currentUser.id).then((response) => response.json())
-      .then((res) => {
-        if (res.length !== this.state.shoppingItems.length) {
-          this.setState({
-            shoppingItems: res
-          });
-        }
-      })
+    const shoppingItemsForFilter = await this.props.homeContext.updateShoppingItems();
+    let shoppingItems = shoppingItemsForFilter.filter(shoppingItem => shoppingItem.boughtBy === '00000000-0000-0000-0000-000000000000');
+
+    this.setState({
+      shoppingItems
+    });
   }
 
-  onButtonPress = () => {
+  onAddShoppingItemPress = () => {
+    Keyboard.dismiss();
     if (this.state.newShoppingItem.length > 0) {
       this.setState(({
         newShoppingItem: ''
       }));
 
-      createShoppingItem(this.state.newShoppingItem, this.props.homeContext.currentUser.id);
-      this._onRefresh()
+      const variables = {
+        input: {
+          name: this.state.newShoppingItem,
+          userId: this.props.homeContext.currentUser.id,
+          homeId: this.props.homeContext.id,
+          bought: false,
+          boughtBy: '00000000-0000-0000-0000-000000000000',
+          createdAt: moment.utc().format('YYYY-MM-DD'),
+          updatedAt: moment.utc().format('YYYY-MM-DD')
+        }
+      };
+      appSyncGraphQl(createShoppingItem, variables)
+        .then((res) => {
+          if (res.status === 200) {
+            this.fetchShoppingItems();
+          }
+        })
     };
+  }
+
+  updateShoppingItem = async (id, bought, name, boughtBy) => {
+    const variables = {
+      input: {
+        id,
+        name,
+        bought,
+        updatedAt: moment.utc().format('YYYY-MM-DD')
+      }
+    };
+
+    appSyncGraphQl(updateShoppingItem, variables)
+      .then((res) => {
+        if (res.status === 200) {
+          this.fetchShoppingItems();
+        }
+      })
+    // this.onModalClose();
+  }
+
+  deleteShoppingItem = (id) => {
+    const variables = {
+      input: {
+        id
+      }
+    };
+
+    appSyncGraphQl(deleteShoppingItem, variables)
+      .then((res) => {
+        if (res.status === 200) {
+          this.fetchShoppingItems();
+        }
+      });
   }
 
   _onRefresh = () => {
@@ -52,11 +112,31 @@ class ShoppingList extends Component {
     });
   }
 
-  renderItem = ({ item }) => {
-    if (this.state.shoppingCart.filter(cartItem => { return cartItem.id === item.id }).length > 0) {
-      return
-    }
+  onClearWithoutExpense = async () => {
+    this.setState({ refreshing: true });
 
+    Promise.all(this.state.shoppingCart.map(shoppingItem => {
+      const variables = {
+        input: {
+          id: shoppingItem.id,
+          boughtBy: this.props.homeContext.currentUser.id,
+          updatedAt: moment.utc().format('YYYY-MM-DD')
+        }
+      };
+
+      appSyncGraphQl(updateShoppingItem, variables);
+    })).then(() => {
+      this.fetchShoppingItems().then(() => {
+        this.setState({ 
+          refreshing: false,
+          shoppingCart: []
+        });
+      });    
+    })
+
+  }
+
+  renderItem = ({ item }) => {
     return (
       <ListItem
         id={item.id}
@@ -64,8 +144,12 @@ class ShoppingList extends Component {
         item={item}
         refreshList={this._onRefresh}
         isShoppingItem={true}
+        bought={item.bought}
         onItemPressed={this.onItemPressed}
         addToShoppingCart={this.addToShoppingCart}
+        removeFromShoppingCart={this.removeFromShoppingCart}
+        updateShoppingItem={this.updateShoppingItem}
+        deleteItem={this.deleteShoppingItem}
       />
     );
   };
@@ -91,39 +175,31 @@ class ShoppingList extends Component {
   saveModalInput = (text, price, id) => {
     updateShoppingItem(id, text, price, this.props.homeContext.currentUser.id);
     this.setState({
-      modalPresented: false
+      itemModalPresented: false
     });
   };
 
   onItemPressed = (item, id) => {
     this.setState({
-      modalPresented: true,
+      itemModalPresented: true,
       pressedItem: item,
       pressedItemId: id
     });
   };
 
-  onCartButtonPress = () => {
+  onShoppingBasketPress = () => {
     this.setState({
-      modalPresented: true
-    });
-  }
-
-  onShoppingBagPress = () => {
-    this.setState({
-      isShoppingCartActive: !this.state.isShoppingCartActive
+      cartModalPresented: true
     });
   };
 
   onModalCose = () => {
-    if (this.state.modalPresented) {
-      this.setState({
-        modalPresented: false,
-        pressedItem: undefined,
-        pressedItemId: undefined,
-        isShoppingCartActive: false
-      });
-    };
+    this.setState({
+      itemModalPresented: false,
+      pressedItem: undefined,
+      pressedItemId: undefined,
+      cartModalPresented: false
+    });
   };
 
   getShoppingCart = () => {
@@ -159,15 +235,10 @@ class ShoppingList extends Component {
   }
 
   addToShoppingCart = (id) => {
-    if (this.state.shoppingCart.filter(item => {return item.id === id}).length > 0) {
-      Alert.alert("This item is already in your Shopping Cart");
-      return 
-    }
-    let shoppingItem = this.state.shoppingItems.filter(item => {
-      return item.id === id;
-    });
+    const shoppingItems = this.state.shoppingItems;
+    let shoppingItem = shoppingItems.filter(item => item.id === id )[0];
 
-    const newShoppingCart = this.state.shoppingCart.concat(shoppingItem[0])
+    const newShoppingCart = this.state.shoppingCart.concat(shoppingItem)
     this.setState({
       shoppingCart: newShoppingCart
     });
@@ -196,7 +267,7 @@ class ShoppingList extends Component {
             additionalTextFieldStyle={{ backgroundColor: 'transparent' }}
             autoFocus={false}
           />
-          <AddButton onPress={this.onButtonPress}/>
+          <AddButton onPress={this.onAddShoppingItemPress}/>
         </View>
         <View style={styles.shoppingContentWrapper}>
           <View style={styles.shoppingItemListWrapper}>
@@ -215,20 +286,26 @@ class ShoppingList extends Component {
           </View>
           <View style={styles.shoppingBasketWrapper}>
             {this.getNotificationNumber()}
-            <TouchableOpacity onPress={this.onShoppingBagPress}>
+            <TouchableOpacity onPress={this.onShoppingBasketPress}>
               <Image source={require('../../../assets/images/shopping-basket.png')} style={styles.shoppingCartImageStyle} />
             </TouchableOpacity>
           </View>
           {shoppingCart}
         </View>
         <ShoppingItemModal
-          showModal={this.state.modalPresented}
+          showModal={this.state.itemModalPresented}
           saveInput={this.saveModalInput}
           onModalClose={this.onModalCose}
           item={this.state.pressedItem}
           id={this.state.pressedItemId}
           cartItems={this.state.shoppingCart}
           currentUser={this.props.homeContext.currentUser}
+        />
+        <ShoppingCartModal
+          onModalClose={this.onModalCose}           
+          showModal={this.state.cartModalPresented}
+          shoppingItems={this.state.shoppingCart}
+          onClearWithoutExpense={this.onClearWithoutExpense}
         />
         <Footer isShoppingCartActive={true}/>
       </View>

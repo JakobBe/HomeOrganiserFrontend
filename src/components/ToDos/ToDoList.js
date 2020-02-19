@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { FlatList, View, RefreshControl, Text, TouchableWithoutFeedback, Image } from 'react-native';
+import { FlatList, View, RefreshControl, Text, TouchableWithoutFeedback, Image, Keyboard } from 'react-native';
 import { AddButton, Footer, ListItem, Input } from '../Common';
 import { fetchUserToDos, filterToDos } from '../../RailsClient';
 import { UserContext } from '../../contexts/UserContextHolder';
@@ -15,6 +15,7 @@ class ToDoList extends Component {
     toDos: [], 
     refreshing: false, 
     filterModalPresented: false,
+    filter: 'all',
     toDoModalPresented: false,
     newToDo: '',
     modalValue: undefined
@@ -23,11 +24,16 @@ class ToDoList extends Component {
   componentWillMount() {
     this.setState({
       toDos: this.props.homeContext.toDos
-    })
+    });
   }
 
   fetchToDos = async () => {
-    const toDos = await this.props.homeContext.updateToDos();
+    let toDos = await this.props.homeContext.updateToDos();
+
+    if (this.state.filter !== 'all') {
+      toDos = toDos.filter(toDo => toDo.done === this.state.filter);
+    }
+
     this.setState({
       toDos
     });
@@ -82,6 +88,7 @@ class ToDoList extends Component {
   };
 
   onAddToDoPress = () => {
+    Keyboard.dismiss();
     if (this.state.newToDo.length > 0) {
       this.setState(({
         newToDo: ''
@@ -120,14 +127,16 @@ class ToDoList extends Component {
     
     if (info === 'all') {
       this.setState({
-        toDos
+        toDos,
+        filter: info
       });
       return;
     };
     
     toDos = toDos.filter(toDo => toDo.done === info);
     this.setState({
-      toDos
+      toDos,
+      filter: info
     });
   };
   

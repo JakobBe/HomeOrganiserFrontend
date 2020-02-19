@@ -40,7 +40,15 @@ class ListItem extends Component {
   }
 
   onCheckBoxPress = () => {
-    this.props.updateToDo(this.props.id, !this.props.done, this.props.text, this.props.appointee);
+    if (this.props.isToDo) {
+      this.props.updateToDo(this.props.id, !this.props.done, this.props.text, this.props.appointee);
+    };
+
+    if (this.props.isShoppingItem) {
+      !this.props.bought ? this.props.addToShoppingCart(this.props.id) : this.props.removeFromShoppingCart(this.props.item);
+      
+      this.props.updateShoppingItem(this.props.id, !this.props.bought, this.props.text);
+    }
   }
 
   onSwipeLeft(gestureState) {
@@ -74,12 +82,12 @@ class ListItem extends Component {
   }
 
   getCheckbox = () => {
-    if (this.props.isToDo) {
+    if (this.props.isToDo || this.props.isShoppingItem) {
       return (
         <CheckBox
           style={styles.checkBox}
           onIconPress={this.onCheckBoxPress}
-          checked={this.props.done}
+          checked={this.props.done || this.props.bought}
           center
           checkedColor={colorPalette.primary}
         />
@@ -187,7 +195,7 @@ class ListItem extends Component {
           <CardSection additionalCardSectionStyles={styles.listItemContainer}>
             {this.getUserMark()}   
             <TouchableWithoutFeedback onPress={() => this.props.onItemPressed(this.props.id)}>
-              <Text style={styles.titleStyle}>
+              <Text style={styles.titleStyle(this.props.bought)}>
                 {this.props.text}
                 {this.getExtraInfo()}
               </Text>
@@ -202,12 +210,13 @@ class ListItem extends Component {
 }
 
 const styles = {
-  titleStyle: {
+  titleStyle: (bought) => ({
     paddingLeft: 10,
     fontSize: 18,
     width: 250,
     color: colorPalette.secondary,
-  }, 
+    textDecorationLine: bought ? 'line-through' : 'none'
+  }), 
 
   descriptionStyle: (color) => ({
     fontSize: 10,
