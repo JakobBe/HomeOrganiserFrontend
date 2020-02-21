@@ -29,7 +29,7 @@ export const appSyncGraphQl = async (query, variables, sort, limit) => {
 
 export const signUp = async (email, password) => {
   try {
-    const user = await Auth.signUp({
+    const user = await Amplify.Auth.signUp({
       username: email,
       password,
       attributes: {
@@ -53,6 +53,16 @@ export const signIn = async (email, password) => {
     return { status: 400, res: error }
   }
 };
+
+export const confirmUser = async (sub, confirmationCode) => {
+  try {
+    const confirmation = await Amplify.Auth.confirmSignUp(sub, confirmationCode);
+    return { status: 200, res: confirmation }
+  } catch (error) {
+    console.log('error user confirmation', error);
+    return { status: 400, res: error }
+  }
+}
 
 
 export const getPreSignedUrl = async (key) => {

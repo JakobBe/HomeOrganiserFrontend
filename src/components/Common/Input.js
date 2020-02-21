@@ -2,7 +2,7 @@ import React from 'react';
 import { TextInput, Text, View } from 'react-native';
 import { colorPalette } from '../../Style/Colors';
 
-const Input = ({ label, value, onChangeText, placeholder, secureTextEntry, additionalInputStyles, autoFocus, onBlur, additionalTextFieldStyle, onFocus, keyboardType }) => {
+const Input = ({ label, value, onChangeText, placeholder, secureTextEntry, additionalInputStyles, autoFocus, onBlur, additionalTextFieldStyle, onFocus, keyboardType, maxLength, focus, newRef, returnKeyType, onKeyPress }) => {
   return (
     <View style={[styles.containerStyle, additionalInputStyles]}>
       <Text style={styles.labelStyle}>
@@ -19,6 +19,11 @@ const Input = ({ label, value, onChangeText, placeholder, secureTextEntry, addit
         onBlur={onBlur}
         onFocus={onFocus}
         keyboardType={keyboardType}
+        maxLength={maxLength}
+        foucs={focus}
+        ref={newRef}
+        returnKeyType={returnKeyType}
+        onKeyPress={onKeyPress}
       />
     </View>
   )

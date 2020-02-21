@@ -6,6 +6,9 @@ import { UserContext } from '../../contexts/UserContextHolder';
 import HomeSelectorModal from './HomeSelectorModal';
 import { Actions, ActionConst } from 'react-native-router-flux';
 import { colorPalette } from '../../Style/Colors';
+import { appSyncGraphQl } from '../../AWSClient';
+import { createHome } from '../../graphql/Homes/mutations';
+import { listHomes } from '../../graphql/Homes/queries';
 import ProfileCompletionModal from './ProfileCompletionModal';
 
 class HomeSelector extends Component {
@@ -18,11 +21,13 @@ class HomeSelector extends Component {
   }
 
   componentDidMount() {
-    fetchHomes().then((response) => response.json())
+    appSyncGraphQl(listHomes)
       .then((res) => {
-        this.setState({
-          homes: res
-        });
+        if (res.status === 200) {
+          this.setState({
+            homes: res.res.listHomes.items
+          });
+        }
       })
   }
 
@@ -67,12 +72,22 @@ class HomeSelector extends Component {
           </Text>
         </View>
         <View style={styles.guideWrapper}>
+          <View style={styles.navigationWrapper}>
           <TouchableOpacity style={styles.imageWrapper} onPress={this.onCreateHomePress}>
             <Image source={require('../../../assets/images/eggplant_single.png')} style={styles.imageStyle}/>
           </TouchableOpacity>
+          <Text style={styles.navigationText}>
+            Create
+          </Text>
+          </View>
+          <View style={styles.navigationWrapper}>
           <TouchableOpacity style={styles.imageWrapper} onPress={this.onJoinHomePress}>
             <Image source={require('../../../assets/images/eggplant_double.png')} style={styles.imageStyle} />
           </TouchableOpacity>
+          <Text style={styles.navigationText}>
+            Join
+          </Text>
+          </View>
         </View>
         <HomeSelectorModal 
           createModalPresented={this.state.createModalPresented}
@@ -132,6 +147,15 @@ const styles = {
   imageStyle: {
     height: 80,
     width: 80
+  },
+
+  navigationWrapper: {
+    flex: 0,
+    alignItems: 'center'
+  },
+
+  navigationText: {
+    fontSize: 18,
   }
 }
 

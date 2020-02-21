@@ -4,13 +4,15 @@ import { View, Text, TouchableOpacity, Alert } from 'react-native'
 import { HomeContext } from '../../contexts/HomeContextHolder';
 import { signIn, RejectionErros } from '../../AWSClient';
 import { layouts } from '../../Style';
+import EmailVerificationModal from './EmailVerificationModal';
 
 class SignIn extends Component {
   state = {
     loading: false,
     email: '',
     password: '',
-    error: ''
+    error: '',
+    emailVerificationModalPresented: false
   }
 
   onEmailChange(text) {
@@ -44,6 +46,13 @@ class SignIn extends Component {
       }
       if (signInRes.res.code === RejectionErros.NotAuthorizedException) {
         Alert.alert("Incorrect email or password.");
+      } 
+      if (signInRes.res.code === RejectionErros.UserNotConfirmedException) {
+        console.log('signInRes.res', signInRes.res)
+        this.setState({
+          loading: false,
+          emailVerificationModalPresented: true
+        });
       }
       this.setState({
         loading: false
@@ -115,6 +124,10 @@ class SignIn extends Component {
             Create a new account
           </Text>
         </TouchableOpacity>
+        <EmailVerificationModal
+          showModal={this.state.emailVerificationModalPresented}
+          email={this.state.email}
+        />
       </View>
     )
   }

@@ -30,22 +30,10 @@ class ToDoFilterModal extends Component {
       loading: true,
       error: ''
     });
+
     const homeId = await this.getHomeId()
     if (homeId !== undefined) {
       this.props.successfulHomeSelection(homeId);
-      // updateUser(this.props.user.id, this.props.user.color, this.props.user.link, homeId)
-      //   .then((response) => response.json())
-      //     .then((res) => {
-      //       if (res.status === '200') {
-      //         this.props.successfulHomeSelection(res.user);
-      //       }
-      //       if (res.status === '400') {
-      //         this.setState({
-      //           loading: false,
-      //           error: 'Ups something went wrong. Please try again - maybe with a different name.'
-      //         })
-      //       }
-      //     })
     }
 
     if (homeId === undefined) {
@@ -59,9 +47,9 @@ class ToDoFilterModal extends Component {
 
   getHomeId = () => {
     if (this.props.joinModalPresented) {
-      const home = this.props.homes.filter(home => { return home.name === this.state.homeName})
-      if (home.length > 0) {
-        return home[0].id
+      const homeName = this.props.homes.filter(home => { return home.name === this.state.homeName})
+      if (homeName.length === 1) {
+        return homeName[0].id
       }
       return undefined;
     }
@@ -69,13 +57,12 @@ class ToDoFilterModal extends Component {
     if (this.props.createModalPresented) {
       const variables = {
         name: this.state.homeName,
-        createdAt: 2020,
-        updatedAt: 2020
+        createdAt: moment.utc().format('YYYY-MM-DD'),
+        updatedAt: moment.utc().format('YYYY-MM-DD')
       }
-      console.log('can you see me?');
+
       return appSyncGraphQl(createHome, variables)
         .then((res) => {
-          console.log(res, res.status);
           if (res.status === 200) {
             console.log('res from createHome GQL', res.res.createHome);
             return res.res.createHome.id
@@ -104,6 +91,7 @@ class ToDoFilterModal extends Component {
   }
 
   render() {
+    console.log('this.props from home selector modal', this.props)
     const buttonLabel = this.props.createModalPresented? 'Create Home' : 'Find Home'
     const infoText = this.getInfoText()
 

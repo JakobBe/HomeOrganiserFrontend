@@ -3,6 +3,7 @@ import { Input, Button, Spinner } from '../Common';
 import { View, Text, TouchableOpacity, Dimensions, Alert } from 'react-native'
 import { signUp, RejectionErros } from '../../AWSClient';
 import { layouts } from '../../Style';
+import EmailVerificationModal from './EmailVerificationModal';
 
 class SignUp extends Component {
   state = {
@@ -10,7 +11,9 @@ class SignUp extends Component {
     email: '',
     password: '',
     error: '',
-    name: ''
+    name: '',
+    sub: '',
+    emailVerificationModalPresented: false
   };
 
   onEmailChange(text) {
@@ -51,8 +54,9 @@ class SignUp extends Component {
     }
     
     if (signUpRes.status === 200) {
-      await this.props.hasSignedUp(signUpRes.res.userSub);
       this.setState({
+        sub: signUpRes.res.userSub,
+        emailVerificationModalPresented: true,
         loading: false
       });
     }
@@ -114,6 +118,11 @@ class SignUp extends Component {
             Log In
           </Text>
         </TouchableOpacity>
+        <EmailVerificationModal
+          showModal={this.state.emailVerificationModalPresented}
+          sub={this.state.sub}
+          hasSignedUp={this.props.hasSignedUp}
+        />
       </View>
     )
   }
