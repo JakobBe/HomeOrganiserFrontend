@@ -75,10 +75,9 @@ class ProfileCompletionModal extends Component {
 
     appSyncGraphQl(createUser, variables)
       .then((res) => {
-        console.log('User creation after home selection', res);
-        if (res.status === '200') {
-          this.props.homeContext.createUserSession(res.createUser);
-          Actions.entry({ type: ActionConst.REPLACE })
+        if (res.status === 200) {
+          this.props.homeContext.createUserSession(res.res.createUser);
+          // this.props.completedSignUp();
         }
       })
   }

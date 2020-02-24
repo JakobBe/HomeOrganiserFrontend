@@ -38,10 +38,10 @@ const RouterComponent = () => {
           component={ToDoList}
           title='ToDos'
           duration={0}
-          rightButtonImage={require('../assets/images/arrow-pointing-to-right.png')}
+          rightButtonImage={require('../assets/images/user-black-c.png')}
           onRight={() => Actions.shoppingList({ type: ActionConst.REPLACE })}
           rightButtonStyle={{ position: 'absolute', right: -deviceWidth / 1.8 }}
-          leftButtonImage={require('../assets/images/arrow-pointing-to-left.png')}
+          leftButtonImage={require('../assets/images/group-c.png')}
           onLeft={() => Actions.entry({ type: ActionConst.REPLACE })}
           leftButtonStyle={{ position: 'absolute', left: -deviceWidth / 1.8 }}
           />

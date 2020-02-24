@@ -102,6 +102,7 @@ class HomeSelector extends Component {
           sub={this.props.homeContext.sub}
           homeId={this.state.homeId}
           onModalClose={this.onModalClose}
+          completedSignUp={this.props.completedSignUp}
         />
       </View>
     );

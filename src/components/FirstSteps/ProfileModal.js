@@ -31,6 +31,7 @@ class ProfileModal extends Component {
 
 
   componentDidMount() {
+    console.log('this.props.homeContext.currentUser', this.props.homeContext.currentUser)
     const { name, color, email, paypalLink, homeId, id } = this.props.homeContext.currentUser;
     this.setState({
       id,
@@ -266,9 +267,9 @@ const styles = {
   // },
 
   imageStyle: {
-    height: 90,
-    width: 90,
-    borderRadius: 45,
+    height: 120,
+    width: 120,
+    borderRadius: 60,
     borderWidth: 2,
     borderColor: colorPalette.secondary,
   },

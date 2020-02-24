@@ -13,7 +13,8 @@ class Entry extends Component {
   state = {
     imageUp: false,
     profileModalActive: false,
-    homeModalActive: false
+    homeModalActive: false,
+    reload: false
   }
 
   onSwipeUp = (gestureState) => {
@@ -45,6 +46,13 @@ class Entry extends Component {
       profileModalActive: false,
       homeModalActive: false
     });
+  }
+
+  completedSignUp = () => {
+    console.log('hello world');
+    this.setState({
+      reload: !reload
+    })
   }
 
   getTodayEvents = () => {
@@ -135,9 +143,10 @@ class Entry extends Component {
   }
 
   render() {
-    const currentUser = this.props.homeContext.currentUser
+    console.log('this.props.homeContext', this.props.homeContext)
+    const {currentUser, users} = this.props.homeContext
 
-    if (currentUser) {
+    if (currentUser && users) {
       return (
         <View style={styles.entryContainer}>
           {this.renderMainContent(currentUser)}
@@ -148,7 +157,9 @@ class Entry extends Component {
 
     return (
       <View style={styles.entryContainer}>
-        <HomeSelector />
+        <HomeSelector
+          completedSignUp={this.completedSignUp}
+        />
       </View>
     );
   }

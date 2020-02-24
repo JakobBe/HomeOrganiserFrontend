@@ -64,7 +64,6 @@ class ToDoFilterModal extends Component {
       return appSyncGraphQl(createHome, variables)
         .then((res) => {
           if (res.status === 200) {
-            console.log('res from createHome GQL', res.res.createHome);
             return res.res.createHome.id
           }
           if (res.status === 400) {

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { FlatList, View, RefreshControl, Text, TouchableWithoutFeedback, Image, Keyboard } from 'react-native';
+import { FlatList, View, RefreshControl, Text, TouchableOpacity, Image, Keyboard } from 'react-native';
 import { AddButton, Footer, ListItem, Input } from '../Common';
 import { fetchUserToDos, filterToDos } from '../../RailsClient';
 import { UserContext } from '../../contexts/UserContextHolder';
@@ -10,6 +10,7 @@ import { dateTimeFormat } from '../../Helpers/magicNumbers';
 import { createToDo, deleteToDo, updateToDo } from '../../graphql/ToDos/mutations';
 import { appSyncGraphQl } from '../../AWSClient';
 import { sortByCreatedAt } from '../../Helpers/sortByDate';
+import { colorPalette, layouts } from '../../Style';
 import moment from 'moment';
 
 class ToDoList extends Component {
@@ -228,11 +229,11 @@ class ToDoList extends Component {
               />
             }
           />
-          <View style={styles.filterImageWrapper}>
-            <TouchableWithoutFeedback onPress={() => this.onFilterMenuPress()}>
+          <TouchableOpacity onPress={() => this.onFilterMenuPress()}>
+            <View style={styles.filterImageWrapper}>
               <Image source={require('../../../assets/images/filter-outline.png')} style={styles.filterImageStyle} />
-            </TouchableWithoutFeedback>
-          </View>
+            </View>
+          </TouchableOpacity>
         </View>
         <ToDoFilterModal
           showFilterModal={this.state.filterModalPresented}
@@ -287,8 +288,9 @@ const styles = {
 
   filterImageStyle: {
     zIndex: 2,
-    height: 28,
-    width: 28,
+    height: 24,
+    width: 24,
+    marginTop: 4
   },
 
   toDoListWrapper: {
@@ -299,7 +301,17 @@ const styles = {
   filterImageWrapper: {
     position: 'absolute',
     bottom: 10,
-    right: 10
+    right: 10,
+    height: 35,
+    width: 35,
+    borderRadius: 35 / 2,
+    backgroundColor: colorPalette.primary,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
   }
 }
 

@@ -290,12 +290,12 @@ class ShoppingList extends Component {
               }
             />
           </View>
-          <View style={styles.shoppingBasketWrapper}>
-            {this.getNotificationNumber()}
-            <TouchableOpacity onPress={this.onShoppingBasketPress}>
+          <TouchableOpacity onPress={this.onShoppingBasketPress}>
+            <View style={styles.shoppingBasketWrapper}>
+              {this.getNotificationNumber()}
               <Image source={require('../../../assets/images/shopping-basket.png')} style={styles.shoppingCartImageStyle} />
-            </TouchableOpacity>
-          </View>
+            </View>
+          </TouchableOpacity>
           {shoppingCart}
         </View>
         <ShoppingItemModal
@@ -371,7 +371,18 @@ const styles = {
   shoppingBasketWrapper: {
     position: 'absolute',
     bottom: 10,
-    right: 10
+    right: 10,
+    height: 35,
+    width: 35,
+    borderRadius: 35 / 2,
+    backgroundColor: colorPalette.primary,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 2
   },
 
   shoppingItemListWrapper: {
@@ -379,10 +390,10 @@ const styles = {
   },
 
   shoppingCartImageStyle: {
-    height: 35,
-    width: 35,
-    padding: 2,
-    marginLeft: 2
+    height: 24,
+    width: 24,
+    marginTop: 4,
+    zIndex: 3
   },
 
   shoppingCartItem: {
@@ -412,7 +423,7 @@ const styles = {
     borderRadius: 20 / 2,
     backgroundColor: 'orangered',
     justifyContent: 'center',
-    zIndex: -1
+    zIndex: 0
   },
 
   notificationNumberStyle: {

@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import { getHome, createSession } from '../RailsClient';
-import { UserContext } from './UserContextHolder';
+import { Actions, ActionConst } from 'react-native-router-flux';
 import { getHome2 } from '../graphql/Homes/queries';
 import { appSyncGraphQl } from '../AWSClient';
 import { getUserBySub } from '../graphql/Users/queries';
@@ -21,7 +20,7 @@ class HomeContextHolder extends Component {
     shoppingItems: undefined,
     name: undefined,
     id: undefined,
-    sub: undefined,
+    sub: undefined
   }
 
   updateSub = (sub) => {
@@ -30,22 +29,25 @@ class HomeContextHolder extends Component {
     });
   }
 
-  createUserSession = async (sub) => {
-    const variables = {
-      sub
+  createUserSession = async (info) => {
+    let currentUser = info;
+    if (info.id === undefined) { 
+      const variables = {
+        sub: info
+      }
+      await appSyncGraphQl(getUserBySub, variables)
+        .then((res) => {
+          if (res.status === 200) {
+            currentUser = res.res.listUsers.items[0];
+          } else if (res.status === 400) {
+          }
+        })
     }
 
-    const currentUser = await appSyncGraphQl(getUserBySub, variables)
-      .then((res) => {
-        if (res.status === 200) {
-          this.setState({
-            currentUser: res.res.listUsers.items[0]
-          });
-          return res.res.listUsers.items[0]
-        } else if (res.status === 400) {
-        }
-      })
-
+    this.setState({
+      currentUser
+    });
+    
     await this.buildHomeContext(currentUser.homeId)
   };
 
@@ -66,7 +68,7 @@ class HomeContextHolder extends Component {
             name: home.name,
             id: home.id
           });
-          this.props.updateApp()
+          Actions.entry({ type: ActionConst.REPLACE })
         } else if (res.status === 400) {
         }
       });
@@ -184,8 +186,10 @@ class HomeContextHolder extends Component {
   };
 };
 
-export default (props) => (
-  <UserContext.Consumer>
-    {userContext => <HomeContextHolder {...props} userContext={userContext} />}
-  </UserContext.Consumer>
-);
+export default HomeContextHolder;
+
+// export default (props) => (
+//   <UserContext.Consumer>
+//     {userContext => <HomeContextHolder {...props} userContext={userContext} />}
+//   </UserContext.Consumer>
+// );
