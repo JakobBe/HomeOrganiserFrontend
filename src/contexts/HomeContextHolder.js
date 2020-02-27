@@ -37,9 +37,14 @@ class HomeContextHolder extends Component {
       }
       await appSyncGraphQl(getUserBySub, variables)
         .then((res) => {
+          console.log('res', res);
           if (res.status === 200) {
             currentUser = res.res.listUsers.items[0];
+            if (res.res.listUsers.items.length === 0) {
+              currentUser = undefined;
+            }
           } else if (res.status === 400) {
+            currentUser = undefined;
           }
         })
     }
@@ -47,8 +52,8 @@ class HomeContextHolder extends Component {
     this.setState({
       currentUser
     });
-    
-    await this.buildHomeContext(currentUser.homeId)
+    return currentUser;
+    // await this.buildHomeContext(currentUser.homeId)
   };
 
   buildHomeContext = async (homeId) => {
@@ -176,7 +181,8 @@ class HomeContextHolder extends Component {
             sub: this.state.sub,
             updateEvents: this.updateEvents,
             updateToDos: this.updateToDos,
-            updateShoppingItems: this.updateShoppingItems
+            updateShoppingItems: this.updateShoppingItems,
+            buildHomeContext: this.buildHomeContext
           }
         }
       >

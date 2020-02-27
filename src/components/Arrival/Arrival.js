@@ -11,11 +11,17 @@ class Arrival extends Component {
   }
 
   hasSignedIn = async (sub) => {
-    await this.props.homeContext.createUserSession(sub);
+    const currentUser = await this.props.homeContext.createUserSession(sub);
+    if (currentUser) {
+      await this.props.homeContext.buildHomeContext(currentUser.homeId);
+    } else {
+      this.props.homeContext.updateSub(sub)
+    }
     Actions.entry({ type: ActionConst.REPLACE })
   };
 
   hasSignedUp = async (sub) => {
+    console.log('this.props', this.props);
     this.props.homeContext.updateSub(sub)
     Actions.entry({ type: ActionConst.REPLACE })
   };
@@ -26,6 +32,7 @@ class Arrival extends Component {
         <SignIn 
           hasSignedIn={this.hasSignedIn}
           navigateSignIn={this.navigateSignIn}
+          hasSignedUp={this.hasSignedUp}
         />
       );
     };

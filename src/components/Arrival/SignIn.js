@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Input, Button, Spinner } from '../Common';
 import { View, Text, TouchableOpacity, Alert } from 'react-native'
 import { HomeContext } from '../../contexts/HomeContextHolder';
-import { signIn, RejectionErros } from '../../AWSClient';
+import { signIn, RejectionErros, getUsersHandler } from '../../AWSClient';
 import { layouts } from '../../Style';
 import EmailVerificationModal from './EmailVerificationModal';
 
@@ -12,6 +12,7 @@ class SignIn extends Component {
     email: '',
     password: '',
     error: '',
+    cognitoSub: '',
     emailVerificationModalPresented: false
   }
 
@@ -48,11 +49,17 @@ class SignIn extends Component {
         Alert.alert("Incorrect email or password.");
       } 
       if (signInRes.res.code === RejectionErros.UserNotConfirmedException) {
-        console.log('signInRes.res', signInRes.res)
-        this.setState({
-          loading: false,
-          emailVerificationModalPresented: true
-        });
+        console.log('Hello world');
+        const cognitoUserRes = await getUsersHandler(email.toLowerCase());
+        console.log('cognitoUserRes', cognitoUserRes);
+        if (cognitoUserRes.status === 200) {
+          this.setState({
+            loading: false,
+            emailVerificationModalPresented: true,
+            cognitoSub: cognitoUserRes.data
+          });
+
+        }
       }
       this.setState({
         loading: false
@@ -61,6 +68,7 @@ class SignIn extends Component {
     }
 
     if (signInRes.status === 200) {
+      console.log('signInRes', signInRes);
       await this.props.hasSignedIn(signInRes.res.attributes.sub);
       this.setState({
         loading: false
@@ -126,7 +134,8 @@ class SignIn extends Component {
         </TouchableOpacity>
         <EmailVerificationModal
           showModal={this.state.emailVerificationModalPresented}
-          email={this.state.email}
+          sub={this.state.cognitoSub}
+          hasSignedUp={this.props.hasSignedUp}
         />
       </View>
     )

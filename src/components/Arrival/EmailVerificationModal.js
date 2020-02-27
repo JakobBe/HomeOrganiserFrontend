@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Text, View, TouchableOpacity, Modal, Image } from 'react-native';
 import { Input, Button } from '../Common';
 import { colorPalette, deviceWidth, deviceHeight, layouts } from '../../Style';
-import { getPreSignedUrl, appSyncGraphQl, confirmUser } from '../../AWSClient';
+import { getPreSignedUrl, appSyncGraphQl, confirmUser, resendConfirmationCode } from '../../AWSClient';
 
 class EmailVerificationModal extends Component {
   state = {
@@ -24,10 +24,15 @@ class EmailVerificationModal extends Component {
   }
 
   confirmUser = async (verificationCode) => {
+    console.log('this.props', this.props);
     const confirmation = await confirmUser(this.props.sub, verificationCode);
     if (confirmation.res === 'SUCCESS') {
       await this.props.hasSignedUp(this.props.sub);
     }
+  }
+
+  resendConfirmationCode = async () => {
+    resendConfirmationCode(this.props.sub);
   }
 
   render() {
@@ -164,6 +169,11 @@ class EmailVerificationModal extends Component {
               }}
                   />
           </View>
+          <TouchableOpacity onPress={() => this.resendConfirmationCode()}>
+            <Text style={styles.resendConfirmationCodeTextStyle}>
+              Resend Confirmation Code
+          </Text>
+          </TouchableOpacity>
         </View>
       </Modal>
     );
@@ -208,12 +218,20 @@ const styles = {
   closeImageStyle: {
     height: 25,
     width: 25,
-    top: 30,
-    left: '90%'
+    top: 40,
+    left: '85%'
   },
 
   additionalInputStyles: {
     width: 30
+  },
+
+  resendConfirmationCodeTextStyle: {
+    marginBottom: '85%',
+    fontSize: 20,
+    alignSelf: 'center',
+    color: 'grey',
+    textDecorationLine: 'underline'
   }
 };
 
