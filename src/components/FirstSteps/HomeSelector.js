@@ -23,6 +23,7 @@ class HomeSelector extends Component {
   componentDidMount() {
     appSyncGraphQl(listHomes)
       .then((res) => {
+        console.log('res', res);
         if (res.status === 200) {
           this.setState({
             homes: res.res.listHomes.items
