@@ -79,17 +79,16 @@ class Entry extends Component {
     return today
   }
 
-  renderMainContent = (currentUser) => {
-    const images = ['https://picsum.photos/id/100/1000/1000', 'https://picsum.photos/id/253/1000/1000', 'https://picsum.photos/id/137/1000/1000', 'https://picsum.photos/id/25/1000/1000', 'https://picsum.photos/id/431/1000/1000', 'https://picsum.photos/id/311/1000/1000'];
+  renderMainContent = (currentUser, name) => {
+    const images = ['https://picsum.photos/id/311/1000/1000', 'https://picsum.photos/id/100/1000/1000', 'https://picsum.photos/id/253/1000/1000', 'https://picsum.photos/id/137/1000/1000', 'https://picsum.photos/id/25/1000/1000', 'https://picsum.photos/id/431/1000/1000'];
     const profileColor = currentUser.color
     const users = this.props.homeContext.users;
     return (
       <View>
-        {/* <View style={styles.carouselWrapper}>
-          <BackgroundCarousel 
-            images={images} 
-          />
-        </View> */}
+        <BackgroundCarousel 
+          images={images}
+          title={name}
+        />
         <View style={styles.guideWrapper}>
           <TouchableOpacity style={styles.imageWrapper(profileColor)} onPress={this.onProfilePress}>
             <Text style={{ color: colorPalette.primary }}>Profile settings</Text>
@@ -144,12 +143,12 @@ class Entry extends Component {
 
   render() {
     console.log('this.props.homeContext', this.props.homeContext)
-    const {currentUser, users} = this.props.homeContext
+    const {currentUser, users, name} = this.props.homeContext
 
     if (currentUser && users) {
       return (
         <View style={styles.entryContainer}>
-          {this.renderMainContent(currentUser)}
+          {this.renderMainContent(currentUser, name)}
           <Footer isHomeActive={true} />
         </View>
       );
@@ -179,7 +178,7 @@ const styles = {
   },
 
   carouselWrapper: {
-    height: '60%'
+    // height: '60%'
   },
 
   greeting: {

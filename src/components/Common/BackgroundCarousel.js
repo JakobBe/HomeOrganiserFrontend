@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, ScrollView, Dimensions, Image } from 'react-native';
+import { View, ScrollView, Dimensions, Image, Text } from 'react-native';
 
 const deviceWidth = Dimensions.get('window').width;
 
@@ -43,21 +43,24 @@ class BackgroundCarousel extends React.Component {
     const {images} = this.props;
     const {selectedIndex} = this.state;
     return (
-      <View style={{height: '100%'}}>
+      <View style={{height: '40%'}}>
+        <Text style={styles.titleText}>{this.props.title}</Text>
         <ScrollView 
           horizontal
           pagingEnabled 
           onMomentumScrollEnd={this.setSelectedIndex}
           ref={this.scrollRef}
+          style={{ backgroundColor: 'rgba(50,50,50,.4)' }}
         >
           {images.map(image => (
             <Image
-             key={image}
-             source={{uri: image}}
-             style={styles.backgroundImage}
-            />
-          ))}
+              key={image}
+              source={{uri: image}}
+              style={styles.backgroundImage}
+             />
+             ))}
         </ScrollView>
+        {/* <View style={{ position: 'absolute', height: '100%', width: '100%', backgroundColor: 'rgba(50,50,50,.4)', zIndex: 1, top: 0 }}></View> */}
         <View style={styles.circleWrapper}>
           {images.map((image, i) => (
             <View 
@@ -75,7 +78,8 @@ const styles = {
   backgroundImage: {
     height: '100%',
     width: deviceWidth,
-    position: 'relative'
+    position: 'relative',
+    opacity: .6
   },
 
   circleWrapper: {
@@ -86,7 +90,8 @@ const styles = {
     flex: 0,
     flexDirection: 'row',
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    zIndex: 2
   },
 
   whiteCircle: {
@@ -95,6 +100,17 @@ const styles = {
     borderRadius: 3,
     margin: 5,
     backgroundColor: 'white'
+  },
+
+  titleText: {
+    position: 'absolute',
+    top: '40%',
+    fontSize: 30,
+    fontWeight: 'bold',
+    color: 'white',
+    letterSpacing: 2.5,
+    zIndex: 2,
+    right: 5
   }
 }
 export { BackgroundCarousel };
