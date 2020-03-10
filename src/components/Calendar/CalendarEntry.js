@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, FlatList, RefreshControl } from 'react-native';
+import { View, FlatList, RefreshControl, Animated } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { Footer, ListItem, AddButton } from '../Common';
 // import { fetchEvents, createNewEvent, updateEvent } from '../../RailsClient';
@@ -8,11 +8,12 @@ import { createEvent, deleteEvent, updateEvent } from '../../graphql/Events/muta
 import { appSyncGraphQl } from '../../AWSClient';
 import { UserContext } from '../../contexts/UserContextHolder';
 import { HomeContext } from '../../contexts/HomeContextHolder';
-import { colorPalette, layouts } from '../../Style';
+import { colorPalette, layouts, deviceHeight } from '../../Style';
 import { CalendarModal } from './CalendarModal';
 import currentDate from '../../Helpers/currentDate';
 import getDayMarkerDots from '../../Helpers/eventDotMarkers';
 import moment from 'moment';
+import GestureRecognizer from 'react-native-swipe-gestures';
 
 class CalendarEntry extends Component {
   state = { 
@@ -21,8 +22,51 @@ class CalendarEntry extends Component {
     modalPresented: false, 
     refreshing: false,
     modalValue: undefined,
-    singleEventId: undefined
+    singleEventId: undefined,
+    isSwipedUp: false
   };
+
+  constructor() {
+    super();
+    const marginTop = deviceHeight - (deviceHeight / 1.8)
+    this.eventContainerHeight = new Animated.Value(marginTop);
+  }
+
+  animateEventContainer = () => {
+    if (!this.state.isSwipedUp) {
+      Animated.timing(
+        this.eventContainerHeight,
+        {
+          toValue: 10,
+          duration: 400
+        }
+      ).start();
+      return;
+    }
+
+    if (this.state.isSwipedUp) {
+      const marginTop = deviceHeight - (deviceHeight / 1.8)
+      Animated.timing(
+        this.eventContainerHeight,
+        {
+          toValue: marginTop,
+          duration: 400
+        }
+      ).start();
+    }
+  }
+
+  onSwipeUp(gestureState) {
+    this.animateEventContainer();
+    this.setState({ isSwipedUp: true });
+  }
+
+  onSwipeDown(gestureState) {
+    if (this.state.isSwipedUp) {
+      this.animateEventContainer();
+      this.setState({ isSwipedUp: false });
+    };
+  }
 
   componentWillMount() {
     this.setState({
@@ -127,7 +171,7 @@ class CalendarEntry extends Component {
 
     return (
       <ListItem
-        userName={item.user_name}
+        userName={itemUser.name}
         id={item.id}
         text={item.text}
         refreshList={this._onRefresh}
@@ -161,12 +205,12 @@ class CalendarEntry extends Component {
   }
 
   getSelectedDayEventList = () => {
-    const rows = this.getSelectedDayEvents()
+    const selectedDayEvents = this.getSelectedDayEvents()
     const extractKey = ({ id }) => id
     return (
       <FlatList
-        style={styles.container}
-        data={rows}
+        style={styles.flatList}
+        data={selectedDayEvents}
         renderItem={this.renderItem}
         keyExtractor={extractKey}
         refreshControl={
@@ -180,7 +224,13 @@ class CalendarEntry extends Component {
   }
 
   render() {
-    const selectedDayEventsList = this.getSelectedDayEventList()
+    console.log('this.state.isSwipedUp', this.state.isSwipedUp);
+    console.log('this.eventContainerHeight', this.eventContainerHeight);
+    const selectedDayEventsList = this.getSelectedDayEventList();
+    const config = {
+      velocityThreshold: 0.3,
+      directionalOffsetThreshold: 80
+    };
 
     let marks = { [this.state.selectedDate]: { selected: true, marked: true, selectedColor: colorPalette.primary } }
 
@@ -200,14 +250,30 @@ class CalendarEntry extends Component {
             selectedDayBackgroundColor: colorPalette.primary,
             todayTextColor: colorPalette.primary,
             arrowColor: colorPalette.primary,
-            width: '100%'
+            // width: '100%',
+            // 'stylesheet.day.basic': {
+            //   'base': {
+            //     width: 30,
+            //     height: 20
+            //   }
+            // }
           }}
         />
-        <View style={layouts.centerWrapper}>
-          <AddButton onPress={() => this.setState({ modalPresented: true })}/>
-        </View>
-        {selectedDayEventsList}
-        {/* {this.renderCalenderModal()} */}
+        <Animated.View style={styles.eventContainer(this.eventContainerHeight, this.state.isSwipedUp)}>
+          <GestureRecognizer
+            onSwipeUp={(state) => this.onSwipeUp(state)}
+            onSwipeDown={(state) => this.onSwipeDown(state)}
+            config={config}
+          >
+            <View style={[layouts.centerWrapper, {marginBottom: 10}]}>
+              <AddButton onPress={() => this.setState({ modalPresented: true })}/>
+            </View>
+            <View style={layouts.centerWrapper}>
+              <View style={{width: 40, borderWidth: 2, borderColor: 'rgb(200,200,200)', borderRadius: 10, marginTop: 10}}></View>
+            </View>
+          </GestureRecognizer>
+          {selectedDayEventsList}
+        </Animated.View>
         <CalendarModal 
           showModal={this.state.modalPresented} 
           saveInput={this.saveModalInput}
@@ -230,10 +296,18 @@ const styles = {
     backgroundColor: 'rgb(255,255,255)',
   },
 
-  container: {
+  flatList: {
     marginTop: 5,
-    flex: 1,
+    flex: 1
   },
+
+  eventContainer: (height, isSwipedUp) => ({
+    position: 'absolute',
+    height: deviceHeight,
+    marginTop: height,
+    width: '100%',
+    backgroundColor: 'white'
+  }),
 
   row: {
     padding: 15,

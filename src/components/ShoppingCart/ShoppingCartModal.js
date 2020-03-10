@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Modal, Text, TouchableHighlight, View, numeric, FlatList, Alert, Animated } from 'react-native';
 import { Button, Input, CloseButton, ListItem } from '../Common';
-import { colorPalette, layouts, deviceHeight} from '../../Style';
+import { colorPalette, layouts, deviceHeight, deviceWidth} from '../../Style';
 
 class ShoppingCartModal extends Component {
   state = {
@@ -68,6 +68,8 @@ class ShoppingCartModal extends Component {
   }
 
   render() {
+    console.log('deviceHeight', deviceHeight);
+    console.log('deviceWidth', deviceWidth);
     const extractKey = ({ id }) => id
 
     return (
@@ -92,14 +94,16 @@ class ShoppingCartModal extends Component {
                   onChangeText={value => this.setState({ price: value })}
                   placeholder={'04.20$'}
                   additionalInputStyles={styles.additionalInputStyles}
-                  additionalTextFieldStyle={{ backgroundColor: 'transparent' }}
+                  additionalTextFieldStyle={{ backgroundColor: 'transparent', paddingRight: 0, paddingLeft: 0, fontSize: 13 }}
                   autoFocus={false}
                   onFocus={() => this._keyboardShown()}
                   onBlur={() => this._keyboardHidden()} 
+                  keyboardType={'numeric'}
                 />
                 <Button
                   onPress={() => this.onClearAsExpensePress()}
                   additionalButtonStyles={styles.additionalExpenseButtonStyle}
+                  additionalButtonTextStyles={{ fontSize: 13 }}
                 >
                   Clear as expense
                 </Button>
@@ -108,6 +112,7 @@ class ShoppingCartModal extends Component {
                 <Button
                   onPress={() => this.onClearWithoutExpensePress()}
                   additionalButtonStyles={styles.buttonStyle}
+                  additionalButtonTextStyles={{fontSize: 13}}
                 >
                   Clear without expense
                 </Button>
@@ -181,7 +186,7 @@ const styles = {
   additionalInputStyles: {
     flexGrow: 1,
     marginTop: 0,
-    maxWidth: '85%'
+    maxWidth: '30%',
   },
 
   inputWrapper: {

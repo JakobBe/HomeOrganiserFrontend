@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
-import { Text, Animated, View, TouchableOpacity, Image, ScrollView, Modal } from 'react-native';
+import { Text, Animated, View, TouchableOpacity, Image, ScrollView, Modal, FlatList } from 'react-native';
 import { UserContext } from '../../contexts/UserContextHolder';
 import { HomeContext } from '../../contexts/HomeContextHolder';
 import { Input, Button, Footer } from '../Common';
 import { Actions, ActionConst } from 'react-native-router-flux';
-import { colorPalette, deviceWidth, layouts } from '../../Style';
+import { colorPalette, deviceHeight, layouts, textStyles } from '../../Style';
 import ImagePicker from 'react-native-image-picker';
 import QRCode from 'react-native-qrcode-svg';
 
@@ -22,7 +22,29 @@ class HomeModal extends Component {
     )
   }
 
+  getProfileImageUrl = (userId) => {
+    return `https://egg-planner-dev.s3.eu-central-1.amazonaws.com/${userId}/profile.jpg`;
+  }
+
+  renderProfileCard = ({item}) => {
+    console.log('item', item);
+    console.log('this.getProfileImageUrl(item.id)', this.getProfileImageUrl(item.id))
+    return (
+      <View style={styles.profileCard(item.color)}>
+        <Image source={{ uri: this.getProfileImageUrl(item.id) }} style={styles.profileImageStyle} />
+        <Text style={textStyles.normalText}>
+          {item.name}
+        </Text>
+        <Text style={textStyles.normalText}>
+          {item.email}
+        </Text>
+      </View>
+    )
+  }
+
   render() {
+    const roommates = this.props.homeContext.users;
+    const extractKey = ({ id }) => id
     return (
       <Modal
         animationType="slide"
@@ -32,21 +54,26 @@ class HomeModal extends Component {
         <View style={styles.transparentBackground}>
           <View style={styles.homeContainer}>
             <TouchableOpacity
-              onPress={() => this.props.onModalClose()}
-              style={{ top: 3, left: '85%' }}
+              onPress={ () => this.props.onModalClose() }
             >
-              <Text style={{ color: colorPalette.primary, fontWeight: 'bold' }}>Close</Text>
+              <Image source={require('../../../assets/images/close.png')} style={styles.closeImageStyle} />
             </TouchableOpacity>
-            <View>
-              <Text style={{ color: colorPalette.secondary, fontWeight: 'bold'  }}>
-                {this.props.homeContext.name}
-              </Text>
-              <Text style={{ color: colorPalette.secondary }}>
-                There are currently {this.props.homeContext.users.length} people registered for this flat.
-              </Text>
-            </View>
-            <View>
+            <Text style={[textStyles.headerStyle, styles.headerStyle]}>
+              {this.props.homeContext.name}
+            </Text>
+            <View style={layouts.centerWrapper}>
               {this.getQRCode()}
+            </View>
+            <Text style={[textStyles.normalText, {margin: 20 }]}>
+              There are currently {this.props.homeContext.users.length} roomies registered for this home.
+            </Text>
+            <View style={styles.profileCardsWrapper}>
+              <FlatList
+                style={styles.container}
+                data={roommates}
+                renderItem={this.renderProfileCard}
+                keyExtractor={extractKey}
+              />
             </View>
           </View>
         </View>
@@ -61,9 +88,16 @@ const styles = {
     backgroundColor: 'rgba(100,100,100,.5)'
   },
 
+  closeImageStyle: {
+    height: 25,
+    width: 25,
+    top: 3,
+    left: '90%'
+  },
+
   homeContainer: {
     margin: 30,
-    marginTop: 110,
+    marginTop: 50,
     marginBottom: 110,
     backgroundColor: 'rgb(255,255,255)',
     widht: '100%',
@@ -75,6 +109,44 @@ const styles = {
     position: 'relative',
     flex: 0,
     justifyContent: 'space-between',
+  },
+
+  headerStyle: {
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+
+  profileCard: (borderColor) => ({
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    textAlign: 'center',
+    margin: 10,
+    backgroundColor: 'rgba(240,240,240,.9)',
+    borderRadius: 40,
+    borderWidth: 1,
+    borderColor
+  }),
+
+  profileCardText: {
+    color: 'black',
+    fontSize: 15,
+    letterSpacing: 2
+  },
+
+  profileImageStyle: {
+    height: 60,
+    width: 60,
+    borderRadius: 30,
+    borderWidth: 1,
+    borderColor: colorPalette.secondary,
+    marginLeft: -1
+  },
+
+  profileCardsWrapper: {
+    flex: 0,
+    height: deviceHeight / 3.6
   }
 };
 

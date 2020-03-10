@@ -5,7 +5,8 @@ import { UserContext } from '../../contexts/UserContextHolder';
 import { HomeContext } from '../../contexts/HomeContextHolder';
 import GestureRecognizer, { swipeDirections } from 'react-native-swipe-gestures';
 import HomeSelector from './HomeSelector';
-import { colorPalette, deviceWidth } from '../../Style';
+import { colorPalette, deviceWidth, textStyles } from '../../Style';
+import currentDate from '../../Helpers/currentDate';
 import ProfileModal from './ProfileModal';
 import HomeModal from './HomeModal';
 
@@ -56,33 +57,18 @@ class Entry extends Component {
   }
 
   getTodayEvents = () => {
-    let selectedDateEvents = this.props.homeContext.events.filter(event => {
-      return event.date === this.currentDate()
+    const selectedDateEvents = this.props.homeContext.events.filter(event => {
+      return event.date === currentDate() && event.userId === this.props.homeContext.currentUser.id
     });
     return selectedDateEvents;
-  }
-
-  currentDate = () => {
-    let day = new Date().getDate();
-    let month = new Date().getMonth() + 1;
-    const year = new Date().getFullYear();
-
-    if (month.toString().length === 1) {
-      month = `0${month}`
-    }
-
-    if (day.toString().length === 1) {
-      day = `0${day}`
-    }
-
-    const today = `${year}-${month}-${day}`;
-    return today
   }
 
   renderMainContent = (currentUser, name) => {
     const images = ['https://picsum.photos/id/311/1000/1000', 'https://picsum.photos/id/100/1000/1000', 'https://picsum.photos/id/253/1000/1000', 'https://picsum.photos/id/137/1000/1000', 'https://picsum.photos/id/25/1000/1000', 'https://picsum.photos/id/431/1000/1000'];
     const profileColor = currentUser.color
     const users = this.props.homeContext.users;
+    const todayEvents = this.getTodayEvents().length !== 0 ? this.getTodayEvents() : [{text: "Hello World"}];
+    console.log('todayEvents', todayEvents);
     return (
       <View>
         <BackgroundCarousel 
@@ -91,23 +77,23 @@ class Entry extends Component {
         />
         <View style={styles.guideWrapper}>
           <TouchableOpacity style={styles.imageWrapper(profileColor)} onPress={this.onProfilePress}>
-            <Text style={{ color: colorPalette.primary }}>Profile settings</Text>
-            <Image source={require('../../../assets/images/user-black-c.png')} style={styles.imageStyle} />
+            <Text style={textStyles.normalStyle}>Profile</Text>
+            {/* <Image source={require('../../../assets/images/user-black-c.png')} style={styles.imageStyle} /> */}
           </TouchableOpacity>
           <TouchableOpacity style={styles.imageWrapper('white')} onPress={this.onHomePress}>
-            <Text style={{ color: colorPalette.primary }}>Home settings</Text>
-            <Image source={require('../../../assets/images/group-c.png')} style={styles.imageStyle} />
+            <Text style={{ color: colorPalette.secondary }}>Home</Text>
+            {/* <Image source={require('../../../assets/images/group-c.png')} style={styles.imageStyle} /> */}
           </TouchableOpacity>
-        </View>
-        <View style={styles.guideWrapper}>
-          <View style={styles.imageWrapper('white')}>
+        {/* </View>
+        <View style={styles.guideWrapper}> */}
+          {/* <View style={styles.imageWrapper('white')}>
             <Text style={{ color: colorPalette.primary }}>Your Balance</Text>
             <Text style={{ color: colorPalette.primary }}>+100$</Text>
-          </View>
-          <View style={styles.imageWrapper('white')}>
+          </View> */}
+          {/* <View style={styles.imageWrapper('white')}>
             <Text style={{ color: colorPalette.primary }}>Events today</Text>
-            {/* <Text style={{ color: colorPalette.primary, textAlign: 'center',  }}>{this.getTodayEvents()[0].text}</Text> */}
-          </View>
+            <Text style={{ color: colorPalette.primary, textAlign: 'center', }}>{todayEvents[0].text}</Text>
+          </View> */}
         </View>
         {/* <GestureRecognizer
           onSwipeUp={(state) => this.onSwipeUp(state)}
@@ -188,8 +174,8 @@ const styles = {
   },
 
   imageStyle: {
-    height: 60,
-    width: 60,
+    height: 20,
+    width: 20,
     alignSelf: 'center',
     marginTop: 20
   },
@@ -218,19 +204,20 @@ const styles = {
     marginBottom: 0,
     flex: 0,
     flexDirection: 'row',
-    justifyContent: 'space-between'
+    justifyContent: 'space-around'
   },
 
   imageWrapper: (backgroundColor) => ({
     flex: 0,
-    alignSelf: 'flex-start',
+    alignItems: 'center',
+    justifyContent: 'center',
     padding: 10,
     borderRadius: 13,
     borderWidth: 2,
     borderColor: colorPalette.secondary,
-    backgroundColor: colorPalette.secondary,
-    height: deviceWidth/2.5,
-    width: deviceWidth/2.5
+    // backgroundColor: colorPalette.secondary,
+    height: deviceWidth/4.5,
+    width: deviceWidth/4.5
   }),
 };
 

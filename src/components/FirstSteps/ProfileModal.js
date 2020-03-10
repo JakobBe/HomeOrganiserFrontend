@@ -24,14 +24,13 @@ class ProfileModal extends Component {
   constructor() {
     super();
     const containerHeight = deviceHeight / 1.3;
-    const wrapperHeight = deviceHeight / 2.2;
+    const wrapperHeight = deviceHeight / 2.5;
     this.containerHeight = new Animated.Value(containerHeight);
     this.wrapperHeight = new Animated.Value(wrapperHeight);
   }
 
 
   componentDidMount() {
-    console.log('this.props.homeContext.currentUser', this.props.homeContext.currentUser)
     const { name, color, email, paypalLink, homeId, id } = this.props.homeContext.currentUser;
     this.setState({
       id,
@@ -45,7 +44,7 @@ class ProfileModal extends Component {
   };
 
   _keyboardShown = () => {
-    const containerHeight = deviceHeight / 1.75;
+    const containerHeight = deviceHeight / 1.62;
     const wrapperHeight = deviceHeight / 3.5;
     Animated.timing(
       this.containerHeight,
@@ -187,14 +186,16 @@ class ProfileModal extends Component {
                   onChangeText={value => this.setState({ name: value })}
                   label='Name'
                   onFocus={() => this._keyboardShown()}
-                  onBlur={() => this._keyboardHidden()}         
+                  onBlur={() => this._keyboardHidden()}
+                  additionalTextFieldStyle={{ backgroundColor: 'transparent' }}         
                 />
                 <Input
                   value={color}
                   onChangeText={value => this.setState({ color: value.toLowerCase() })}
                   label='Your Color'
                   onFocus={() => this._keyboardShown()}
-                  onBlur={() => this._keyboardHidden()} 
+                  onBlur={() => this._keyboardHidden()}
+                  additionalTextFieldStyle={{ backgroundColor: 'transparent' }}
                 />
                 <Input
                   value={paypalLink}
@@ -202,6 +203,7 @@ class ProfileModal extends Component {
                   label='PayPal Link'
                   onFocus={() => this._keyboardShown()}
                   onBlur={() => this._keyboardHidden()}
+                  additionalTextFieldStyle={{ backgroundColor: 'transparent' }}
                 />
                 <Input
                   value={email}
@@ -209,6 +211,7 @@ class ProfileModal extends Component {
                   label='E-Mail'
                   onFocus={() => this._keyboardShown()}
                   onBlur={() => this._keyboardHidden()}
+                  additionalTextFieldStyle={{ backgroundColor: 'transparent' }}
                 />
               </ScrollView>
             </Animated.View>
@@ -232,8 +235,8 @@ const styles = {
 
   profileContainer: (color, height) => ({
     margin: 30,
-    marginTop: 50,
-    marginBottom: 110,
+    marginTop: deviceHeight / 20,
+    marginBottom: deviceHeight / 2.5,
     backgroundColor: 'white',
     widht: '100%',
     borderRadius: 10,
@@ -248,10 +251,10 @@ const styles = {
   }),
 
   inputWrapper: (height) => ({
-    backgroundColor: 'rgb(255,255,255)',
+    backgroundColor: 'rgba(240,240,240,.5)',
+    borderRadius: 20,
     margin: 5,
     padding: 5,
-    borderRadius: 20,
     height
   }),
 
@@ -267,9 +270,9 @@ const styles = {
   // },
 
   imageStyle: {
-    height: 120,
-    width: 120,
-    borderRadius: 60,
+    height: deviceHeight / 8,
+    width: deviceHeight / 8,
+    borderRadius: deviceHeight / 16,
     borderWidth: 2,
     borderColor: colorPalette.secondary,
   },

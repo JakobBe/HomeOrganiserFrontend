@@ -43,7 +43,7 @@ class BackgroundCarousel extends React.Component {
     const {images} = this.props;
     const {selectedIndex} = this.state;
     return (
-      <View style={{height: '40%'}}>
+      <View style={{height: '50%'}}>
         <Text style={styles.titleText}>{this.props.title}</Text>
         <ScrollView 
           horizontal

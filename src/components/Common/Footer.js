@@ -87,17 +87,12 @@ const styles = {
     alignItems: 'center',
     flexDirection: 'row',
     backgroundColor: 'rgb(255,255,255)',
-    padding: 10,
-    paddingBottom: 20,
     borderRadius: 5,
     borderTopColor: colorPalette.secondary,
     borderTopWidth: 1,
     minHeight: 80
   },
 
-  iconWrapperStyle: {
-    marginTop: 10 
-  },
 
   imageStyle: {
     height: 25,
