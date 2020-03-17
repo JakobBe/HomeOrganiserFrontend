@@ -166,7 +166,14 @@ const styles = {
   },
   
   loginWrapper: {
-    flex: 0
+    flex: 0,
+    transform: [
+      {perspective: 1000 }, 
+      { translateX: 0 },
+      { rotateY: '18rad'},
+      // { translateX: -100 },
+      { scale: 0.8 }
+    ]
   },
 }
 
