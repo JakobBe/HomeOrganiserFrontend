@@ -9,11 +9,15 @@ import EmailVerificationModal from './EmailVerificationModal';
 class SignIn extends Component {
   state = {
     loading: false,
-    email: '',
-    password: '',
+    email: 'jakob@bethmann.de',
+    password: '123456',
     error: '',
     cognitoSub: '',
     emailVerificationModalPresented: false
+  }
+
+  componentDidMount() {
+    this.onLoginButtonPress();
   }
 
   onEmailChange(text) {
@@ -30,6 +34,7 @@ class SignIn extends Component {
 
   onLoginButtonPress = async () => {
     const { email, password } = this.state;
+
     if (email.length === 0 || password.length === 0) {
       Alert.alert("Please enter an E-Mail address and a password.");
       return
@@ -167,13 +172,13 @@ const styles = {
   
   loginWrapper: {
     flex: 0,
-    transform: [
-      {perspective: 1000 }, 
-      { translateX: 0 },
-      { rotateY: '18rad'},
-      // { translateX: -100 },
-      { scale: 0.8 }
-    ]
+    // transform: [
+    //   {perspective: 1000 }, 
+    //   { translateX: 0 },
+    //   { rotateY: '18rad'},
+    //   // { translateX: -100 },
+    //   { scale: 0.8 }
+    // ]
   },
 }
 
