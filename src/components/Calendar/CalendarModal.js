@@ -145,6 +145,11 @@ class CalendarModal extends Component {
                 })
               }}
             />
+            <View style={layouts.centerWrapper}>
+              <Text style={styles.dateHeader}>
+                {this.props.day}
+              </Text>
+            </View>
             {/* <TouchableHighlight
               onPress={() => { this.props.onModalClose(), 
                 this.setState({ 
@@ -246,6 +251,10 @@ const styles = {
     paddingTop: 10,
     marginBottom: 20
   },
+
+  dateHeader: {
+    fontWeight: 'bold'
+  }
 }
 
 export { CalendarModal };

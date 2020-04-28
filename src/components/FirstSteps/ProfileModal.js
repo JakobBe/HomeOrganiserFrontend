@@ -230,11 +230,11 @@ class ProfileModal extends Component {
 const styles = {
   transparentBackground: {
     height: '100%',
-    backgroundColor: 'rgba(100,100,100,.5)'
+    // backgroundColor: 'rgba(100,100,100,.5)'
   },
 
   profileContainer: (color, height) => ({
-    margin: 30,
+    // margin: 30,
     marginTop: deviceHeight / 20,
     marginBottom: deviceHeight / 2.5,
     backgroundColor: 'white',
@@ -247,7 +247,7 @@ const styles = {
     position: 'relative',
     flex: 0,
     justifyContent: 'space-between',
-    height
+    height: '100%',
   }),
 
   inputWrapper: (height) => ({

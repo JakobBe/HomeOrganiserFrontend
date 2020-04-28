@@ -31,9 +31,7 @@ class Entry extends Component {
   }
 
   onProfilePress = async () => {
-    this.setState({
-      profileModalActive: true
-    });
+    this.props.homeContext.profileModal.open();
   }
 
   onHomePress = () => {
@@ -43,10 +41,11 @@ class Entry extends Component {
   }
 
   onModalClose = () => {
-    this.setState({
-      profileModalActive: false,
-      homeModalActive: false
-    });
+    this.props.homeContext.profileModal.close();
+    // this.setState({
+    //   profileModalActive: false,
+    //   homeModalActive: false
+    // });
   }
 
   completedSignUp = () => {
@@ -115,10 +114,11 @@ class Entry extends Component {
             ))}
           </View>
         </View> */}
-        <ProfileModal 
+        {/* <ProfileModal 
           profileModalActive={this.state.profileModalActive}
           onModalClose={this.onModalClose}
-        />
+        /> */}
+        {this.props.homeContext.profileModal.render}
         <HomeModal
           homeModalActive={this.state.homeModalActive}
           onModalClose={this.onModalClose}

@@ -26,57 +26,54 @@ const RouterComponent = () => {
           component={Entry}
           title='Welcome Home'
           duration={0}
-          rightButtonImage={require('../assets/images/arrow-pointing-to-right.png')}
-          onRight={() => Actions.toDoList({ type: ActionConst.REPLACE })}
+          rightButtonImage={require('../assets/images/user-black.png')}
+          onRight={() => Actions.profile()}
           rightButtonStyle={{ position: 'absolute', right: -deviceWidth / 1.8 }}
-          leftButtonImage={require('../assets/images/arrow-pointing-to-left.png')}
-          onLeft={() => Actions.calendar({ type: ActionConst.REPLACE })}
-          leftButtonStyle={{ position: 'absolute', left: -deviceWidth / 1.8 }}
         />
         <Scene 
           key='toDoList' 
           component={ToDoList}
           title='ToDos'
           duration={0}
-          rightButtonImage={require('../assets/images/user-black-c.png')}
-          onRight={() => Actions.shoppingList({ type: ActionConst.REPLACE })}
+          rightButtonImage={require('../assets/images/user-black.png')}
+          onRight={() => Actions.profile()}
           rightButtonStyle={{ position: 'absolute', right: -deviceWidth / 1.8 }}
-          leftButtonImage={require('../assets/images/group-c.png')}
-          onLeft={() => Actions.entry({ type: ActionConst.REPLACE })}
-          leftButtonStyle={{ position: 'absolute', left: -deviceWidth / 1.8 }}
           />
         <Scene
           key='moneyBox'
           component={MoneyEntry}
           duration={0}
-          hideNavBar={true}
+          // hideNavBar={true}
+          rightButtonImage={require('../assets/images/user-black.png')}
+          onRight={() => Actions.profile()}
+          rightButtonStyle={{ position: 'absolute', right: -deviceWidth / 1.8 }}
+          navigationBarStyle={{ backgroundColor: colorPalette.secondary }}
         />
         <Scene
           key='calendar'
           component={CalendarEntry}
           title='Calendar'
           duration={0}
-          rightButtonImage={require('../assets/images/arrow-pointing-to-right.png')}
-          onRight={() => Actions.entry({ type: ActionConst.REPLACE })}
+          rightButtonImage={require('../assets/images/user-black.png')}
+          onRight={() => Actions.profile()}
           rightButtonStyle={{ position: 'absolute', right: -deviceWidth / 1.8 }}
-          leftButtonImage={require('../assets/images/arrow-pointing-to-left.png')}
-          onLeft={() => Actions.moneyBox({ type: ActionConst.REPLACE })}
-          leftButtonStyle={{ position: 'absolute', left: -deviceWidth / 1.8 }}
         />
         <Scene
           key='shoppingList'
           component={ShoppingList}
           title='Shopping List'
           duration={0}
-          leftButtonImage={require('../assets/images/arrow-pointing-to-left.png')}
-          onLeft={() => Actions.toDoList({ type: ActionConst.REPLACE })}
-          leftButtonStyle={{ position: 'absolute', left: -deviceWidth / 1.8 }}
+          rightButtonImage={require('../assets/images/user-black.png')}
+          onRight={() => Actions.profile()}
+          rightButtonStyle={{ position: 'absolute', right: -deviceWidth / 1.8 }}
         />
         <Scene
           key='profile'
           component={Profile}
           title='Profile'
-          back={true}
+          leftButtonImage={require('../assets/images/arrow-pointing-to-left.png')}
+          leftButtonStyle={{ position: 'absolute', left: -deviceWidth / 1.8 }}
+          onLeft={() => Actions.pop()}
           // leftTitle='Back'
           // onLeft={() => Actions.entry({ type: ActionConst.REPLACE })}
           duration={0}

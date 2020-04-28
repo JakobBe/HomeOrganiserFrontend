@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, FlatList, RefreshControl, Animated } from 'react-native';
+import { View, FlatList, RefreshControl, Animated, Text } from 'react-native';
 import { Calendar, CalendarList } from 'react-native-calendars';
 import { Footer, ListItem, AddButton } from '../Common';
 // import { fetchEvents, createNewEvent, updateEvent } from '../../RailsClient';
@@ -30,8 +30,8 @@ class CalendarEntry extends Component {
 
   constructor() {
     super();
-    const calendarHeight = (deviceHeight - 180);
-    const eventHeight = (0);
+    const calendarHeight = (deviceHeight - 220);
+    const eventHeight = (40);
     this.calendarHeight = new Animated.Value(calendarHeight);
     this.eventContainerHeight = new Animated.Value(eventHeight);
   }
@@ -46,7 +46,7 @@ class CalendarEntry extends Component {
   animateContainers = (eventCount, swipeUp) => {
     console.log('Are you animating?', eventCount, swipeUp);
     if (!swipeUp) {
-      let toValue = (deviceHeight - 180);
+      let toValue = (deviceHeight - 250);
       Animated.timing(
         this.calendarHeight,
         {
@@ -54,7 +54,7 @@ class CalendarEntry extends Component {
           duration: 400
         }
       ).start();
-      toValue = 0;
+      toValue = 40;
       Animated.timing(
         this.eventContainerHeight,
         {
@@ -86,7 +86,7 @@ class CalendarEntry extends Component {
   }
 
   onSwipeUp(gestureState) {
-    this.animateContainers(undefined, true);
+    this.animateContainers(2, true);
     this.setState({ isSwipedUp: true });
   }
 
@@ -241,20 +241,23 @@ class CalendarEntry extends Component {
   }
 
   onDayPress = (day) => {
+    // if (day.dateString === selectedDate) {
+
+    // }
+
     this.setState({ selectedDate: day.dateString });
     let selectedDateEvents = this.state.events.filter(event => {
       return event.date === day.dateString
     });
 
-    if (selectedDateEvents.length === 0) {
+    if (selectedDateEvents.length === 0 && this.state.isSwipedUp) {
       this.setState({ isSwipedUp: false });
       this.animateContainers(selectedDateEvents.length, false);
     }
 
-    if (selectedDateEvents.length > 0) {
+    if (selectedDateEvents.length > 0 && !this.state.isSwipedUp) {
       this.setState({ 
         isSwipedUp: true,
-        isCalendarListActive: false
       });
       this.animateContainers(selectedDateEvents.length, true);
     }
@@ -286,13 +289,13 @@ class CalendarEntry extends Component {
     );
   }
 
-  onVisibleMonthsChange = (months) => {
-    console.log('months', months.length, this.state.prevMonthsVisible.length);
-    // if (this.state.prevMonthsVisible.length > months.length) {
-    //   this.setState({
-    //     prevMonthsVisible: months
-    //   });
-    // }
+  onVisibleMonthsChange = (months, isCalendarListActive) => {
+    if (isCalendarListActive) {
+      this.setState({
+        isCalendarListActive: false
+      });
+      return
+    }
 
     if (this.state.isSwipedUp && months.length > 1) {
       this.setState({
@@ -312,7 +315,7 @@ class CalendarEntry extends Component {
       })
     }
 
-    if (this.state.isCalendarListActive) {
+    if (!this.state.isSwipedUp) {    
       return (
         <CalendarList
           pastScrollRange={12}
@@ -338,7 +341,7 @@ class CalendarEntry extends Component {
         futureScrollRange={36}
         scrollEnabled={true}
         showScrollIndicator={true}
-        onVisibleMonthsChange={(months) => this.onVisibleMonthsChange(months)}
+        onVisibleMonthsChange={(months) => this.onVisibleMonthsChange(months, this.state.isCalendarListActive)}
         onDayPress={(day) => this.onDayPress(day)}
         markedDates={marks}
         current={this.state.selectedDate}
@@ -372,6 +375,11 @@ class CalendarEntry extends Component {
               onSwipeDown={(state) => this.onSwipeDown(state)}
               config={config}
             >
+              <View style={layouts.centerWrapper}>  
+                <Text style={styles.dateHeader}>
+                  {this.state.selectedDate}
+                </Text>
+              </View>
             </GestureRecognizer>
             {selectedDayEventsList}
             <View style={styles.addButtonStyle}>
@@ -386,8 +394,8 @@ class CalendarEntry extends Component {
             onModalClose={this.onModalCose}
             modalValue={this.state.modalValue}
             singleEventId={this.state.singleEventId}
+            day={this.state.selectedDate}
           />
-
         </View>
         <Footer isCalendarActive={true}/>
       </View>  
@@ -416,7 +424,10 @@ const styles = {
     height,
     width: '100%',
     backgroundColor: 'white',
-    position: 'relative'
+    position: 'relative',
+    borderTopColor: colorPalette.primary,
+    borderTopWidth: 1,
+    paddingTop: 10
   }),
 
   row: {
@@ -427,8 +438,12 @@ const styles = {
 
   addButtonStyle: {
     position: 'absolute',
-    bottom: 0,
+    bottom: 2,
     right: 10
+  },
+
+  dateHeader: {
+    fontWeight: 'bold'
   }
 };
 

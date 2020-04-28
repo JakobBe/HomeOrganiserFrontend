@@ -6,6 +6,7 @@ import { getUserBySub } from '../graphql/Users/queries';
 import { listEventsWithHomeId } from '../graphql/Events/queries';
 import { listToDosWithHomeId } from '../graphql/ToDos/queries';
 import { listShoppingItemsWithHomeId } from '../graphql/ShoppingItems/queries';
+import ProfileModal from '../components/FirstSteps/ProfileModal';
 import moment from 'moment';
 
 const defaultValue = {};
@@ -20,7 +21,8 @@ class HomeContextHolder extends Component {
     shoppingItems: undefined,
     name: undefined,
     id: undefined,
-    sub: undefined
+    sub: undefined,
+    profileModalActive: false
   }
 
   updateSub = (sub) => {
@@ -163,6 +165,27 @@ class HomeContextHolder extends Component {
     });
   }
 
+  onProfileModalClose = () => {
+    this.setState({
+      profileModalActive: false
+    });
+  }
+
+  onProfileModalClick = () => {
+    this.setState({
+      profileModalActive: true
+    });
+  }
+
+  renderProfileModal = () => {
+    return (
+      <ProfileModal 
+        profileModalActive={this.state.profileModalActive}
+        onModalClose={this.onProfileModalClose}
+      />
+    )
+  }
+
   render() {
     return (
       <HomeContext.Provider
@@ -182,7 +205,8 @@ class HomeContextHolder extends Component {
             updateEvents: this.updateEvents,
             updateToDos: this.updateToDos,
             updateShoppingItems: this.updateShoppingItems,
-            buildHomeContext: this.buildHomeContext
+            buildHomeContext: this.buildHomeContext,
+            profileModal: {component: this.render.profileModal, open: this.onProfileModalClick, close: this.onProfileModalClose},
           }
         }
       >
