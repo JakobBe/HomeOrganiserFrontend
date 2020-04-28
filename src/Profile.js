@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Text, Animated, View, TouchableOpacity, Image, ScrollView, Modal } from 'react-native';
 import { UserContext } from './contexts/UserContextHolder';
 import { HomeContext } from './contexts/HomeContextHolder';
-import { Input, Button, Footer } from './components/Common';
+import { Input, Button, Footer, Spinner } from './components/Common';
 // import { updateUser } from '../../RailsClient';
 import { Actions, ActionConst } from 'react-native-router-flux';
 import { colorPalette, deviceWidth, deviceHeight, layouts } from './Style';
@@ -18,7 +18,9 @@ class Profile extends Component {
     email: '',
     paypalLink: '',
     homeId: '',
-    profileImage: ''
+    profileImage: '',
+    loading: false,
+    updateImg: false
   }
 
   constructor() {
@@ -97,6 +99,9 @@ class Profile extends Component {
     const preSignedUrl = await getPreSignedUrl(`${user.id}/profile.jpg`);
 
     ImagePicker.showImagePicker(options, (response) => {
+      this.setState({
+        loading: true
+      });
       if (response.didCancel) {
       } else if (response.error) {
       } else if (response.customButton) {
@@ -104,10 +109,14 @@ class Profile extends Component {
       } else {
         const xhr = new XMLHttpRequest();
         xhr.open('PUT', preSignedUrl);
-        xhr.onreadystatechange = function () {
+        xhr.onreadystatechange = () => {
           if (xhr.readyState === 4) {
             if (xhr.status === 200) {
               console.log('Image successfully uploaded to S3', xhr);
+              this.setState({
+                loading: false,
+                updateImg: !this.state.updateImg
+              });
             }
           } else {
             console.log('Error while sending the image to S3', xhr);
@@ -116,12 +125,6 @@ class Profile extends Component {
         xhr.setRequestHeader('Content-Type', 'image/jpeg');
         xhr.send({ uri: response.uri, type: 'image/jpeg', name: 'test.jpg' });
       }
-
-      const profileImageUrl = this.getProfileImageUrl(user.id);
-
-      this.setState({
-        profileImage: profileImageUrl
-      });
     });
 
   }
@@ -145,10 +148,31 @@ class Profile extends Component {
       })
   }
 
+  renderProfileImage = () => {
+    console.log('this.state.profileImage', this.state.profileImage);
+    const uri = this.state.profileImage;
+    const imgAddition = this.state.loading ? <Spinner size='large' color={'black'} additionalSpinnerStyle={styles.additionalSpinnerStyle}/> : 
+      <TouchableOpacity onPress={() => this.onCameraPress()}>
+        <Image source={require('../assets/images/photo-camera.png')} style={styles.cameraImageStyle} />
+      </TouchableOpacity>
+    // Image.prefetch(uri);
+
+    return (
+      <View style={styles.imageWrapper}>
+        <Image key={this.state.updateImg} source={{ uri }} style={styles.imageStyle(this.state.loading)} />
+        {imgAddition}
+        {/* <TouchableOpacity onPress={() => this.onCameraPress()}>
+          <Image source={require('../assets/images/photo-camera.png')} style={styles.cameraImageStyle} />
+        </TouchableOpacity> */}
+      </View>
+    );
+  }
+
   render() {
     const { name, color, email, paypalLink } = this.state;
     const containerHeight = deviceHeight / 1.3;
     const wrapperHeight = deviceHeight / 2.2;
+    const profileImage = this.renderProfileImage();
 
     return (
       <Animated.View style={styles.profileContainer(color, this.containerHeight)}>
@@ -158,12 +182,7 @@ class Profile extends Component {
         >
           <Text style={{ color: colorPalette.primary, fontWeight: 'bold' }}>Close</Text>
         </TouchableOpacity> */}
-        <View style={styles.imageWrapper}>
-          <Image source={{ uri: this.state.profileImage }} style={styles.imageStyle} />
-          <TouchableOpacity onPress={() => this.onCameraPress()}>
-            <Image source={require('../assets/images/photo-camera.png')} style={styles.cameraImageStyle} />
-          </TouchableOpacity>
-        </View>
+        {profileImage}
         <Animated.View style={styles.inputWrapper(this.wrapperHeight)}>
           <ScrollView>
             <Input
@@ -241,13 +260,14 @@ const styles = {
   //   marginTop: 20
   // },
 
-  imageStyle: {
+  imageStyle: (loading) => ({
     height: deviceHeight / 8,
     width: deviceHeight / 8,
     borderRadius: deviceHeight / 16,
     borderWidth: 2,
     borderColor: colorPalette.secondary,
-  },
+    opacity: loading ? .5 : 1
+  }),
 
   imageWrapper: {
     padding: 10,
@@ -263,6 +283,14 @@ const styles = {
     bottom: -7,
     left: 23,
     zIndex: 2
+  },
+
+  additionalSpinnerStyle: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    marginLeft: -5,
+    marginTop: 0
   }
 };
 
