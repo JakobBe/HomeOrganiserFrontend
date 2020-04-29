@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Text, View, Image, TouchableOpacity } from 'react-native';
-import { Footer, BackgroundCarousel } from '../Common';
+import { Footer, BackgroundCarousel, ColorSlider } from '../Common';
 import { UserContext } from '../../contexts/UserContextHolder';
 import { HomeContext } from '../../contexts/HomeContextHolder';
 import GestureRecognizer, { swipeDirections } from 'react-native-swipe-gestures';
@@ -75,6 +75,7 @@ class Entry extends Component {
           title={name}
         />
         <View style={styles.guideWrapper}>
+          <ColorSlider />
           <TouchableOpacity style={styles.imageWrapper(profileColor)} onPress={this.onProfilePress}>
             <Text style={textStyles.normalStyle}>Profile</Text>
             {/* <Image source={require('../../../assets/images/user-black-c.png')} style={styles.imageStyle} /> */}
@@ -83,41 +84,7 @@ class Entry extends Component {
             <Text style={{ color: colorPalette.secondary }}>Home</Text>
             {/* <Image source={require('../../../assets/images/group-c.png')} style={styles.imageStyle} /> */}
           </TouchableOpacity>
-        {/* </View>
-        <View style={styles.guideWrapper}> */}
-          {/* <View style={styles.imageWrapper('white')}>
-            <Text style={{ color: colorPalette.primary }}>Your Balance</Text>
-            <Text style={{ color: colorPalette.primary }}>+100$</Text>
-          </View> */}
-          {/* <View style={styles.imageWrapper('white')}>
-            <Text style={{ color: colorPalette.primary }}>Events today</Text>
-            <Text style={{ color: colorPalette.primary, textAlign: 'center', }}>{todayEvents[0].text}</Text>
-          </View> */}
         </View>
-        {/* <GestureRecognizer
-          onSwipeUp={(state) => this.onSwipeUp(state)}
-          onSwipeDown={(state) => this.onSwipeDown(state)}
-        >
-          <Image source={require('../../assets/images/eggplant.png')} style={styles.imageStyle(this.state.imageUp)} />
-        </GestureRecognizer> */}
-        {/* <View style={styles.flatmatesContainer}>
-          <Text style={styles.greeting}>
-            Hi {this.props.homeContext.currentUser.name}, these are your flatmates.
-          </Text>
-          <View style={styles.userLetterWrapper}>
-            {users.map(user => (
-              <View style={styles.userLetterStyleContainer(user.color || 'black')}>
-                <Text style={styles.userLetterStyle}>
-                  {user.name.charAt(0).toUpperCase()}
-                </Text>
-              </View>
-            ))}
-          </View>
-        </View> */}
-        {/* <ProfileModal 
-          profileModalActive={this.state.profileModalActive}
-          onModalClose={this.onModalClose}
-        /> */}
         {this.props.homeContext.profileModal.render}
         <HomeModal
           homeModalActive={this.state.homeModalActive}

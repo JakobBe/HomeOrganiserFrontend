@@ -13,3 +13,4 @@ export * from './AddButton';
 export * from './CloseButton';
 export * from './BackgroundCarousel';
 export * from './TouchableTextHighlight';
+export * from './ColorSlider';

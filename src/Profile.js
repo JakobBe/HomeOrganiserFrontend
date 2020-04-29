@@ -9,6 +9,7 @@ import { colorPalette, deviceWidth, deviceHeight, layouts } from './Style';
 import ImagePicker from 'react-native-image-picker';
 import { getPreSignedUrl, appSyncGraphQl } from './AWSClient';
 import { updateUser } from './graphql/Users/mutations';
+import Slider from '@react-native-community/slider';
 
 class Profile extends Component {
   state = {
@@ -20,7 +21,8 @@ class Profile extends Component {
     homeId: '',
     profileImage: '',
     loading: false,
-    updateImg: false
+    updateImg: false,
+    nameEdit: false
   }
 
   constructor() {
@@ -148,6 +150,21 @@ class Profile extends Component {
       })
   }
 
+  onEditName = () => {
+    this.setState({
+      nameEdit: !this.state.nameEdit,
+    });
+    console.log('nameInput', this.nameInput.focus, this.nameInput);
+    this.nameInput.focus();
+  }
+
+  onNameBlur = () => {
+    this._keyboardHidden()
+    this.setState({
+      nameEdit: false,
+    })
+  }
+
   renderProfileImage = () => {
     console.log('this.state.profileImage', this.state.profileImage);
     const uri = this.state.profileImage;
@@ -190,9 +207,13 @@ class Profile extends Component {
               onChangeText={value => this.setState({ name: value })}
               label='Name'
               onFocus={() => this._keyboardShown()}
-              onBlur={() => this._keyboardHidden()}
+              onBlur={this.onNameBlur}
               additionalTextFieldStyle={{ backgroundColor: 'transparent' }}
-            />
+              withEdit={true}
+              editCallback={this.onEditName}
+              editable={this.state.nameEdit}
+              newRef={(refName) => {this.nameInput = refName}}
+          />
             <Input
               value={color}
               onChangeText={value => this.setState({ color: value.toLowerCase() })}
