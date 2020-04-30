@@ -1,6 +1,7 @@
 import React from 'react';
-import { Navigator } from 'react-native';
+import { Navigator, TouchableOpacity, Alert } from 'react-native';
 import { Scene, Router, Actions, ActionConst } from 'react-native-router-flux';
+import { HomeContext } from './contexts/HomeContextHolder';
 import ToDoList from './components/ToDos/ToDoList';
 import MoneyEntry from './components/MoneyBox/MoneyEntry';
 import Entry from './components/FirstSteps/Entry';
@@ -9,8 +10,17 @@ import ShoppingList from './components/ShoppingCart/ShoppingList';
 import Profile from './Profile';
 import Arrival from './components/Arrival/Arrival';
 import { colorPalette, deviceWidth } from './Style';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faArrowAltCircleLeft, faUserCircle, faPowerOff } from '@fortawesome/free-solid-svg-icons';
 
 const RouterComponent = () => {
+  const logout = () => {
+    Alert.alert("Are you sure you want to logout?", '', [
+      { text: 'Cancle', onPress: () => console.log('cancle'), style: 'cancel' },
+      { text: 'Yes', onPress: () => { Actions.arrival(); }}
+    ]);
+  }
+
   return (
     <Router>
       <Scene key='root' >
@@ -26,27 +36,33 @@ const RouterComponent = () => {
           component={Entry}
           title='Welcome Home'
           duration={0}
-          rightButtonImage={require('../assets/images/user-black.png')}
-          onRight={() => Actions.profile()}
-          rightButtonStyle={{ position: 'absolute', right: -deviceWidth / 1.8 }}
+          renderRightButton={() =>
+            <TouchableOpacity onPress={() => Actions.profile()}>
+              <FontAwesomeIcon icon={faUserCircle} style={{ color: colorPalette.primary, marginRight: 15 }} size={30} />
+            </TouchableOpacity>
+          }
         />
         <Scene 
           key='toDoList' 
           component={ToDoList}
           title='ToDos'
           duration={0}
-          rightButtonImage={require('../assets/images/user-black.png')}
-          onRight={() => Actions.profile()}
-          rightButtonStyle={{ position: 'absolute', right: -deviceWidth / 1.8 }}
+          renderRightButton={() =>
+            <TouchableOpacity onPress={() => Actions.profile()}>
+              <FontAwesomeIcon icon={faUserCircle} style={{ color: colorPalette.primary, marginRight: 15 }} size={30} />
+            </TouchableOpacity>
+          }
           />
         <Scene
           key='moneyBox'
           component={MoneyEntry}
           duration={0}
           // hideNavBar={true}
-          rightButtonImage={require('../assets/images/user-black.png')}
-          onRight={() => Actions.profile()}
-          rightButtonStyle={{ position: 'absolute', right: -deviceWidth / 1.8 }}
+          renderRightButton={() =>
+            <TouchableOpacity onPress={() => Actions.profile()}>
+              <FontAwesomeIcon icon={faUserCircle} style={{ color: colorPalette.primary, marginRight: 15 }} size={30} />
+            </TouchableOpacity>
+          }
           navigationBarStyle={{ backgroundColor: colorPalette.secondary }}
         />
         <Scene
@@ -54,30 +70,41 @@ const RouterComponent = () => {
           component={CalendarEntry}
           title='Calendar'
           duration={0}
-          rightButtonImage={require('../assets/images/user-black.png')}
-          onRight={() => Actions.profile()}
-          rightButtonStyle={{ position: 'absolute', right: -deviceWidth / 1.8 }}
+          renderRightButton={() =>
+            <TouchableOpacity onPress={() => Actions.profile()}>
+              <FontAwesomeIcon icon={faUserCircle} style={{ color: colorPalette.primary, marginRight: 15 }} size={30} />
+            </TouchableOpacity>
+          }
         />
         <Scene
           key='shoppingList'
           component={ShoppingList}
           title='Shopping List'
           duration={0}
-          rightButtonImage={require('../assets/images/user-black.png')}
-          onRight={() => Actions.profile()}
-          rightButtonStyle={{ position: 'absolute', right: -deviceWidth / 1.8 }}
+          renderRightButton={() =>
+            <TouchableOpacity onPress={() => Actions.profile()}>
+              <FontAwesomeIcon icon={faUserCircle} style={{ color: colorPalette.primary, marginRight: 15 }} size={30} />
+            </TouchableOpacity>
+          }
+          // rightButtonImage={require('../assets/images/user-black.png')}
+          // onRight={() => Actions.profile()}
+          // rightButtonStyle={{ position: 'absolute', right: -deviceWidth / 1.8 }}
         />
         <Scene
           key='profile'
           component={Profile}
           title='Profile'
-          leftButtonImage={require('../assets/images/arrow-pointing-to-left.png')}
-          leftButtonStyle={{ position: 'absolute', left: -deviceWidth / 1.8 }}
-          onLeft={() => Actions.pop()}
-          // leftTitle='Back'
-          // onLeft={() => Actions.entry({ type: ActionConst.REPLACE })}
+          renderLeftButton={() =>
+            <TouchableOpacity onPress={() => Actions.pop()}>
+              <FontAwesomeIcon icon={faArrowAltCircleLeft} style={{ color: colorPalette.primary, marginLeft: 15 }} size={25}/>
+            </TouchableOpacity>
+          }
+          renderRightButton={() =>
+            <TouchableOpacity onPress={() => logout()}>
+              <FontAwesomeIcon icon={faPowerOff} style={{ color: colorPalette.primary, marginRight: 15 }} size={25} />
+            </TouchableOpacity>
+          }
           duration={0}
-          // leftButtonTextStyle={{ color: colorPalette.secondary }}
         />
       </Scene>
     </Router>

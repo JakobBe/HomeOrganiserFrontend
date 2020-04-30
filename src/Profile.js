@@ -2,14 +2,13 @@ import React, { Component } from 'react';
 import { Text, Animated, View, TouchableOpacity, Image, ScrollView, Modal } from 'react-native';
 import { UserContext } from './contexts/UserContextHolder';
 import { HomeContext } from './contexts/HomeContextHolder';
-import { Input, Button, Footer, Spinner } from './components/Common';
+import { Input, Button, Footer, Spinner, ColorSlider } from './components/Common';
 // import { updateUser } from '../../RailsClient';
 import { Actions, ActionConst } from 'react-native-router-flux';
 import { colorPalette, deviceWidth, deviceHeight, layouts } from './Style';
 import ImagePicker from 'react-native-image-picker';
 import { getPreSignedUrl, appSyncGraphQl } from './AWSClient';
 import { updateUser } from './graphql/Users/mutations';
-import Slider from '@react-native-community/slider';
 
 class Profile extends Component {
   state = {
@@ -22,13 +21,16 @@ class Profile extends Component {
     profileImage: '',
     loading: false,
     updateImg: false,
-    nameEdit: false
+    nameEdit: false,
+    colorEdit: false,
+    paypalLinkEdit: false,
+    saveButtonActive: true
   }
 
   constructor() {
     super();
     const containerHeight = deviceHeight / 1.3;
-    const wrapperHeight = deviceHeight / 2.5;
+    const wrapperHeight = deviceHeight / 1.5;
     this.containerHeight = new Animated.Value(containerHeight);
     this.wrapperHeight = new Animated.Value(wrapperHeight);
   }
@@ -46,6 +48,16 @@ class Profile extends Component {
       profileImage: this.getProfileImageUrl(id)
     });
   };
+
+  componentDidUpdate() {
+    if (this.state.nameEdit) {
+      this.nameInput.focus();
+    }
+
+    if (this.state.paypalLinkEdit) {
+      this.paypalLinkInput.focus();
+    }
+  }
 
   _keyboardShown = () => {
     const containerHeight = deviceHeight / 1.62;
@@ -69,7 +81,7 @@ class Profile extends Component {
 
   _keyboardHidden = () => {
     const containerHeight = deviceHeight / 1.3;
-    const wrapperHeight = deviceHeight / 2.2;
+    const wrapperHeight = deviceHeight / 1.5;
     Animated.timing(
       this.containerHeight,
       {
@@ -131,14 +143,18 @@ class Profile extends Component {
 
   }
 
-  onButtonPress = () => {
-    const { name, paypalLink, color, id } = this.state;
+  updateCurrentUser = (color) => {
+    this.setState({
+      loading: true
+    });
+
+    const { name, paypalLink, id } = this.state;
     const variables = {
       input: {
         id,
         name,
         paypalLink,
-        color
+        color: color ? color : this.state.color
       }
     };
 
@@ -146,43 +162,107 @@ class Profile extends Component {
       .then((res) => {
         if (res.status === 200) {
           this.props.homeContext.updateCurrentUser(res.res.updateUser);
+          this.setState({
+            loading: false
+          });
         }
       })
   }
 
-  onEditName = () => {
+  onNameEdit = () => {
     this.setState({
       nameEdit: !this.state.nameEdit,
+      saveButtonActive: true
     });
-    console.log('nameInput', this.nameInput.focus, this.nameInput);
-    this.nameInput.focus();
   }
 
   onNameBlur = () => {
-    this._keyboardHidden()
+    this._keyboardHidden();
     this.setState({
       nameEdit: false,
-    })
+    });
+    this.updateCurrentUser();
+  }
+
+  onColorEdit = () => {
+    this.setState({
+      colorEdit: !this.state.colorEdit,
+      saveButtonActive: true
+    });
+  }
+
+  onColorChange = (colorCode) => {
+    const color = `rgb(${colorCode.r},${colorCode.g},${colorCode.b})`
+    this.setState({
+      color,
+      colorEdit: false
+    });
+    this.updateCurrentUser(color);
+  }
+
+  onPaypalLinkEdit = () => {
+    this.setState({
+      paypalLinkEdit: !this.state.paypalLinkEdit,
+      saveButtonActive: true
+    });
+  }
+
+  onPaypalLinkBlur = () => {
+    this._keyboardHidden()
+    this.setState({
+      paypalLinkEdit: false,
+    });
+    this.updateCurrentUser();
   }
 
   renderProfileImage = () => {
-    console.log('this.state.profileImage', this.state.profileImage);
     const uri = this.state.profileImage;
     const imgAddition = this.state.loading ? <Spinner size='large' color={'black'} additionalSpinnerStyle={styles.additionalSpinnerStyle}/> : 
       <TouchableOpacity onPress={() => this.onCameraPress()}>
         <Image source={require('../assets/images/photo-camera.png')} style={styles.cameraImageStyle} />
       </TouchableOpacity>
-    // Image.prefetch(uri);
 
     return (
       <View style={styles.imageWrapper}>
         <Image key={this.state.updateImg} source={{ uri }} style={styles.imageStyle(this.state.loading)} />
         {imgAddition}
-        {/* <TouchableOpacity onPress={() => this.onCameraPress()}>
-          <Image source={require('../assets/images/photo-camera.png')} style={styles.cameraImageStyle} />
-        </TouchableOpacity> */}
       </View>
     );
+  }
+
+  renderSaveButton = () => {
+    if (this.state.saveButtonActive) {
+      return (
+        <View style={layouts.centerWrapper}>
+          <Button onPress={this.onButtonPress} additionalButtonStyles={styles.buttonStyle(this.state.saveButtonActive)}>
+            Save
+            </Button>
+        </View>
+      );
+    }
+  }
+
+  renderColorSlider = () => {
+    if (this.state.colorEdit) {
+      const prevColorCodeArr = this.state.color.includes('rgb') ? this.state.color.split('(')[1].split(',') : ['255', '0', '0'];
+      const prevColorCode = { r: parseInt(prevColorCodeArr[0]), g: parseInt(prevColorCodeArr[1]), b: parseInt(prevColorCodeArr[2])};
+
+      return (
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={this.state.colorEdit}
+        >
+          <View style={styles.colorModalContainer}>
+            <ColorSlider
+              onColorChange={this.onColorChange}
+              prevColorCode={prevColorCode}
+
+            />
+          </View>
+        </Modal>
+      );
+    }
   }
 
   render() {
@@ -190,19 +270,16 @@ class Profile extends Component {
     const containerHeight = deviceHeight / 1.3;
     const wrapperHeight = deviceHeight / 2.2;
     const profileImage = this.renderProfileImage();
+    const saveButton = this.renderSaveButton();
+    const colorSlider = this.renderColorSlider();
 
     return (
       <Animated.View style={styles.profileContainer(color, this.containerHeight)}>
-        {/* <TouchableOpacity
-          onPress={() => { this.containerHeight = new Animated.Value(containerHeight), this.wrapperHeight = new Animated.Value(wrapperHeight), this.props.onModalClose() }}
-          style={{ top: 3, left: '85%' }}
-        >
-          <Text style={{ color: colorPalette.primary, fontWeight: 'bold' }}>Close</Text>
-        </TouchableOpacity> */}
         {profileImage}
         <Animated.View style={styles.inputWrapper(this.wrapperHeight)}>
           <ScrollView>
             <Input
+              newRef={(refName) => {this.nameInput = refName}}
               value={name}
               onChangeText={value => this.setState({ name: value })}
               label='Name'
@@ -210,41 +287,42 @@ class Profile extends Component {
               onBlur={this.onNameBlur}
               additionalTextFieldStyle={{ backgroundColor: 'transparent' }}
               withEdit={true}
-              editCallback={this.onEditName}
+              editCallback={this.onNameEdit}
               editable={this.state.nameEdit}
-              newRef={(refName) => {this.nameInput = refName}}
-          />
-            <Input
-              value={color}
-              onChangeText={value => this.setState({ color: value.toLowerCase() })}
-              label='Your Color'
-              onFocus={() => this._keyboardShown()}
-              onBlur={() => this._keyboardHidden()}
-              additionalTextFieldStyle={{ backgroundColor: 'transparent' }}
             />
             <Input
+              label='Your Color'
+              additionalTextFieldStyle={{ backgroundColor: 'transparent' }}
+              color={this.state.color}
+              withEdit={true}
+              editCallback={this.onColorEdit}
+              editable={this.state.colorEdit}
+            />
+            {colorSlider}
+            <Input
+              newRef={(refPaypalLink) => { this.paypalLinkInput = refPaypalLink }}
               value={paypalLink}
               onChangeText={value => this.setState({ paypalLink: value })}
               label='PayPal Link'
               onFocus={() => this._keyboardShown()}
-              onBlur={() => this._keyboardHidden()}
+              onBlur={this.onPaypalLinkBlur}
               additionalTextFieldStyle={{ backgroundColor: 'transparent' }}
+              withEdit={true}
+              editCallback={this.onPaypalLinkEdit}
+              editable={this.state.paypalLinkEdit}
             />
-            <Input
+            {/* <Input
               value={email}
               onChangeText={value => this.setState({ email: value.toLowerCase() })}
               label='E-Mail'
               onFocus={() => this._keyboardShown()}
               onBlur={() => this._keyboardHidden()}
               additionalTextFieldStyle={{ backgroundColor: 'transparent' }}
-            />
+            /> */}
           </ScrollView>
+          {/* {saveButton} */}
         </Animated.View>
-        <View style={layouts.centerWrapper}>
-          <Button onPress={this.onButtonPress} additionalButtonStyles={styles.buttonStyle}>
-            Update
-          </Button>
-        </View>
+        
       </Animated.View>
     );
   };
@@ -277,9 +355,9 @@ const styles = {
     left: '90%'
   },
 
-  // buttonStyle: {
-  //   marginTop: 20
-  // },
+  buttonStyle: (buttonActive) => ({
+    backgroundColor: buttonActive ? 'rgba(36,36,36,1)' : 'rgba(36,36,36,.5)',
+  }),
 
   imageStyle: (loading) => ({
     height: deviceHeight / 8,
@@ -312,6 +390,15 @@ const styles = {
     left: '50%',
     marginLeft: -5,
     marginTop: 0
+  },
+
+  colorModalContainer: {
+    height: '100%',
+    backgroundColor: 'rgba(36,36,36,.9)',
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 30
   }
 };
 
