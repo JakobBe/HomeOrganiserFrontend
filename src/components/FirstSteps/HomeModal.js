@@ -27,8 +27,6 @@ class HomeModal extends Component {
   }
 
   renderProfileCard = ({item}) => {
-    console.log('item', item);
-    console.log('this.getProfileImageUrl(item.id)', this.getProfileImageUrl(item.id))
     return (
       <View style={styles.profileCard(item.color)}>
         <Image source={{ uri: this.getProfileImageUrl(item.id) }} style={styles.profileImageStyle} />
@@ -46,18 +44,18 @@ class HomeModal extends Component {
     const roommates = this.props.homeContext.users;
     const extractKey = ({ id }) => id
     return (
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={this.props.homeModalActive}
-      >
-        <View style={styles.transparentBackground}>
+      // <Modal
+      //   animationType="slide"
+      //   transparent={true}
+      //   visible={this.props.homeModalActive}
+      // >
+      //   <View style={styles.transparentBackground}>
           <View style={styles.homeContainer}>
-            <TouchableOpacity
+            {/* <TouchableOpacity
               onPress={ () => this.props.onModalClose() }
             >
               <Image source={require('../../../assets/images/close.png')} style={styles.closeImageStyle} />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
             <Text style={[textStyles.headerStyle, styles.headerStyle]}>
               {this.props.homeContext.name}
             </Text>
@@ -76,8 +74,8 @@ class HomeModal extends Component {
               />
             </View>
           </View>
-        </View>
-      </Modal>
+      //   </View>
+      // </Modal>
     );
   };
 };
@@ -98,7 +96,7 @@ const styles = {
   homeContainer: {
     margin: 30,
     marginTop: 50,
-    marginBottom: 110,
+    // marginBottom: 110,
     backgroundColor: 'rgb(255,255,255)',
     widht: '100%',
     borderRadius: 10,
@@ -146,7 +144,7 @@ const styles = {
 
   profileCardsWrapper: {
     flex: 0,
-    height: deviceHeight / 3.6
+    height: deviceHeight / 2.6
   }
 };
 

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import { Text, View, Image, TouchableOpacity } from 'react-native';
-import { Footer, BackgroundCarousel, ColorSlider } from '../Common';
+import { Text, View, Image, TouchableOpacity, ImageBackground } from 'react-native';
+import { Footer, BackgroundCarousel } from '../Common';
 import { UserContext } from '../../contexts/UserContextHolder';
 import { HomeContext } from '../../contexts/HomeContextHolder';
 import GestureRecognizer, { swipeDirections } from 'react-native-swipe-gestures';
@@ -70,22 +70,19 @@ class Entry extends Component {
     console.log('todayEvents', todayEvents);
     return (
       <View>
-        <BackgroundCarousel 
+        {/* <BackgroundCarousel 
           images={images}
           title={name}
         />
         <View style={styles.guideWrapper}>
-          <ColorSlider />
           <TouchableOpacity style={styles.imageWrapper(profileColor)} onPress={this.onProfilePress}>
             <Text style={textStyles.normalStyle}>Profile</Text>
-            {/* <Image source={require('../../../assets/images/user-black-c.png')} style={styles.imageStyle} /> */}
           </TouchableOpacity>
           <TouchableOpacity style={styles.imageWrapper('white')} onPress={this.onHomePress}>
             <Text style={{ color: colorPalette.secondary }}>Home</Text>
-            {/* <Image source={require('../../../assets/images/group-c.png')} style={styles.imageStyle} /> */}
           </TouchableOpacity>
         </View>
-        {this.props.homeContext.profileModal.render}
+        {this.props.homeContext.profileModal.render} */}
         <HomeModal
           homeModalActive={this.state.homeModalActive}
           onModalClose={this.onModalClose}
@@ -100,10 +97,15 @@ class Entry extends Component {
 
     if (currentUser && users) {
       return (
+      <ImageBackground
+        source={require('../../../assets/images/real-aubergine.jpg')}
+        style={styles.backgroundImage}
+      >
         <View style={styles.entryContainer}>
-          {this.renderMainContent(currentUser, name)}
-          <Footer isHomeActive={true} />
+            {this.renderMainContent(currentUser, name)}
+            <Footer isHomeActive={true} />
         </View>
+      </ImageBackground>
       );
     }
 
@@ -127,7 +129,7 @@ const styles = {
   entryContainer: {
     flex: 1,
     justifyContent: 'space-between',
-    backgroundColor: 'white',
+    backgroundColor: 'transparent',
   },
 
   carouselWrapper: {
@@ -186,6 +188,11 @@ const styles = {
     height: deviceWidth/4.5,
     width: deviceWidth/4.5
   }),
+
+  backgroundImage: {
+    width: '100%',
+    height: '100%'
+  }
 };
 
 export default (props) => (

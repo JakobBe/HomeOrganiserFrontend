@@ -6,8 +6,6 @@ import { getUserBySub } from '../graphql/Users/queries';
 import { listEventsWithHomeId } from '../graphql/Events/queries';
 import { listToDosWithHomeId } from '../graphql/ToDos/queries';
 import { listShoppingItemsWithHomeId } from '../graphql/ShoppingItems/queries';
-import ProfileModal from '../components/FirstSteps/ProfileModal';
-import moment from 'moment';
 
 const defaultValue = {};
 export const HomeContext = React.createContext(defaultValue);
@@ -22,7 +20,6 @@ class HomeContextHolder extends Component {
     name: undefined,
     id: undefined,
     sub: undefined,
-    profileModalActive: false
   }
 
   updateSub = (sub) => {
@@ -39,7 +36,6 @@ class HomeContextHolder extends Component {
       }
       await appSyncGraphQl(getUserBySub, variables)
         .then((res) => {
-          console.log('res', res);
           if (res.status === 200) {
             currentUser = res.res.listUsers.items[0];
             if (res.res.listUsers.items.length === 0) {
@@ -165,25 +161,17 @@ class HomeContextHolder extends Component {
     });
   }
 
-  onProfileModalClose = () => {
+  logout = () => {
     this.setState({
-      profileModalActive: false
+      currentUser: undefined,
+      users: undefined,
+      toDos: undefined,
+      events: undefined,
+      shoppingItems: undefined,
+      name: undefined,
+      id: undefined,
+      sub: undefined,
     });
-  }
-
-  onProfileModalClick = () => {
-    this.setState({
-      profileModalActive: true
-    });
-  }
-
-  renderProfileModal = () => {
-    return (
-      <ProfileModal 
-        profileModalActive={this.state.profileModalActive}
-        onModalClose={this.onProfileModalClose}
-      />
-    )
   }
 
   render() {
@@ -206,7 +194,7 @@ class HomeContextHolder extends Component {
             updateToDos: this.updateToDos,
             updateShoppingItems: this.updateShoppingItems,
             buildHomeContext: this.buildHomeContext,
-            profileModal: {component: this.render.profileModal, open: this.onProfileModalClick, close: this.onProfileModalClose},
+            logout: this.logout
           }
         }
       >

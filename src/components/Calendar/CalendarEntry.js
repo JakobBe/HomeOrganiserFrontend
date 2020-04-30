@@ -44,7 +44,6 @@ class CalendarEntry extends Component {
   }
 
   animateContainers = (eventCount, swipeUp) => {
-    console.log('Are you animating?', eventCount, swipeUp);
     if (!swipeUp) {
       let toValue = (deviceHeight - 220);
       Animated.timing(

@@ -4,7 +4,7 @@ import { colorPalette } from '../../Style/Colors';
 
 const Button = (props) => {
   return (
-    <TouchableOpacity onPress={props.onPress} style={[styles.buttonStyle, props.additionalButtonStyles]}>
+    <TouchableOpacity onPress={props.onPress} style={[styles.buttonStyle, props.additionalButtonStyles]} enabled={props.enabled}>
       <Text style={[styles.textStyle, props.additionalButtonTextStyles]}>
         {props.children}
       </Text>
@@ -22,7 +22,7 @@ const styles = {
   },
 
   textStyle: {
-    color: colorPalette.primary,
+    color: 'white',
     alignSelf: 'center',
     fontSize: 16,
     fontWeight: '600',

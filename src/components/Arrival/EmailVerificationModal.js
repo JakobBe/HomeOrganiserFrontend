@@ -3,6 +3,8 @@ import { Text, View, TouchableOpacity, Modal, Image } from 'react-native';
 import { Input, Button } from '../Common';
 import { colorPalette, deviceWidth, deviceHeight, layouts } from '../../Style';
 import { getPreSignedUrl, appSyncGraphQl, confirmUser, resendConfirmationCode } from '../../AWSClient';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
+import { faTimesCircle } from '@fortawesome/free-solid-svg-icons'
 
 class EmailVerificationModal extends Component {
   state = {
@@ -24,7 +26,6 @@ class EmailVerificationModal extends Component {
   }
 
   confirmUser = async (verificationCode) => {
-    console.log('this.props', this.props);
     const confirmation = await confirmUser(this.props.sub, verificationCode);
     if (confirmation.res === 'SUCCESS') {
       await this.props.hasSignedUp(this.props.sub);
@@ -43,13 +44,8 @@ class EmailVerificationModal extends Component {
         visible={this.props.showModal}
       >
         <View style={styles.transparentBackground}>
-          <TouchableOpacity
-            onPress={() => {
-              this.props.onModalClose()
-            }
-            }
-          >
-            <Image source={require('../../../assets/images/close-primary.png')} style={styles.closeImageStyle} />
+          <TouchableOpacity onPress={() => this.props.onModalClose()}>
+            <FontAwesomeIcon icon={faTimesCircle} style={styles.closeImageStyle} size={25} />
           </TouchableOpacity>
           <Text style={styles.textStyle}>
             Please verify your email address with the 6-digit code that was sent to you.
@@ -202,7 +198,7 @@ const styles = {
     backgroundColor: 'transparent', 
     paddingLeft: 5, 
     paddingRight: 0, 
-    color: 'white', 
+    color: colorPalette.primary, 
     fontSize: 25 
   },
 
@@ -216,10 +212,9 @@ const styles = {
   },
 
   closeImageStyle: {
-    height: 25,
-    width: 25,
-    top: 40,
-    left: '85%'
+    top: 50,
+    left: '90%',
+    color: colorPalette.primary
   },
 
   additionalInputStyles: {

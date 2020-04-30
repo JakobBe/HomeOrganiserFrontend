@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { Text, TouchableOpacity, View, Image } from 'react-native';
 import { Actions, ActionConst } from 'react-native-router-flux';
 import { colorPalette } from '../../Style/Colors';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
+import { faCalendarAlt, faEuroSign, faHome, faListAlt, faShoppingBag } from '@fortawesome/free-solid-svg-icons'
 
 class Footer extends Component {
   onMoneyboxPress = () => {
@@ -36,7 +38,7 @@ class Footer extends Component {
       <View style={styles.footerContainer}>
         <TouchableOpacity onPress={this.onMoneyboxPress} >
           <View style={styles.navigationWrapper}>
-            <Image source={moneyBoxImage} style={styles.imageStyle} />
+            <FontAwesomeIcon icon={faEuroSign} style={{ color: this.props.isMoneyboxActive ? colorPalette.primary : 'black', marginBottom: 8 }} size={25} />
             <Text style={styles.navigationText}>
               Money
             </Text>
@@ -44,7 +46,7 @@ class Footer extends Component {
         </TouchableOpacity>
         <TouchableOpacity onPress={this.onClanedarPress} >
           <View style={styles.navigationWrapper}>
-            <Image source={calendarImage} style={styles.imageStyle} />
+            <FontAwesomeIcon icon={faCalendarAlt} style={{ color: this.props.isCalendarActive ? colorPalette.primary : 'black', marginBottom: 8 }} size={25}/>
             <Text style={styles.navigationText}>
               Calendar
             </Text>
@@ -52,7 +54,7 @@ class Footer extends Component {
         </TouchableOpacity>
         <TouchableOpacity onPress={this.onHomePress} >
           <View style={styles.navigationWrapper}>
-            <Image source={homeImage} style={styles.homeImageStyle} />
+            <FontAwesomeIcon icon={faHome} style={{ color: this.props.isHomeActive ? colorPalette.primary : 'black', marginBottom: 8 }} size={25} />
             <Text style={styles.navigationText}>
               Home
             </Text>
@@ -60,7 +62,7 @@ class Footer extends Component {
         </TouchableOpacity>
         <TouchableOpacity onPress={this.onCleaningPress} >
           <View style={styles.navigationWrapper}>
-            <Image source={cleaningImage} style={styles.imageStyle} />
+            <FontAwesomeIcon icon={faListAlt} style={{ color: this.props.isCleaningActive ? colorPalette.primary : 'black', marginBottom: 8 }} size={25} />
             <Text style={styles.navigationText}>
               ToDo's
             </Text>
@@ -68,7 +70,7 @@ class Footer extends Component {
         </TouchableOpacity>
         <TouchableOpacity onPress={this.onShoppingcartPress} >
           <View style={styles.navigationWrapper}>
-            <Image source={shoppingCartImage} style={styles.imageStyle} />
+            <FontAwesomeIcon icon={faShoppingBag} style={{ color: this.props.isShoppingCartActive ? colorPalette.primary : 'black', marginBottom: 8 }} size={25} />
             <Text style={styles.navigationText}>
               Shopping
             </Text>

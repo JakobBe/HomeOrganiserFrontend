@@ -17,7 +17,7 @@ class SignIn extends Component {
   }
 
   componentDidMount() {
-    this.onLoginButtonPress();
+    // this.onLoginButtonPress();
   }
 
   onEmailChange(text) {
@@ -73,12 +73,17 @@ class SignIn extends Component {
     }
 
     if (signInRes.status === 200) {
-      console.log('signInRes', signInRes);
       await this.props.hasSignedIn(signInRes.res.attributes.sub);
       this.setState({
         loading: false
       });
     }
+  }
+
+  onEmailVerificationModalClose = () => {
+    this.setState({
+      emailVerificationModalPresented: false
+    });
   }
 
   renderButton() {
@@ -141,6 +146,7 @@ class SignIn extends Component {
           showModal={this.state.emailVerificationModalPresented}
           sub={this.state.cognitoSub}
           hasSignedUp={this.props.hasSignedUp}
+          onModalClose={this.onEmailVerificationModalClose}
         />
       </View>
     )

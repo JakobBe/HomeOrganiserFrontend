@@ -62,6 +62,12 @@ class SignUp extends Component {
     }
   }
 
+  onEmailVerificationModalClose = () => {
+    this.setState({
+      emailVerificationModalPresented: false
+    });
+  }
+
   renderButton() {
     if (this.state.loading) {
       return <Spinner size='large' />;
@@ -122,6 +128,7 @@ class SignUp extends Component {
           showModal={this.state.emailVerificationModalPresented}
           sub={this.state.sub}
           hasSignedUp={this.props.hasSignedUp}
+          onModalClose={this.onEmailVerificationModalClose}
         />
       </View>
     )

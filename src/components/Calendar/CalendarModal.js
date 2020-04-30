@@ -16,9 +16,7 @@ class CalendarModal extends Component {
   };
 
   componentDidUpdate(prevProps, prevState) {
-    // console.log('prevState, newState', prevState, newState);
     if (this.props.singleEventId && this.props.singleEventId !== prevProps.singleEventId) {
-      console.log('this.props.modalValue', this.props.modalValue);
       const { text, allDay, time } = this.props.modalValue
       this.setState({
         newEvent: text,

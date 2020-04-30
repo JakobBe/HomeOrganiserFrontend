@@ -4,6 +4,7 @@ import { HomeContext } from '../../contexts/HomeContextHolder';
 import SignIn from './SignIn';
 import SignUp from './SignUp';
 import { Actions, ActionConst } from 'react-native-router-flux';
+import { colorPalette } from '../../Style';
 
 class Arrival extends Component {
   state = {
@@ -21,7 +22,6 @@ class Arrival extends Component {
   };
 
   hasSignedUp = async (sub) => {
-    console.log('this.props', this.props);
     this.props.homeContext.updateSub(sub)
     Actions.entry({ type: ActionConst.REPLACE })
   };
@@ -58,10 +58,11 @@ class Arrival extends Component {
   render() {
     const deviceHeight = Dimensions.get('window').height
 
+    // { uri: 'https://picsum.photos/id/57/2448/3264' }
     return (
-      <View style={styles.arrivalContainer}>
+      <View style={styles.arrivalContainer()}>
         <ImageBackground 
-          source={{uri: 'https://picsum.photos/id/57/2448/3264'}}
+          source={require('../../../assets/images/real-aubergine.jpg')}
           style={styles.backgroundImage}
         >
           <View style={styles.scrollViewWrapper(deviceHeight)}>
@@ -90,6 +91,9 @@ const styles = {
 
   arrivalContainer: () => ({
     flex: 1,
+    height: '100%',
+    width: '100%',
+    backgroundColor: colorPalette.primary
   }),
 
   backgroundImage: {

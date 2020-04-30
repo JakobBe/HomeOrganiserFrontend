@@ -70,6 +70,7 @@ class ListItem extends Component {
   onDeletePress = () => {
     if (this.props.isCalendarEntry && this.props.itemUserId !== this.props.currentUserId) {
       Alert.alert("You can not delete this entry");
+      this.onSwipeRight();
       return;
     }
 

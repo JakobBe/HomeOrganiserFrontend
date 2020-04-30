@@ -4,9 +4,10 @@ import { colorPalette } from '../../Style/Colors';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
 import { faEdit } from '@fortawesome/free-solid-svg-icons'
 
-const Input = ({ label, value, onChangeText, placeholder, secureTextEntry, additionalInputStyles, autoFocus, onBlur, additionalTextFieldStyle, onFocus, keyboardType, maxLength, focus, newRef, returnKeyType, onKeyPress, withEdit, editCallback, editable }) => {
+const Input = ({ label, value, onChangeText, placeholder, secureTextEntry, additionalInputStyles, autoFocus, onBlur, additionalTextFieldStyle, onFocus, keyboardType, maxLength, focus, newRef, returnKeyType, onKeyPress, withEdit, editCallback, editable, color }) => {
 
   if (withEdit) {
+    const colorBlock = color ? <View style={{height: 30, width: '90%', position: 'absolute', backgroundColor: color, top: 25, padding: 10}}></View> : undefined; 
     return (
       <View style={[styles.containerStyle, additionalInputStyles]}>
         <Text style={styles.labelStyle}>
@@ -27,12 +28,12 @@ const Input = ({ label, value, onChangeText, placeholder, secureTextEntry, addit
           onFocus={onFocus}
           keyboardType={keyboardType}
           maxLength={maxLength}
-          foucs={focus}
           ref={newRef}
           returnKeyType={returnKeyType}
           onKeyPress={onKeyPress}
           editable={editable}
         />
+        {colorBlock}
       </View>
     );
   }
@@ -46,7 +47,7 @@ const Input = ({ label, value, onChangeText, placeholder, secureTextEntry, addit
         secureTextEntry={secureTextEntry}
         placeholder={placeholder}
         autoCorrect={false}
-        style={[styles.inputStyle(false), additionalTextFieldStyle]}
+        style={[styles.inputStyle(true), additionalTextFieldStyle]}
         value={value}
         onChangeText={onChangeText}
         autoFocus={autoFocus}
@@ -54,7 +55,6 @@ const Input = ({ label, value, onChangeText, placeholder, secureTextEntry, addit
         onFocus={onFocus}
         keyboardType={keyboardType}
         maxLength={maxLength}
-        foucs={focus}
         ref={newRef}
         returnKeyType={returnKeyType}
         onKeyPress={onKeyPress}
@@ -65,13 +65,13 @@ const Input = ({ label, value, onChangeText, placeholder, secureTextEntry, addit
 
 const styles = {
   inputStyle: (editable) => ({
-    color: colorPalette.secondary,
+    color: editable ? 'rgba(36,36,36,1)' : 'rgba(36,36,36,.5)',
     paddingRight: 10,
     paddingLeft: 10,
     fontSize: 20,
     backgroundColor: 'rgb(256,256,256)',
     borderBottomWidth: 2,
-    borderColor: editable ? 'red' : colorPalette.primary,
+    borderColor: editable ? 'rgba(36,36,36,1)' : 'rgba(36,36,36,.5)',
     alignItems: 'center',
     height: 40,
   }),
