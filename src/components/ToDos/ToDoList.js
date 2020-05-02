@@ -25,10 +25,17 @@ class ToDoList extends Component {
   };
 
   componentWillMount() {
-    const toDos = sortByCreatedAt(this.props.homeContext.toDos);
+    const toDos = this.filterUserRelevantToDos(this.props.homeContext.toDos);
     this.setState({
       toDos
     });
+  }
+
+  filterUserRelevantToDos = (toDos) => {
+    const userToDos = toDos.filter(toDo => toDo.appointee === this.props.homeContext.currentUser.id);
+    const everyoneToDos = toDos.filter(toDo => toDo.appointee === '00000000-0000-0000-0000-000000000000');
+  
+    return sortByCreatedAt([userToDos, everyoneToDos].flat());
   }
 
   fetchToDos = async () => {
@@ -38,7 +45,7 @@ class ToDoList extends Component {
       toDos = toDos.filter(toDo => toDo.done === this.state.filter);
     }
 
-    toDos = sortByCreatedAt(toDos);
+    toDos = this.filterUserRelevantToDos(toDos);
 
     this.setState({
       toDos
@@ -133,7 +140,7 @@ class ToDoList extends Component {
     
     if (info === 'all') {
       this.setState({
-        toDos,
+        toDos: this.filterUserRelevantToDos(toDos),
         filter: info
       });
       return;
@@ -141,7 +148,7 @@ class ToDoList extends Component {
     
     toDos = toDos.filter(toDo => toDo.done === info);
     this.setState({
-      toDos,
+      toDos: this.filterUserRelevantToDos(toDos),
       filter: info
     });
   };
@@ -161,38 +168,27 @@ class ToDoList extends Component {
   };
 
   renderItem = ({ item }) => {
-    let appointerUser = undefined;
-    let userColor = undefined;
-    let appointerColor = undefined;
-    let userName = undefined;
-
     const { currentUser, users } = this.props.homeContext;
-    const itemUserId = item.userId;
-    const itemUser = currentUser.id === itemUserId ? currentUser : users.filter(user => user.id === itemUserId)[0];
-    userColor = itemUser.color
-    userName = itemUser.name
+    let forEveryone = false;
+    let appointer = undefined;
 
-    // if (item.appointee === 'all') {
-    //   homeUsers = this.props.homeContext.users
-    //   appointerUser = homeUsers.filter(user => user.id === item.user_id)[0]
-    //   userColor = 'green'
-    //   userName = 'A'
-    //   appointerColor = appointerUser.color
-    // }
+    if (item.appointee !== item.userId) {
+      appointer = users.filter(user => user.id === item.userId)[0];
+      forEveryone = item.appointee === '00000000-0000-0000-0000-000000000000' ? true : false;
+    }
     
     return (
       <ListItem
         id={item.id}
-        appointee={item.appointee}
-        description={userName}
+        appointer={appointer}
+        forEveryone={forEveryone}
         date={item.dueDate}
         text={item.task}
         refreshList={this._onRefresh}
         isToDo={true}
-        userName={userName}
+        userName={currentUser.name}
         done={item.done}
-        userColor={userColor}
-        appointerColor={userColor}
+        userColor={currentUser.color}
         updateToDo={this.updateToDo}
         deleteItem={this.deleteToDo}
         onItemPressed={this.onItemPressed}

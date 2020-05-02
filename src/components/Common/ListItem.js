@@ -97,7 +97,7 @@ class ListItem extends Component {
   };
 
   getUserMark = () => {
-    if (this.props.appointee === '00000000-0000-0000-0000-000000000000') {
+    if (this.props.forEveryone) {
       return (
         <Image source={require('../../../assets/images/rainbow.png')} style={styles.userLetterStyleContainer('black')}/>
       );
@@ -130,10 +130,10 @@ class ListItem extends Component {
   }
 
   getExtraInfo = () => {
-    if (this.props.isToDo && this.props.description !== this.props.userName) {
+    if (this.props.appointer) {
       return (
-        <Text style={styles.descriptionStyle(this.props.appointerColor)}>
-          {"\n"} Appointed by {this.props.description} {this.props.date}
+        <Text style={styles.descriptionStyle(this.props.appointer.color)}>
+          {"\n"} Appointed by {this.props.appointer.name}
         </Text>
       );
     };
