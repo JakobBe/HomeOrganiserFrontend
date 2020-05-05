@@ -1,25 +1,32 @@
 import React, { Component } from 'react';
-import { Modal, Text, TouchableHighlight, View } from 'react-native';
-import { colorPalette } from '../../Style';
-import { CloseButton } from '../Common';
-import { CheckBox } from 'react-native-elements';
+import { Modal, View, Picker } from 'react-native';
+import { colorPalette, layouts } from '../../Style';
+import { CloseButton, Button } from '../Common';
 
 class ToDoFilterModal extends Component {
-  state = {
-    item: undefined,
-    price: undefined
-  };
+  getFilterOneValues = () => {
+    const filterOneValues = ['All ToDos', 'Open ToDos', 'Done ToDos'];
+
+    return filterOneValues.map(value => {
+      return (
+        <Picker.Item label={value} value={value} style={{ color: colorPalette.secondary }} />
+      );
+    });
+  }
+
+  getFilterTwoValues = () => {
+    const filterTwoValues = ['I can see', 'for me', 'for me & everyone', 'appointed by me'];
+
+    return filterTwoValues.map(value => {
+      return (
+        <Picker.Item label={value} value={value} style={{ color: colorPalette.secondary }} />
+      );
+    });
+  }
 
   onPriceInput = (price) => {
     this.setState({
       price
-    });
-  };
-
-  onButtonPress = () => {
-    this.props.saveInput((this.state.item || this.props.item), this.state.price, this.props.id);
-    this.setState({
-      price: ''
     });
   };
 
@@ -34,56 +41,29 @@ class ToDoFilterModal extends Component {
           <View style={styles.modalContainer}>
             <CloseButton onPress={() => this.props.onModalClose()}/>
             <View style={styles.filterWrapper}>
-              {/* <Text style={styles.filterText}>
-                Filter:
-              </Text> */}
-              <TouchableHighlight onPress={() => this.props.onFilterToDosPress(false)}>
-                <View style={styles.filterTextWrapper}>
-                  <Text style={styles.filterText}>
-                    Show only open ToDos
-                  </Text>
-                  <CheckBox
-                    style={styles.checkBox}
-                    checked={false}
-                    center
-                    checkedColor={colorPalette.primary}
-                  />
-                </View>
-              </TouchableHighlight>
-              <TouchableHighlight onPress={() => this.props.onFilterToDosPress(true)}>
-                <View style={styles.filterTextWrapper}>
-                  <Text style={styles.filterText}>
-                    Show only done ToDos
-                  </Text>
-                  <CheckBox
-                    style={styles.checkBox}
-                    checked={true}
-                    center
-                    checkedColor={colorPalette.primary}
-                  />
-                </View>
-              </TouchableHighlight>
-              <TouchableHighlight onPress={() => this.props.onFilterToDosPress('all')}>
-                <View style={styles.filterTextWrapper}>
-                  <Text style={styles.filterText}>
-                    Show all
-                  </Text>
-                  <View style={{ felx: 2, flexDirection: 'row' }}>
-                    <CheckBox
-                      style={styles.checkBox}
-                      checked={false}
-                      center
-                      checkedColor={colorPalette.primary}
-                    />
-                    <CheckBox
-                      style={styles.checkBox}
-                      checked={true}
-                      center
-                      checkedColor={colorPalette.primary}
-                    />
-                  </View>
-                </View>
-              </TouchableHighlight>
+              <View style={styles.filterPickerWrapper}>
+                <Picker
+                  selectedValue={this.props.filterOneValue}
+                  onValueChange={value => this.props.onFilterValueOneChange(value)}
+                  style={{ height: 200, backgroundColor: 'white', width: 150, color: colorPalette.secondary }}
+                  itemStyle={{ height: 200 }}
+                >
+                  {this.getFilterOneValues()}
+                </Picker>
+                <Picker
+                  selectedValue={this.props.filterTwoValue}
+                  onValueChange={value => this.props.onFilterValueTwoChange(value)}
+                  style={{ height: 200, backgroundColor: 'white', width: 150, color: colorPalette.secondary }}
+                  itemStyle={{ height: 200 }}
+                >
+                  {this.getFilterTwoValues()}
+                </Picker>
+              </View>
+              <View style={layouts.centerWrapper}>
+                <Button onPress={() => this.props.onFilterToDosPress(this.props.filterOneValue, this.props.filterTwoValue)}>
+                  Apply filter
+                </Button>
+              </View>
             </View>
           </View>
         </View>
@@ -105,9 +85,9 @@ const styles = {
     backgroundColor: 'rgb(255,255,255)',
     widht: '100%',
     borderRadius: 10,
-    borderColor: colorPalette.primary,
-    borderStyle: 'solid',
-    borderWidth: .5,
+    // borderColor: colorPalette.primary,
+    // borderStyle: 'solid',
+    // borderWidth: .5,
     padding: 20,
     position: 'relative',
     flex: 0,
@@ -120,24 +100,17 @@ const styles = {
     alignItems: 'flex-start',
   },
 
-  filterTextWrapper: {
+  filterPickerWrapper: {
     marginTop: 20,
+    marginBottom: 20,
     width: '100%',
     flex: 0,
     flexDirection: 'row',
-    justifyContent: 'space-between'
-  },
-
-  filterText: {
-    color: colorPalette.secondary,
-    margin: 20,
-    fontSize: 20,
-    textDecorationLine: 'underline' 
-  },
-
-  checkBox: {
-    height: 30,
-    width: 30
+    justifyContent: 'space-around',
+    borderColor: colorPalette.primary,
+    borderStyle: 'solid',
+    borderWidth: 5,
+    borderRadius: 10,
   }
 }
 

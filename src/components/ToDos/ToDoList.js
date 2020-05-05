@@ -11,6 +11,8 @@ import { createToDo, deleteToDo, updateToDo } from '../../graphql/ToDos/mutation
 import { appSyncGraphQl } from '../../AWSClient';
 import { sortByCreatedAt } from '../../Helpers/sortByDate';
 import { colorPalette, layouts } from '../../Style';
+import { filterMatrix } from '../../Helpers/filterMatrix';
+import { getKeyByValue } from '../../Helpers/getKeyByValue';
 import moment from 'moment';
 
 class ToDoList extends Component {
@@ -18,34 +20,73 @@ class ToDoList extends Component {
     toDos: [], 
     refreshing: false, 
     filterModalPresented: false,
-    filter: 'all',
+    filter: 1,
+    filterOneValue: 'All ToDos',
+    filterTwoValue: 'for me',
     toDoModalPresented: false,
     newToDo: '',
     modalValue: undefined
   };
 
-  componentWillMount() {
-    const toDos = this.filterUserRelevantToDos(this.props.homeContext.toDos);
+  componentDidMount() {
+    const toDos = this.filterUserRelevantToDos(this.props.homeContext.toDos, this.state.filter);
     this.setState({
       toDos
     });
   }
 
-  filterUserRelevantToDos = (toDos) => {
+  filterUserRelevantToDos = (toDos, filter) => {
+    let relevantToDos = [];
     const userToDos = toDos.filter(toDo => toDo.appointee === this.props.homeContext.currentUser.id);
     const everyoneToDos = toDos.filter(toDo => toDo.appointee === '00000000-0000-0000-0000-000000000000');
+    const appointedToDos = toDos.filter(toDo => toDo.userId === this.props.homeContext.currentUser.id && toDo.appointee !== this.props.homeContext.currentUser.id);
+    relevantToDos = [...new Set([userToDos, everyoneToDos, appointedToDos].flat())];
+
+    switch (filter) {
+      case 0:
+        relevantToDos = relevantToDos;
+        break;
+      case 1:
+        relevantToDos = userToDos;
+        break;
+      case 2: 
+        relevantToDos = [userToDos, everyoneToDos].flat();
+        break;
+      case 3: 
+        relevantToDos = appointedToDos;
+        break;
+      case 4:
+        relevantToDos = relevantToDos.filter(toDo => !toDo.done);
+        break;
+      case 5:
+        relevantToDos = userToDos.filter(toDo => !toDo.done);
+        break;
+      case 6:
+        relevantToDos = [userToDos, everyoneToDos].flat().filter(toDo => !toDo.done);
+        break;
+      case 7:
+        relevantToDos = appointedToDos.filter(toDo => !toDo.done);
+        break;
+      case 8:
+        relevantToDos = relevantToDos.filter(toDo => toDo.done);
+        break;
+      case 9:
+        relevantToDos = userToDos.filter(toDo => toDo.done);
+        break;
+      case 10:
+        relevantToDos = [userToDos, everyoneToDos].flat().filter(toDo => toDo.done);
+        break;
+      case 11:
+        relevantToDos = appointedToDos.filter(toDo => toDo.done);
+        break;
+    }
   
-    return sortByCreatedAt([userToDos, everyoneToDos].flat());
+    return sortByCreatedAt(relevantToDos);
   }
 
   fetchToDos = async () => {
     let toDos = await this.props.homeContext.updateToDos();
-
-    if (this.state.filter !== 'all') {
-      toDos = toDos.filter(toDo => toDo.done === this.state.filter);
-    }
-
-    toDos = this.filterUserRelevantToDos(toDos);
+    toDos = this.filterUserRelevantToDos(toDos, this.state.filter);
 
     this.setState({
       toDos
@@ -134,29 +175,50 @@ class ToDoList extends Component {
     })
   }
 
-  onFilterToDosPress = async (info) => {
-    this.onModalClose();
-    let toDos = this.props.homeContext.toDos
-    
-    if (info === 'all') {
-      this.setState({
-        toDos: this.filterUserRelevantToDos(toDos),
-        filter: info
-      });
-      return;
-    };
-    
-    toDos = toDos.filter(toDo => toDo.done === info);
+  onFilterValueOneChange = (filterOneValue) => {
     this.setState({
-      toDos: this.filterUserRelevantToDos(toDos),
-      filter: info
+      filterOneValue
+    });
+  }
+
+  onFilterValueTwoChange = (filterTwoValue) => {
+    this.setState({
+      filterTwoValue
+    });
+  }
+
+  getFilterKeyFromValue = (value) => {
+    let filterOneValue = undefined;
+    let filterTwoValue = undefined;
+    Object.keys(filterMatrix).map(topLevelKey => {
+      const key = getKeyByValue(filterMatrix[topLevelKey], value);
+      filterOneValue = key !== undefined ? topLevelKey : filterOneValue;
+      filterTwoValue = key !== undefined ? key : filterTwoValue;
+    })
+
+    return { filterOneValue, filterTwoValue };
+  }
+
+  onFilterToDosPress = async (filterOneValue, filterTwoValue) => {
+    this.onModalClose();
+    const filter = filterMatrix[filterOneValue][filterTwoValue];
+    const toDos = this.filterUserRelevantToDos(this.props.homeContext.toDos, filter);
+
+    this.setState({
+      filter,
+      filterOneValue,
+      filterTwoValue,
+      toDos
     });
   };
   
   onModalClose = () => {
     if (this.state.filterModalPresented) {
+      const { filterOneValue, filterTwoValue } = this.getFilterKeyFromValue(this.state.filter);
       this.setState({
-        filterModalPresented: false
+        filterModalPresented: false,
+        filterOneValue,
+        filterTwoValue
       });
     };
 
@@ -171,10 +233,18 @@ class ToDoList extends Component {
     const { currentUser, users } = this.props.homeContext;
     let forEveryone = false;
     let appointer = undefined;
+    let userName = currentUser.name;
+    let userColor = currentUser.color;
 
     if (item.appointee !== item.userId) {
       appointer = users.filter(user => user.id === item.userId)[0];
-      forEveryone = item.appointee === '00000000-0000-0000-0000-000000000000' ? true : false;
+      if (item.appointee === '00000000-0000-0000-0000-000000000000') {
+        forEveryone = true;
+      } else if (appointer.id === currentUser.id) {
+        const appointee = users.filter(user => user.id === item.appointee)[0];
+        userName = appointee.name;
+        userColor = appointee.color;
+      }
     }
     
     return (
@@ -186,9 +256,9 @@ class ToDoList extends Component {
         text={item.task}
         refreshList={this._onRefresh}
         isToDo={true}
-        userName={currentUser.name}
+        userName={userName}
         done={item.done}
-        userColor={currentUser.color}
+        userColor={userColor}
         updateToDo={this.updateToDo}
         deleteItem={this.deleteToDo}
         onItemPressed={this.onItemPressed}
@@ -235,6 +305,10 @@ class ToDoList extends Component {
           showFilterModal={this.state.filterModalPresented}
           onModalClose={this.onModalClose}
           onFilterToDosPress={this.onFilterToDosPress}
+          filterOneValue={this.state.filterOneValue}
+          filterTwoValue={this.state.filterTwoValue}
+          onFilterValueOneChange={this.onFilterValueOneChange}
+          onFilterValueTwoChange={this.onFilterValueTwoChange}
           />
         {
           this.state.modalValue ? 
