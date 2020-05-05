@@ -6,6 +6,7 @@ import { getUserBySub } from '../graphql/Users/queries';
 import { listEventsWithHomeId } from '../graphql/Events/queries';
 import { listToDosWithHomeId } from '../graphql/ToDos/queries';
 import { listShoppingItemsWithHomeId } from '../graphql/ShoppingItems/queries';
+import { listExpensesWithHomeId } from '../graphql/Expenses/queries';
 
 const defaultValue = {};
 export const HomeContext = React.createContext(defaultValue);
@@ -17,6 +18,7 @@ class HomeContextHolder extends Component {
     toDos: undefined,
     events: undefined,
     shoppingItems: undefined,
+    expenses: undefined,
     name: undefined,
     id: undefined,
     sub: undefined,
@@ -61,6 +63,7 @@ class HomeContextHolder extends Component {
 
     await appSyncGraphQl(getHome2, variables)
       .then((res) => {
+        console.log('res from building home Context', res);
         if (res.status === 200) {
           const home = res.res.getHome;
           this.setState({
@@ -68,6 +71,7 @@ class HomeContextHolder extends Component {
             toDos: home.toDos.items,
             events: home.events.items,
             shoppingItems: home.shoppingItems.items,
+            expenses: home.expenses.items,
             name: home.name,
             id: home.id
           });
@@ -147,6 +151,26 @@ class HomeContextHolder extends Component {
     return shoppingItems;
   }
 
+  updateExpenses = async () => {
+    const variables = {
+      homeId: this.state.id
+    };
+  
+    const expenses = await appSyncGraphQl(listExpensesWithHomeId, variables)
+      .then((res) => {
+        if (res.status === 200) {
+          this.setState({
+            expenses: res.res.listExpenses.items
+          });
+          return res.res.listExpenses.items;
+        } else if (res.status === 400) {
+          return [];
+        }
+      })
+      return expenses;
+  }
+
+
   updateCurrentUser = async (currentUser) => {
     let users = this.state.users;
     const userIndex = users.indexOf(users.filter(user => user.id === currentUser.id)[0]);
@@ -168,6 +192,7 @@ class HomeContextHolder extends Component {
       toDos: undefined,
       events: undefined,
       shoppingItems: undefined,
+      expenses: undefined,
       name: undefined,
       id: undefined,
       sub: undefined,
@@ -193,6 +218,7 @@ class HomeContextHolder extends Component {
             updateEvents: this.updateEvents,
             updateToDos: this.updateToDos,
             updateShoppingItems: this.updateShoppingItems,
+            updateExpenses: this.updateExpenses,
             buildHomeContext: this.buildHomeContext,
             logout: this.logout
           }
