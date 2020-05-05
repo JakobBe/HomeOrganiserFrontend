@@ -2,10 +2,11 @@ import React, { Component } from 'react';
 import { Modal, Text, TouchableHighlight, View, numeric, FlatList, Alert, Animated } from 'react-native';
 import { Button, Input, CloseButton, ListItem } from '../Common';
 import { colorPalette, layouts, deviceHeight, deviceWidth} from '../../Style';
+import { valueFormatter } from '../../Helpers/valueFormatter';
 
 class ShoppingCartModal extends Component {
   state = {
-    price: undefined
+    price: ''
   }
 
   constructor() {
@@ -40,6 +41,37 @@ class ShoppingCartModal extends Component {
       }
     ).start();
   }
+
+  onPriceChange = (price) => {
+    let allowedNumericInput = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '.'];
+    const isAllowed = (singleInput) => allowedNumericInput.includes(singleInput);
+    console.log('price', price.split('').every(isAllowed));
+    if (price.split('').every(isAllowed)) {
+      if (price.length === 0) {
+        this.setState({
+          price
+        })
+        return;
+      }
+      const commaSplit = price.split('.');
+      if (commaSplit.length === 1) {
+        let floatPrice = parseFloat(price);
+        this.setState({
+          price: floatPrice
+        })
+        return;
+      }
+      if (commaSplit.length === 2 && commaSplit[1].length < 3) {
+        let floatPrice = parseFloat(price);
+        this.setState({
+          price: floatPrice
+        })
+        return;
+      }
+    } else {
+
+    }
+  }
  
   onClearAsExpensePress = () => {
     if (this.state.price === undefined) {
@@ -47,7 +79,7 @@ class ShoppingCartModal extends Component {
       return;
     }
 
-    this.props.onClearAsExpense();
+    this.props.onClearAsExpense(this.state.price);
   }
 
   onClearWithoutExpensePress = () => {
@@ -68,8 +100,7 @@ class ShoppingCartModal extends Component {
   }
 
   render() {
-    console.log('deviceHeight', deviceHeight);
-    console.log('deviceWidth', deviceWidth);
+    console.log('this.state.price', this.state.price);
     const extractKey = ({ id }) => id
 
     return (
@@ -91,7 +122,7 @@ class ShoppingCartModal extends Component {
               <View style={styles.inputWrapper}>
                 <Input
                   value={this.state.price}
-                  onChangeText={value => this.setState({ price: value })}
+                  onChangeText={value => this.onPriceChange(value)}
                   placeholder={'04.20$'}
                   additionalInputStyles={styles.additionalInputStyles}
                   additionalTextFieldStyle={{ backgroundColor: 'transparent', paddingRight: 0, paddingLeft: 0, fontSize: 13 }}

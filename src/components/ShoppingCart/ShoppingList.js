@@ -8,6 +8,7 @@ import ShoppingCartModal from './ShoppingCartModal';
 import GestureRecognizer from 'react-native-swipe-gestures';
 import { colorPalette } from '../../Style/Colors';
 import { createShoppingItem, deleteShoppingItem, updateShoppingItem } from '../../graphql/ShoppingItems/mutations';
+import { createExpense } from '../../graphql/Expenses/mutations';
 import { appSyncGraphQl } from '../../AWSClient';
 import { defaultId, dateTimeFormat } from '../../Helpers/magicNumbers';
 import { sortByCreatedAt } from '../../Helpers/sortByDate';
@@ -69,7 +70,6 @@ class ShoppingList extends Component {
       };
       appSyncGraphQl(createShoppingItem, variables)
         .then((res) => {
-          console.log('res creating shopping item', res)
           if (res.status === 200) {
             this.fetchShoppingItems();
           }
@@ -118,6 +118,46 @@ class ShoppingList extends Component {
     });
   }
 
+  onClearAsExpense = async (price) => {
+    this.setState({ refreshing: true });
+
+    const expenseVariables = {
+      input: {
+        ammount: parseFloat(price),
+        userId: this.props.homeContext.currentUser.id,
+        homeId: this.props.homeContext.id,
+        compensated: false,
+        createdAt: moment.utc().format(dateTimeFormat),
+        updatedAt: moment.utc().format(dateTimeFormat)
+      }
+    };
+
+    appSyncGraphQl(createExpense, expenseVariables)
+      .then((res) => {
+        console.log('+++++++++++++++++++++', res);
+        if (res.status === 200) {
+        }
+      });
+
+    Promise.all(this.state.shoppingCart.map(shoppingItem => {
+      const variables = {
+        input: {
+          id: shoppingItem.id,
+          boughtBy: this.props.homeContext.currentUser.id,
+          updatedAt: moment.utc().format(dateTimeFormat)
+        }
+      };
+      appSyncGraphQl(updateShoppingItem, variables);
+    })).then(() => {
+      this.fetchShoppingItems().then(() => {
+        this.setState({
+          refreshing: false,
+          shoppingCart: []
+        });
+      });
+    })
+  }
+
   onClearWithoutExpense = async () => {
     this.setState({ refreshing: true });
 
@@ -129,7 +169,6 @@ class ShoppingList extends Component {
           updatedAt: moment.utc().format(dateTimeFormat)
         }
       };
-
       appSyncGraphQl(updateShoppingItem, variables);
     })).then(() => {
       this.fetchShoppingItems().then(() => {
@@ -139,7 +178,6 @@ class ShoppingList extends Component {
         });
       });    
     })
-
   }
 
   renderItem = ({ item }) => {
@@ -312,6 +350,7 @@ class ShoppingList extends Component {
           showModal={this.state.cartModalPresented}
           shoppingItems={this.state.shoppingCart}
           onClearWithoutExpense={this.onClearWithoutExpense}
+          onClearAsExpense={this.onClearAsExpense}
         />
         <Footer isShoppingCartActive={true}/>
       </View>
