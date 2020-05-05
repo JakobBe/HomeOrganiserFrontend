@@ -27,11 +27,27 @@ export const getHome2 = /* GraphQL */ `
         nextToken
       }
       expenses {
-        id
-        ammount
-        userId
-        homeId
-        compensated
+        items {
+          id
+          ammount
+          userId
+          homeId
+          shoppingItems {
+            items {
+              id
+            }
+          }
+          accountableUsers {
+            items {
+              id
+            }
+          }
+          compensated
+          info
+          createdAt
+          updatedAt
+        }
+        nextToken
       }
       shoppingItems(limit: 100) {
         items {
