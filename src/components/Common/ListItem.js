@@ -145,11 +145,11 @@ class ListItem extends Component {
       );
     };
     if (this.props.isExpense) {
-      return (
-        <Text style={styles.descriptionStyle(this.props.appointerColor)}>
-          {"\n"} {this.props.date}
-        </Text>
-      );
+      // return (
+      //   <Text style={styles.descriptionStyle(this.props.userColor)}>
+      //     {"\n"} {moment.utc(this.props.date).format('DD-MM-YYYY')}
+      //   </Text>
+      // );
     }
   }
 
@@ -193,10 +193,10 @@ class ListItem extends Component {
           onSwipeRight={(state) => this.onSwipeRight(state)}
           config={config}
         >
-          <CardSection additionalCardSectionStyles={styles.listItemContainer}>
+          <CardSection additionalCardSectionStyles={styles.listItemContainer(this.props.backgroundColor)}>
             {this.getUserMark()}   
             <TouchableWithoutFeedback onPress={() => this.props.onItemPressed(this.props.id)}>
-              <Text style={styles.titleStyle(this.props.bought)}>
+              <Text style={styles.titleStyle(this.props.bought, this.props.textColor)}>
                 {this.props.text}
                 {this.getExtraInfo()}
               </Text>
@@ -211,11 +211,11 @@ class ListItem extends Component {
 }
 
 const styles = {
-  titleStyle: (bought) => ({
+  titleStyle: (bought, textColor) => ({
     paddingLeft: 10,
     fontSize: 18,
     width: 250,
-    color: colorPalette.secondary,
+    color: textColor ? textColor : colorPalette.secondary,
     textDecorationLine: bought ? 'line-through' : 'none'
   }), 
 
@@ -265,9 +265,10 @@ const styles = {
     fontWeight: 'bold'
   },
 
-  listItemContainer: {
+  listItemContainer: (backgroundColor) => ({
     height: 100,
-  },
+    backgroundColor: backgroundColor ? backgroundColor : 'white',
+  }),
 
   userLetterStyleContainer: (color) => ({
     width: 25,

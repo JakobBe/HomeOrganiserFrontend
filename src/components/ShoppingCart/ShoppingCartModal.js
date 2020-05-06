@@ -74,12 +74,16 @@ class ShoppingCartModal extends Component {
   }
  
   onClearAsExpensePress = () => {
-    if (this.state.price === undefined) {
+    if (this.state.price.length === 0) {
       Alert.alert("Please provide a price in order to save as expense.");
       return;
     }
 
     this.props.onClearAsExpense(this.state.price);
+    this.setState({
+      price: ''
+    });
+    this.props.onModalClose();
   }
 
   onClearWithoutExpensePress = () => {

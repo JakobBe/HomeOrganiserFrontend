@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
 import { View, Picker, Modal, TouchableHighlight, Text, Alert } from 'react-native';
 import { Input, AddButton, Footer, Button, CloseButton } from '../Common';
-import { Actions, ActionConst } from 'react-native-router-flux';
-import { Calendar } from 'react-native-calendars';
 import { UserContext } from '../../contexts/UserContextHolder';
 import { HomeContext } from '../../contexts/HomeContextHolder';
 import { colorPalette, layouts } from '../../Style';

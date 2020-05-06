@@ -27,12 +27,12 @@ class ShoppingList extends Component {
     cartModalPresented: false
   };
 
-  componentWillMount() {
+  componentDidMount() {
     const shoppingItemsForFilter = this.props.homeContext.shoppingItems;
     let shoppingItems = shoppingItemsForFilter.filter(shoppingItem => shoppingItem.boughtBy === defaultId);
     const sortedShoppingItems = sortByCreatedAt(shoppingItems);
     let shoppingCart = sortedShoppingItems.filter(shoppingItem => shoppingItem.bought);
-
+    console.log('shoppingItems', shoppingItems);
     this.setState({
       shoppingItems: sortedShoppingItems,
       shoppingCart
@@ -132,18 +132,20 @@ class ShoppingList extends Component {
       }
     };
 
-    appSyncGraphQl(createExpense, expenseVariables)
+    const expense = await appSyncGraphQl(createExpense, expenseVariables)
       .then((res) => {
-        console.log('+++++++++++++++++++++', res);
         if (res.status === 200) {
+          this.props.homeContext.updateExpenses();
+          return res.res.createExpense;
         }
       });
 
     Promise.all(this.state.shoppingCart.map(shoppingItem => {
+      console.log('expense', expense);
       const variables = {
         input: {
           id: shoppingItem.id,
-          boughtBy: this.props.homeContext.currentUser.id,
+          boughtBy: expense.id,
           updatedAt: moment.utc().format(dateTimeFormat)
         }
       };
