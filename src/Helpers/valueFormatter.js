@@ -1,3 +1,5 @@
+import moment from 'moment';
+
 export const valueFormatter = (value, format) => {
   let currencyFormatter = new Intl.NumberFormat('de-DE', {
     style: 'currency',
@@ -26,6 +28,9 @@ export const valueFormatter = (value, format) => {
       break;
     case 'years':
       formattedValue = `${value} Jahre`;
+      break;
+    case 'day':
+      formattedValue = `${moment.utc(value).format('DD.MM.YYYY')}`;
       break;
   }
 
