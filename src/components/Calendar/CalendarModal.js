@@ -1,58 +1,66 @@
 import React, { Component } from 'react';
-import { Modal, Text, TouchableHighlight, View, Picker, Switch, Keyboard } from 'react-native';
+import { Modal, Text, TouchableOpacity, View, Picker, Switch, Keyboard, Animated } from 'react-native';
 import { Button, Input, TouchableTextHighlight, CloseButton } from '../Common';
 import { colorPalette, layouts } from '../../Style';
 import moment from 'moment';
+import { valueFormatter } from '../../Helpers/valueFormatter';
 
 class CalendarModal extends Component {
   state = {
-    newEvent: '',
-    allDay: false,
-    timeInformationPresented: true,
+    timeDetailsPresented: true,
     timePickerPresented: false,
-    hour: moment.utc().format('HH'),
-    minute: moment.utc().format('MM'),
-    needsUpdate: true
   };
 
-  componentDidUpdate(prevProps, prevState) {
-    if (this.props.singleEventId && this.props.singleEventId !== prevProps.singleEventId) {
-      const { text, allDay, time } = this.props.modalValue
-      this.setState({
-        newEvent: text,
-        allDay,
-        timeInformationPresented: !allDay,
-        hour: time.substring(0,2),
-        minute: time.substring(3, 5),
-        needsUpdate: false
-      })
-    }
+  constructor() {
+    super();
+    this.timePickerHeight = new Animated.Value(0);
   }
 
-  onSaveButtonPress = () => {
-    let { newEvent, hour, minute, allDay } = this.state;
-    if (allDay) {
-      hour = '00';
-      minute = '00';
-    }
+  onSaveButtonPress = (eventId) => {
+    this.setState({
+      timePickerPresented: false
+    });
 
-    if (this.props.singleEventId) {
-      this.props.updateEvent(this.props.singleEventId, newEvent, allDay, `${hour}:${minute}`);
-      this.setState({ newEvent: '', allDay: false, hour: moment.utc().format('HH'), minute: moment.utc().format('MM'), needsUpdate: false });
+    if (eventId !== undefined) {
+      this.props.updateEvent(eventId);
       return;
     }
 
-    this.props.createEvent(newEvent, allDay, `${hour}:${minute}`); 
-    this.setState({ newEvent: '', allDay: false, hour: moment.utc().format('HH'), minute: moment.utc().format('MM') });
+    this.props.createEvent(); 
   }
 
-  onAllDayToggle = () => {
+  onAllDayToggle = (value) => {
+    this.props.calendarModalValues.onAllDayToggle(value);
     Keyboard.dismiss();
+
+    if (this.state.timePickerPresented) {
+      this.onAnimation(this.state.timePickerPresented);
+    }
+
     this.setState({
-      allDay: !this.state.allDay,
-      timeInformationPresented: this.state.allDay,
-      timePickerPresented: this.state.allDay && this.state.timeInformationPresented
+      allDay: value,
+      timeDetailsPresented: !value,
+      timePickerPresented: false
     });
+  }
+
+  onTimePressed = () => {
+    this.onAnimation(this.state.timePickerPresented);
+
+    this.setState({
+      timePickerPresented: !this.state.timePickerPresented
+    });
+  }
+
+  onAnimation = (timePickerPresented) => {
+    const toValue = timePickerPresented ? 0 : 150;
+    Animated.timing(
+      this.timePickerHeight,
+      {
+        toValue,
+        duration: 400
+      }
+    ).start();
   }
 
   getHourPickerItems = () => {
@@ -77,54 +85,69 @@ class CalendarModal extends Component {
     });
   }
 
-  getTimePicker = () => {
-    const hourPickerItems = this.getHourPickerItems()
-    const minutePickerItems = this.getMinutePickerItems()
+  getTimePicker = (time, onTimeChange) => {
+    if (time === undefined) {
+      return;
+    }
 
-    return this.state.timePickerPresented ? (
-      <View style={styles.timePickerWrapper}>
+    const hourPickerItems = this.getHourPickerItems();
+    const minutePickerItems = this.getMinutePickerItems();
+
+    const hour = time.substring(0, 2);
+    const minute = time.substring(3, 5);
+    const height = this.state.timePickerPresented ? 200 : 0;
+    return (
+      <Animated.View style={styles.timePickerWrapper(this.timePickerHeight)}>
         <Picker
-          selectedValue={this.state.hour}
-          onValueChange={value => this.setState({ hour: value })}
-          style={{ height: 200, backgroundColor: 'white', width: 80, color: colorPalette.secondary }}
-          itemStyle={{ height: 200 }}
+          selectedValue={hour}
+          onValueChange={value => onTimeChange(`${value}:${minute}`)}
+          style={{ height, backgroundColor: 'transparent', width: 80, color: colorPalette.secondary }}
+          itemStyle={{ height }}
         >
           {hourPickerItems}
         </Picker>
         <Text style={{ fontSize: 30, color: colorPalette.secondary }}>:</Text>
         <Picker
-          selectedValue={this.state.minute}
-          onValueChange={value => this.setState({ minute: value })}
-          style={{ height: 200, backgroundColor: 'white', width: 80, color: colorPalette.secondary }}
-          itemStyle={{ height: 200 }}
+          selectedValue={minute}
+          onValueChange={value => onTimeChange(`${hour}:${value}`)}
+          style={{ height, backgroundColor: 'transparent', width: 80, color: colorPalette.secondary }}
+          itemStyle={{ height }}
         >
           {minutePickerItems}
         </Picker>
-      </View>
+      </Animated.View>
+    );
+  }
+
+  getTimeDetails = (time, allDay) => {
+    return !allDay ? (
+      <TouchableOpacity
+        onPress={this.onTimePressed}
+        underlayColor={'white'}
+        style={styles.timeDetailsWrapper}
+      >
+        {/* <Text style={styles.allDayText}>
+          Starting
+        </Text> */}
+        <Text style={styles.time}>
+          {time}
+        </Text>
+    </TouchableOpacity>
     ) : undefined;
   }
 
-  getTimeInformation = () => {
-    return this.state.timeInformationPresented ? (
-      <TouchableTextHighlight
-        onPress={() => this.setState({ timePickerPresented: !this.state.timePickerPresented })}
-        feedbackColor={colorPalette.primary}
-      >
-        <View style={styles.timeWrapper}>
-          <Text>
-            Starting
-          </Text>
-          <Text>
-            {this.state.hour}:{this.state.minute}
-          </Text>
-        </View>
-      </TouchableTextHighlight>
-    ) : undefined;
+  onModalClose = () => {
+    this.timePickerHeight = new Animated.Value(0);
+    this.setState({
+      timePickerPresented: false
+    });
+    this.props.onModalClose();
   }
 
   render() {
-    const timePicker = this.getTimePicker();
-    const timeInformation = this.getTimeInformation();
+    const { date, eventText, eventId, allDay, time, onEventTextChange, onTimeChange } = this.props.calendarModalValues;
+    const timePicker = this.getTimePicker(time, onTimeChange);
+    const timeDetails = this.getTimeDetails(time, allDay);
 
     return (
       <Modal
@@ -134,51 +157,34 @@ class CalendarModal extends Component {
       >
         <View style={styles.transparentBackground}>
           <View style={styles.modalContainer}>
-            <CloseButton
-              onPress={() => {
-                this.props.onModalClose(),
-                this.setState({
-                  newEvent: this.props.singleEventId ? this.state.newEvent : '',
-                  needsUpdate: this.props.singleEventId ? true : false
-                })
-              }}
-            />
+            <CloseButton onPress={this.onModalClose} />
             <View style={layouts.centerWrapper}>
               <Text style={styles.dateHeader}>
-                {this.props.day}
+                {valueFormatter(date, 'day')}
               </Text>
             </View>
-            {/* <TouchableHighlight
-              onPress={() => { this.props.onModalClose(), 
-                this.setState({ 
-                  newEvent: this.props.singleEventId ? this.state.newEvent : '',
-                  needsUpdate: this.props.singleEventId ? true : false
-                }) 
-              }}
-              style={{ top: 3, left: '85%' }}
-            >
-              <Text style={{ color: colorPalette.primary, fontWeight: 'bold' }}>Close</Text>
-            </TouchableHighlight> */}
             <Input
-              value={this.state.newEvent}
-              onChangeText={value => this.setState({ newEvent: value })}
+              value={eventText}
+              onChangeText={value => onEventTextChange(value)}
               placeholder={'Enter a new event'}
               autoFocus={true}
             />
-            <View style={styles.allDayWrapper}>
-              <Text>
-                All-day
-              </Text>
-              <Switch
-                value={this.state.allDay}
-                onValueChange={() => this.onAllDayToggle()}
-              />
+            <View style={styles.timeInfoWrapper}>
+              <View style={styles.allDayWrapper(allDay)}>
+                <Text style={styles.allDayText}>
+                  All-day
+                </Text>
+                <Switch
+                  value={allDay}
+                  onValueChange={(value) => this.onAllDayToggle(value)}
+                />
+              </View>
+              {timeDetails}
             </View>
-            {timeInformation}
             {timePicker}
             <View style={layouts.centerWrapper}>
               <Button
-                onPress={() => this.onSaveButtonPress()}
+                onPress={() => this.onSaveButtonPress(eventId)}
                 additionalButtonStyles={styles.buttonStyle}
               >
                 Save
@@ -218,40 +224,61 @@ const styles = {
     marginTop: 5
   },
 
-  timePickerWrapper: {
+  timeInfoWrapper: {
+    flex: 0,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: 5,
+    marginTop: 20
+  },
+
+  timePickerWrapper: (height) => ({
     flex: 0,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 20
-  },
+    margin: 20,
+    backgroundColor: 'white',
+    height
+  }),
 
-  allDayWrapper: {
+  allDayWrapper: (allDay) =>  ({
     flex: 0,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    borderBottomColor: '',
-    borderBottomStyle: 'solid',
-    borderBottomWidth: .2,
-    paddingBottom: 10
+    margin: 10,
+    borderRightColor: allDay ? 'none' : colorPalette.secondary,
+    borderRightWidth: allDay ? 0 : 2,
+    marginRight: 0,
+    padding: 5,
+    paddingRight: 10
+  }),
+
+  allDayText: {
+    fontSize: 20,
+    marginRight: 5
   },
 
-  timeWrapper: {
-    flex: 0,
+  time: {
+    fontSize: 20,
+    color: 'white'
+  },
+
+  timeDetailsWrapper: {
+    flex: 1,
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
-    borderBottomColor: '',
-    borderBottomStyle: 'solid',
-    borderBottomWidth: .2,
-    paddingBottom: 10,
-    paddingTop: 10,
-    marginBottom: 20
+    backgroundColor: colorPalette.primary,
+    borderRadius: 20,
+    padding: 5,
+    margin: 10
   },
 
   dateHeader: {
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    fontSize: 20
   }
 }
 

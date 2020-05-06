@@ -2,9 +2,7 @@ import React, { Component } from 'react';
 import { View, FlatList, RefreshControl, Animated, Text } from 'react-native';
 import { Calendar, CalendarList } from 'react-native-calendars';
 import { Footer, ListItem, AddButton } from '../Common';
-// import { fetchEvents, createNewEvent, updateEvent } from '../../RailsClient';
 import { createEvent, deleteEvent, updateEvent } from '../../graphql/Events/mutations';
-// import {  } from '../../graphql/Events/queris';
 import { appSyncGraphQl } from '../../AWSClient';
 import { UserContext } from '../../contexts/UserContextHolder';
 import { HomeContext } from '../../contexts/HomeContextHolder';
@@ -14,14 +12,15 @@ import currentDate from '../../Helpers/currentDate';
 import getDayMarkerDots from '../../Helpers/eventDotMarkers';
 import moment from 'moment';
 import GestureRecognizer from 'react-native-swipe-gestures';
+import { valueFormatter } from '../../Helpers/valueFormatter';
 
 class CalendarEntry extends Component {
   state = { 
     selectedDate: undefined, 
     events: [], 
-    modalPresented: false, 
+    calendarModalPresented: false, 
     refreshing: false,
-    modalValue: undefined,
+    calendarModalValues: {},
     singleEventId: undefined,
     isSwipedUp: false,
     isCalendarListActive: true,
@@ -34,12 +33,27 @@ class CalendarEntry extends Component {
     const eventHeight = (40);
     this.calendarHeight = new Animated.Value(calendarHeight);
     this.eventContainerHeight = new Animated.Value(eventHeight);
+    this.eventContainerBackgroundColor = new Animated.Value(1);
   }
 
   componentDidMount() {
+    const hour = moment.utc().format('HH');
+    const minute = moment.utc().format('MM');
+
+    let calendarModalValues = {
+      date: currentDate(),
+      eventText: '',
+      isExistingEvent: false,
+      onAllDayToggle: this.onAllDayToggle,
+      onEventTextChange: this.onEventTextChange,
+      onTimeChange: this.onTimeChange,
+      time: `${hour}:${minute}`
+    };
+
     this.setState({
       events: this.props.homeContext.events,
-      selectedDate: currentDate()
+      selectedDate: currentDate(),
+      calendarModalValues
     });
   }
 
@@ -56,6 +70,14 @@ class CalendarEntry extends Component {
       toValue = 40;
       Animated.timing(
         this.eventContainerHeight,
+        {
+          toValue,
+          duration: 400
+        }
+      ).start();
+      toValue = 1;
+      Animated.timing(
+        this.eventContainerBackgroundColor,
         {
           toValue,
           duration: 400
@@ -81,6 +103,14 @@ class CalendarEntry extends Component {
           duration: 400
         }
       ).start();
+      toValue = 2;
+      Animated.timing(
+        this.eventContainerBackgroundColor,
+        {
+          toValue,
+          duration: 400
+        }
+      ).start();
     }
   }
 
@@ -93,13 +123,6 @@ class CalendarEntry extends Component {
     this.animateContainers(undefined, false);
     this.setState({ isSwipedUp: false });
   }
-
-  // componentWillMount() {
-  //   this.setState({
-  //     events: this.props.homeContext.events,
-  //     selectedDate: currentDate()
-  //   });
-  // }
 
   fetchEvents = async () => {
     const events = await this.props.homeContext.updateEvents();
@@ -124,12 +147,13 @@ class CalendarEntry extends Component {
     });
   }
 
-  updateEvent = (id, text, allDay, time) => {
+  updateEvent = (id) => {
+    const { eventText, allDay, time } = this.state.calendarModalValues;
     const variables = {
       input: {
         id,
         date: this.state.selectedDate,
-        text,
+        text: eventText,
         allDay,
         time,
         userId: this.props.homeContext.currentUser.id,
@@ -145,15 +169,16 @@ class CalendarEntry extends Component {
         }
       })
     this.setState({
-      modalPresented: false
+      calendarModalPresented: false
     }); 
   }
 
-  createEvent = (text, allDay, time) => {
+  createEvent = () => {
+    const { eventText, allDay, time } = this.state.calendarModalValues;
     const variables = {
       input: {
         date: this.state.selectedDate,
-        text,
+        text: eventText,
         allDay,
         time,
         userId: this.props.homeContext.currentUser.id,
@@ -165,12 +190,13 @@ class CalendarEntry extends Component {
 
     appSyncGraphQl(createEvent, variables)
       .then((res) => {
+        console.log('res from createEvent', res);
         if (res.status === 200) {
           this.fetchEvents();
         }
       })
     this.setState({
-      modalPresented: false
+      calendarModalPresented: false
     });  
   }
 
@@ -196,11 +222,59 @@ class CalendarEntry extends Component {
     });
   }
 
-  onItemPressed = (item) => {
+  onTimeChange = (value) => {
+    let calendarModalValues = this.state.calendarModalValues;
+    calendarModalValues['time'] = value;
+
     this.setState({
-      modalPresented: true,
-      modalValue: item,
-      singleEventId: item.id
+      calendarModalValues
+    });
+  }
+
+  onAllDayToggle = (value) => {
+    let calendarModalValues = this.state.calendarModalValues;
+    calendarModalValues['allDay'] = value;
+
+    this.setState({
+      calendarModalValues
+    });
+  }
+
+  onEventTextChange = (value) => {
+    let calendarModalValues = this.state.calendarModalValues;
+    calendarModalValues['eventText'] = value;
+
+    this.setState({
+      calendarModalValues
+    });
+  }
+
+  onModalOpen = (id) => {
+    const event = this.state.events.find(event => event.id === id);
+    const hour = moment.utc().format('HH');
+    const minute = moment.utc().format('MM');
+
+    let calendarModalValues = {
+      date: this.state.selectedDate,
+      eventText: '',
+      eventId: undefined,
+      onAllDayToggle: this.onAllDayToggle,
+      onEventTextChange: this.onEventTextChange,
+      onTimeChange: this.onTimeChange,
+      time: `${hour}:${minute}`,
+      allDay: false
+    };
+
+    if (event) {
+      calendarModalValues['eventText'] = event.text
+      calendarModalValues['allDay'] = event.allDay
+      calendarModalValues['time'] = event.time
+      calendarModalValues['eventId'] = event.id
+    } 
+
+    this.setState({
+      calendarModalPresented: true,
+      calendarModalValues
     });
   }
 
@@ -218,7 +292,7 @@ class CalendarEntry extends Component {
         text={item.text}
         refreshList={this._onRefresh}
         userColor={userColor}
-        onItemPressed={this.onItemPressed}
+        onItemPressed={this.onModalOpen}
         description={time}
         isCalendarEntry={true}
         itemUserId={itemUser.id}
@@ -230,20 +304,15 @@ class CalendarEntry extends Component {
   }
 
   onModalCose = () => {
-    if (this.state.modalPresented) {
+    if (this.state.calendarModalPresented) {
       this.setState({
-        modalPresented: false,
-        modalValue: undefined,
-        singleEventId: undefined
+        calendarModalPresented: false,
+        calendarModalValues: {},
       })
     }
   }
 
   onDayPress = (day) => {
-    // if (day.dateString === selectedDate) {
-
-    // }
-
     this.setState({ selectedDate: day.dateString });
     let selectedDateEvents = this.state.events.filter(event => {
       return event.date === day.dateString
@@ -361,6 +430,10 @@ class CalendarEntry extends Component {
       velocityThreshold: 0.3,
       directionalOffsetThreshold: 80
     };
+    const interpolateColor = this.eventContainerBackgroundColor.interpolate({
+      inputRange: [1, 2],
+      outputRange: [colorPalette.primary, 'white']
+    });
 
     return (
       <View style={styles.calendarContainer}>
@@ -368,30 +441,31 @@ class CalendarEntry extends Component {
           <Animated.View style={styles.calendarWrapper(this.calendarHeight)}>
             {this.getCalendarComponent()}
           </Animated.View>
-          <Animated.View style={styles.eventContainer(this.eventContainerHeight)}>
+          <Animated.View style={styles.eventContainer(this.eventContainerHeight, interpolateColor)}>
             <GestureRecognizer
               onSwipeUp={(state) => this.onSwipeUp(state)}
               onSwipeDown={(state) => this.onSwipeDown(state)}
               config={config}
             >
-              <View style={layouts.centerWrapper}>  
-                <Text style={styles.dateHeader}>
-                  {this.state.selectedDate}
+              <View style={layouts.centerWrapper}> 
+                <Animated.View style={styles.swipUpIndicator(interpolateColor)}></Animated.View>
+                <Text style={styles.dateHeader} onPress={(state) => this.onSwipeUp(state)}>
+                  {valueFormatter(this.state.selectedDate, 'day')}
                 </Text>
               </View>
             </GestureRecognizer>
             {selectedDayEventsList}
             <View style={styles.addButtonStyle}>
-              <AddButton onPress={() => this.setState({ modalPresented: true })}/>
+              <AddButton onPress={this.onModalOpen}/>
             </View>
           </Animated.View>
           <CalendarModal 
-            showModal={this.state.modalPresented} 
+            showModal={this.state.calendarModalPresented} 
             saveInput={this.saveModalInput}
             createEvent={this.createEvent}
             updateEvent={this.updateEvent}
             onModalClose={this.onModalCose}
-            modalValue={this.state.modalValue}
+            calendarModalValues={this.state.calendarModalValues}
             singleEventId={this.state.singleEventId}
             day={this.state.selectedDate}
           />
@@ -419,14 +493,17 @@ const styles = {
     width: '100%',
   }),
 
-  eventContainer: (height) => ({
+  eventContainer: (height, backgroundColor) => ({
     height,
     width: '100%',
     backgroundColor: 'white',
     position: 'relative',
     borderTopColor: colorPalette.primary,
     borderTopWidth: 1,
-    paddingTop: 10
+  }),
+
+  swipUpIndicator: (backgroundColor) => ({
+    width: 20, height: 2.5, backgroundColor, borderRadius: 2, margin: 5
   }),
 
   row: {
@@ -437,12 +514,13 @@ const styles = {
 
   addButtonStyle: {
     position: 'absolute',
-    bottom: 2,
+    bottom: -4,
     right: 10
   },
 
   dateHeader: {
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    fontSize: 20
   }
 };
 
