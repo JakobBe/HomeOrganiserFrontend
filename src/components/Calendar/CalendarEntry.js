@@ -190,7 +190,6 @@ class CalendarEntry extends Component {
 
     appSyncGraphQl(createEvent, variables)
       .then((res) => {
-        console.log('res from createEvent', res);
         if (res.status === 200) {
           this.fetchEvents();
         }
