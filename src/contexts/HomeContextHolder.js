@@ -211,6 +211,7 @@ class HomeContextHolder extends Component {
             name: this.state.name,
             id: this.state.id,
             shoppingItems: this.state.shoppingItems,
+            expenses: this.state.expenses,
             createUserSession: this.createUserSession,
             updateCurrentUser: this.updateCurrentUser,
             updateSub: this.updateSub,
