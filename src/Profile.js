@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, Animated, View, TouchableOpacity, Image, ScrollView, Modal } from 'react-native';
+import { Text, Animated, View, TouchableOpacity, Image, ScrollView, Modal, Alert } from 'react-native';
 import { UserContext } from './contexts/UserContextHolder';
 import { HomeContext } from './contexts/HomeContextHolder';
 import { Input, Button, Footer, Spinner, ColorSlider } from './components/Common';
@@ -37,19 +37,27 @@ class Profile extends Component {
 
 
   componentDidMount() {
-    const { name, color, email, paypalLink, homeId, id } = this.props.homeContext.currentUser;
-    this.setState({
-      id,
-      name: name || '',
-      color: color || '',
-      email: email || '',
-      paypalLink: paypalLink || '',
-      homeId: homeId || '',
-      profileImage: this.getProfileImageUrl(id)
-    });
+    if (this.props.homeContext.currentUser === undefined) {
+      Alert.alert("Almost done! We juts need a Name and your color so your Housemates know who you are.");
+    }
+
+    if (this.props.homeContext.currentUser) {
+      const { name, color, email, paypalLink, homeId, id } = this.props.homeContext.currentUser;
+  
+      this.setState({
+        id,
+        name: name || '',
+        color: color || '',
+        email: email || '',
+        paypalLink: paypalLink || '',
+        homeId: homeId || '',
+        profileImage: this.getProfileImageUrl(id)
+      });
+    }
   };
 
   componentDidUpdate() {
+    console.log('Did update')
     if (this.state.nameEdit) {
       this.nameInput.focus();
     }
@@ -177,6 +185,11 @@ class Profile extends Component {
   }
 
   onNameBlur = () => {
+    if (this.state.name.length === 0) {
+      Alert.alert("You cant leave this field blank.");
+      return;
+    }
+
     this._keyboardHidden();
     this.setState({
       nameEdit: false,
@@ -266,6 +279,7 @@ class Profile extends Component {
   }
 
   render() {
+    console.log('render Profile');
     const { name, color, email, paypalLink } = this.state;
     const containerHeight = deviceHeight / 1.3;
     const wrapperHeight = deviceHeight / 2.2;

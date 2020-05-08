@@ -6,8 +6,8 @@ import { faEdit } from '@fortawesome/free-solid-svg-icons'
 
 const Input = ({ label, value, onChangeText, placeholder, secureTextEntry, additionalInputStyles, autoFocus, onBlur, additionalTextFieldStyle, onFocus, keyboardType, maxLength, focus, newRef, returnKeyType, onKeyPress, withEdit, editCallback, editable, color }) => {
 
+  const colorBlock = color ? <View style={{height: 30, width: '90%', position: 'absolute', backgroundColor: color, top: 25, padding: 10, zIndex: 0}}></View> : undefined; 
   if (withEdit) {
-    const colorBlock = color ? <View style={{height: 30, width: '90%', position: 'absolute', backgroundColor: color, top: 25, padding: 10}}></View> : undefined; 
     return (
       <View style={[styles.containerStyle, additionalInputStyles]}>
         <Text style={styles.labelStyle}>
@@ -59,6 +59,7 @@ const Input = ({ label, value, onChangeText, placeholder, secureTextEntry, addit
         returnKeyType={returnKeyType}
         onKeyPress={onKeyPress}
       />
+      {colorBlock}
     </View>
   )
 };
@@ -69,7 +70,8 @@ const styles = {
     paddingRight: 10,
     paddingLeft: 10,
     fontSize: 20,
-    backgroundColor: 'rgb(256,256,256)',
+    backgroundColor: 'transparent',
+    zIndex: 1,
     borderBottomWidth: 2,
     borderColor: editable ? 'rgba(36,36,36,1)' : 'rgba(36,36,36,.5)',
     alignItems: 'center',

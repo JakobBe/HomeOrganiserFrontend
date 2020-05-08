@@ -30,8 +30,8 @@ class CalendarModal extends Component {
   }
 
   onAllDayToggle = (value) => {
-    this.props.calendarModalValues.onAllDayToggle(value);
     Keyboard.dismiss();
+    this.props.calendarModalValues.onAllDayToggle(value);
 
     if (this.state.timePickerPresented) {
       this.onAnimation(this.state.timePickerPresented);
@@ -45,6 +45,7 @@ class CalendarModal extends Component {
   }
 
   onTimePressed = () => {
+    Keyboard.dismiss();
     this.onAnimation(this.state.timePickerPresented);
 
     this.setState({

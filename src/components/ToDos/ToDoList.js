@@ -20,9 +20,9 @@ class ToDoList extends Component {
     toDos: [], 
     refreshing: false, 
     filterModalPresented: false,
-    filter: 1,
+    filter: 2,
     filterOneValue: 'All ToDos',
-    filterTwoValue: 'for me',
+    filterTwoValue: 'for me & everyone',
     toDoModalPresented: false,
     newToDo: '',
     modalValue: undefined
