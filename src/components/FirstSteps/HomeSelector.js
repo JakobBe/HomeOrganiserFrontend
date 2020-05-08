@@ -23,7 +23,6 @@ class HomeSelector extends Component {
   componentDidMount() {
     appSyncGraphQl(listHomes)
       .then((res) => {
-        console.log('res', res);
         if (res.status === 200) {
           this.setState({
             homes: res.res.listHomes.items
@@ -53,12 +52,8 @@ class HomeSelector extends Component {
   }
 
   successfulHomeSelection = async (homeId) => {
-    this.setState({
-      homeId,
-      createModalPresented: false,
-      joinModalPresented: false,
-      profileCompletionModalPresented: true
-    })
+    await this.props.homeContext.buildHomeContext(homeId);
+    Actions.newProfile({ type: ActionConst.REPLACE });
   }
 
   render() {
@@ -103,7 +98,7 @@ class HomeSelector extends Component {
           sub={this.props.homeContext.sub}
           homeId={this.state.homeId}
           onModalClose={this.onModalClose}
-          completedSignUp={this.props.completedSignUp}
+          // completedSignUp={this.props.completedSignUp}
         />
       </View>
     );

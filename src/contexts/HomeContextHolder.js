@@ -63,7 +63,6 @@ class HomeContextHolder extends Component {
 
     await appSyncGraphQl(getHome2, variables)
       .then((res) => {
-        console.log('res from building home Context', res);
         if (res.status === 200) {
           const home = res.res.getHome;
           this.setState({
@@ -75,7 +74,6 @@ class HomeContextHolder extends Component {
             name: home.name,
             id: home.id
           });
-          Actions.entry({ type: ActionConst.REPLACE })
         } else if (res.status === 400) {
         }
       });
@@ -177,6 +175,8 @@ class HomeContextHolder extends Component {
 
     if (userIndex !== -1) {
       users[userIndex] = currentUser
+    } else {
+      users.push(currentUser);
     };
 
     this.setState({

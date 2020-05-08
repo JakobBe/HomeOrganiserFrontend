@@ -9,15 +9,11 @@ import EmailVerificationModal from './EmailVerificationModal';
 class SignIn extends Component {
   state = {
     loading: false,
-    email: 'jakob@bethmann.de',
+    email: 'jakob.bethmann+5@gmail.com',
     password: '123456',
     error: '',
     cognitoSub: '',
     emailVerificationModalPresented: false
-  }
-
-  componentDidMount() {
-    // this.onLoginButtonPress();
   }
 
   onEmailChange(text) {
@@ -54,16 +50,13 @@ class SignIn extends Component {
         Alert.alert("Incorrect email or password.");
       } 
       if (signInRes.res.code === RejectionErros.UserNotConfirmedException) {
-        console.log('Hello world');
         const cognitoUserRes = await getUsersHandler(email.toLowerCase());
-        console.log('cognitoUserRes', cognitoUserRes);
         if (cognitoUserRes.status === 200) {
           this.setState({
             loading: false,
             emailVerificationModalPresented: true,
             cognitoSub: cognitoUserRes.data
           });
-
         }
       }
       this.setState({

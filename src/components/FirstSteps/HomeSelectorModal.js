@@ -90,7 +90,6 @@ class ToDoFilterModal extends Component {
   }
 
   render() {
-    console.log('this.props from home selector modal', this.props)
     const buttonLabel = this.props.createModalPresented? 'Create Home' : 'Find Home'
     const infoText = this.getInfoText()
 

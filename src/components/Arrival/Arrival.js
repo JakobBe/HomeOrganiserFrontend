@@ -15,15 +15,16 @@ class Arrival extends Component {
     const currentUser = await this.props.homeContext.createUserSession(sub);
     if (currentUser) {
       await this.props.homeContext.buildHomeContext(currentUser.homeId);
+      Actions.entry({ type: ActionConst.REPLACE })
     } else {
       this.props.homeContext.updateSub(sub)
+      Actions.homeSelector({ type: ActionConst.REPLACE })
     }
-    Actions.entry({ type: ActionConst.REPLACE })
   };
 
   hasSignedUp = async (sub) => {
     this.props.homeContext.updateSub(sub)
-    Actions.entry({ type: ActionConst.REPLACE })
+    Actions.homeSelector({ type: ActionConst.REPLACE })
   };
 
   renderSignIn = () => {
