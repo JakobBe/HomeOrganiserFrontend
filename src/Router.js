@@ -9,9 +9,11 @@ import CalendarEntry from './components/Calendar/CalendarEntry';
 import ShoppingList from './components/ShoppingCart/ShoppingList';
 import Profile from './Profile';
 import Arrival from './components/Arrival/Arrival';
+import HomeSelector from './components/FirstSteps/HomeSelector';
 import { colorPalette, deviceWidth } from './Style';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faArrowAltCircleLeft, faUserCircle, faPowerOff } from '@fortawesome/free-solid-svg-icons';
+import { faArrowAltCircleLeft, faUserCircle, faPowerOff, faTimesCircle } from '@fortawesome/free-solid-svg-icons';
+import NewProfile from './NewProfile';
 
 const RouterComponent = () => {
   const logout = () => {
@@ -30,6 +32,12 @@ const RouterComponent = () => {
           initial
           duration={0}
           hideNavBar={true}
+        />
+        <Scene
+          key='homeSelector'
+          component={HomeSelector}
+          title='Select a Home'
+          duration={0}
         />
         <Scene
           key='entry'
@@ -102,6 +110,17 @@ const RouterComponent = () => {
           renderRightButton={() =>
             <TouchableOpacity onPress={() => logout()}>
               <FontAwesomeIcon icon={faPowerOff} style={{ color: colorPalette.primary, marginRight: 15 }} size={25} />
+            </TouchableOpacity>
+          }
+          duration={0}
+        />
+        <Scene
+          key='newProfile'
+          component={NewProfile}
+          title='Create Profile'
+          renderRightButton={() =>
+            <TouchableOpacity onPress={() => logout()}>
+              <FontAwesomeIcon icon={faTimesCircle} style={{ color: colorPalette.primary, marginRight: 15 }} size={25} />
             </TouchableOpacity>
           }
           duration={0}
