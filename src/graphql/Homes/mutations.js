@@ -1,12 +1,6 @@
 export const createHome = /* GraphQL */ `
-  mutation CreateHome(
-      $name: String!,
-      $createdAt: AWSTimestamp
-      $updatedAt: AWSTimestamp
-    ) {
-    createHome(input: {
-      name: $name, createdAt: $createdAt, updatedAt: $updatedAt
-    }) {
+  mutation CreateHome($input: CreateHomeInput!) {
+    createHome(input: $input) {
       id
       name
       createdAt

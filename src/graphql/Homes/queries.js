@@ -13,7 +13,7 @@ export const getHome2 = /* GraphQL */ `
         }
         nextToken
       }
-      events {
+      events(limit: 100) {
         items {
           id
           text

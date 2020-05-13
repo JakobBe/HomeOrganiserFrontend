@@ -23,6 +23,7 @@ export const getUserBySub = /* GraphQL */ `
         name
         color
         paypalLink
+        sub
       }
     }
   }
