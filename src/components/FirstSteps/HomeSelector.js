@@ -10,6 +10,8 @@ import { appSyncGraphQl } from '../../AWSClient';
 import { createHome } from '../../graphql/Homes/mutations';
 import { listHomes } from '../../graphql/Homes/queries';
 import ProfileCompletionModal from './ProfileCompletionModal';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faHammer, faDoorOpen } from '@fortawesome/free-solid-svg-icons';
 
 class HomeSelector extends Component {
   state = {
@@ -61,7 +63,7 @@ class HomeSelector extends Component {
       <View style={styles.homeSelectorContainer}>
         <View style={styles.textWrapper}>
           <Text style={styles.mainText}>
-            Hello & welcome to EggPlanner. {"\n"}
+            Welcome to EggPlanner. {"\n"} {"\n"}
             <Text style={styles.mainTextBody}>
               In order to get started you have to create a new Home or join an existing one.
             </Text>
@@ -70,7 +72,8 @@ class HomeSelector extends Component {
         <View style={styles.guideWrapper}>
           <View style={styles.navigationWrapper}>
           <TouchableOpacity style={styles.imageWrapper} onPress={this.onCreateHomePress}>
-            <Image source={require('../../../assets/images/eggplant_single.png')} style={styles.imageStyle}/>
+              <FontAwesomeIcon icon={faHammer} style={{ color: colorPalette.secondary, marginBottom: 8 }} size={60} mask={['far', 'circle']} />
+            {/* <Image source={require('../../../assets/images/eggplant_single.png')} style={styles.imageStyle}/> */}
           </TouchableOpacity>
           <Text style={styles.navigationText}>
             Create
@@ -78,7 +81,8 @@ class HomeSelector extends Component {
           </View>
           <View style={styles.navigationWrapper}>
           <TouchableOpacity style={styles.imageWrapper} onPress={this.onJoinHomePress}>
-            <Image source={require('../../../assets/images/eggplant_double.png')} style={styles.imageStyle} />
+            <FontAwesomeIcon icon={faDoorOpen} style={{ color: colorPalette.secondary, marginBottom: 8 }} size={60} mask={['far', 'circle']} />
+            {/* <Image source={require('../../../assets/images/eggplant_double.png')} style={styles.imageStyle} /> */}
           </TouchableOpacity>
           <Text style={styles.navigationText}>
             Join
@@ -126,10 +130,11 @@ const styles = {
   },
 
   guideWrapper: {
-    marginTop: 40,
+    marginTop: 50,
     flex: 0,
     flexDirection: 'row',
-    justifyContent: 'space-between'
+    justifyContent: 'space-between',
+    padding: 30
   },
 
   imageWrapper: {
@@ -153,6 +158,7 @@ const styles = {
 
   navigationText: {
     fontSize: 18,
+    color: colorPalette.primary
   }
 }
 

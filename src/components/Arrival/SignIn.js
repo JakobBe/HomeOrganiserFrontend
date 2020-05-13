@@ -9,7 +9,7 @@ import EmailVerificationModal from './EmailVerificationModal';
 class SignIn extends Component {
   state = {
     loading: false,
-    email: 'jakob.bethmann+5@gmail.com',
+    email: 'jakob.bethmann+9@gmail.com',
     password: '123456',
     error: '',
     cognitoSub: '',

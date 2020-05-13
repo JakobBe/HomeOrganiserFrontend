@@ -7,6 +7,7 @@ import { layouts } from '../../Style';
 import { appSyncGraphQl } from '../../AWSClient';
 import { createHome } from '../../graphql/Homes/mutations';
 import moment from 'moment';
+import { dateTimeFormat } from '../../Helpers/magicNumbers';
 
 class ToDoFilterModal extends Component {
   state = {
@@ -47,6 +48,7 @@ class ToDoFilterModal extends Component {
 
   getHomeId = () => {
     if (this.props.joinModalPresented) {
+      console.log('this.props', this.props);
       const homeName = this.props.homes.filter(home => { return home.name === this.state.homeName})
       if (homeName.length === 1) {
         return homeName[0].id
@@ -56,13 +58,17 @@ class ToDoFilterModal extends Component {
 
     if (this.props.createModalPresented) {
       const variables = {
-        name: this.state.homeName,
-        createdAt: moment.utc().format('YYYY-MM-DD'),
-        updatedAt: moment.utc().format('YYYY-MM-DD')
+        input: {
+          name: this.state.homeName,
+          createdAt: moment.utc().format(dateTimeFormat),
+          updatedAt: moment.utc().format(dateTimeFormat)
+        }
       }
 
+      console.log('variables', variables);
       return appSyncGraphQl(createHome, variables)
         .then((res) => {
+          console.log('res from creating home', res);
           if (res.status === 200) {
             return res.res.createHome.id
           }
