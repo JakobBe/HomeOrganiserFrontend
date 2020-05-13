@@ -16,7 +16,7 @@ class Profile extends Component {
     name: '',
     color: '',
     email: '',
-    paypalLink: '',
+    paypalLink: undefined,
     homeId: '',
     profileImage: '',
     loading: false,
@@ -49,7 +49,7 @@ class Profile extends Component {
         name: name || '',
         color: color || '',
         email: email || '',
-        paypalLink: paypalLink || '',
+        paypalLink: paypalLink || undefined,
         homeId: homeId || '',
         profileImage: this.getProfileImageUrl(id)
       });
@@ -57,7 +57,6 @@ class Profile extends Component {
   };
 
   componentDidUpdate() {
-    console.log('Did update')
     if (this.state.nameEdit) {
       this.nameInput.focus();
     }
@@ -168,6 +167,7 @@ class Profile extends Component {
 
     appSyncGraphQl(updateUser, variables)
       .then((res) => {
+        console.log('res from updating user', res);
         if (res.status === 200) {
           this.props.homeContext.updateCurrentUser(res.res.updateUser);
           this.setState({

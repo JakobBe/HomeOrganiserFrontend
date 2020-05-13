@@ -124,7 +124,6 @@ class MoneyEntry extends Component {
   };
 
   render() {
-    console.log('this.state', this.state);
     const extractKey = ({ id }) => id
     return (
       <View style={styles.moneyBoxContainer}>

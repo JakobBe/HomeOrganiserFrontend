@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import { Text, TouchableOpacity, View, Image } from 'react-native';
 import { Actions, ActionConst } from 'react-native-router-flux';
 import { colorPalette } from '../../Style/Colors';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
-import { faCalendarAlt, faEuroSign, faHome, faListAlt, faShoppingBag } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faCalendarAlt, faEuroSign, faHome, faListAlt, faShoppingBag } from '@fortawesome/free-solid-svg-icons';
 
 class Footer extends Component {
   onMoneyboxPress = () => {

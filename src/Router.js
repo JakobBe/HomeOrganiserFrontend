@@ -42,7 +42,7 @@ const RouterComponent = () => {
         <Scene
           key='entry'
           component={Entry}
-          title='Welcome Home'
+          title='Home'
           duration={0}
           renderRightButton={() =>
             <TouchableOpacity onPress={() => Actions.profile()}>

@@ -497,7 +497,7 @@ const styles = {
     width: '100%',
     backgroundColor: 'white',
     position: 'relative',
-    borderTopColor: colorPalette.primary,
+    borderTopColor: colorPalette.secondary,
     borderTopWidth: 1,
   }),
 

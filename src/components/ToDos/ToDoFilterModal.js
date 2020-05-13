@@ -45,7 +45,7 @@ class ToDoFilterModal extends Component {
                 <Picker
                   selectedValue={this.props.filterOneValue}
                   onValueChange={value => this.props.onFilterValueOneChange(value)}
-                  style={{ height: 200, backgroundColor: 'white', width: 150, color: colorPalette.secondary }}
+                  style={{ height: 200, backgroundColor: 'white', width: '100%', color: colorPalette.secondary }}
                   itemStyle={{ height: 200 }}
                 >
                   {this.getFilterOneValues()}
@@ -53,7 +53,7 @@ class ToDoFilterModal extends Component {
                 <Picker
                   selectedValue={this.props.filterTwoValue}
                   onValueChange={value => this.props.onFilterValueTwoChange(value)}
-                  style={{ height: 200, backgroundColor: 'white', width: 150, color: colorPalette.secondary }}
+                  style={{ height: 200, backgroundColor: 'white', width: '100%', color: colorPalette.secondary }}
                   itemStyle={{ height: 200 }}
                 >
                   {this.getFilterTwoValues()}
@@ -90,27 +90,22 @@ const styles = {
     // borderWidth: .5,
     padding: 20,
     position: 'relative',
-    flex: 0,
+    // flex: 0,
     justifyContent: 'space-between',
   },
 
   filterWrapper: {
     flex: 0,
     justifyContent: 'space-around',
-    alignItems: 'flex-start',
+    width: '100%'
   },
 
   filterPickerWrapper: {
-    marginTop: 20,
+    marginTop: 10,
     marginBottom: 20,
     width: '100%',
     flex: 0,
-    flexDirection: 'row',
     justifyContent: 'space-around',
-    borderColor: colorPalette.primary,
-    borderStyle: 'solid',
-    borderWidth: 5,
-    borderRadius: 10,
   }
 }
 
