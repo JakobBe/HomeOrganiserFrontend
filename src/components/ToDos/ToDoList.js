@@ -13,6 +13,8 @@ import { sortByCreatedAt } from '../../Helpers/sortByDate';
 import { colorPalette, layouts } from '../../Style';
 import { filterMatrix } from '../../Helpers/filterMatrix';
 import { getKeyByValue } from '../../Helpers/getKeyByValue';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faFilter } from '@fortawesome/free-solid-svg-icons';
 import moment from 'moment';
 
 class ToDoList extends Component {
@@ -297,7 +299,7 @@ class ToDoList extends Component {
           />
           <TouchableOpacity onPress={() => this.onFilterMenuPress()}>
             <View style={styles.filterImageWrapper}>
-              <Image source={require('../../../assets/images/filter-outline.png')} style={styles.filterImageStyle} />
+              <FontAwesomeIcon icon={faFilter} style={{ color: 'white' }} size={20} />
             </View>
           </TouchableOpacity>
         </View>

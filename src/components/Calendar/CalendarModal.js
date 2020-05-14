@@ -227,7 +227,7 @@ const styles = {
 
   timeInfoWrapper: {
     flex: 0,
-    flexDirection: 'row',
+    // flexDirection: 'row',
     justifyContent: 'space-between',
     padding: 5,
     marginTop: 20
@@ -246,11 +246,11 @@ const styles = {
   allDayWrapper: (allDay) =>  ({
     flex: 0,
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    // justifyContent: 'space-between',
     alignItems: 'center',
     margin: 10,
-    borderRightColor: allDay ? 'none' : colorPalette.secondary,
-    borderRightWidth: allDay ? 0 : 2,
+    // borderRightColor: allDay ? 'none' : colorPalette.secondary,
+    // borderRightWidth: allDay ? 0 : 2,
     marginRight: 0,
     padding: 5,
     paddingRight: 10
@@ -267,7 +267,7 @@ const styles = {
   },
 
   timeDetailsWrapper: {
-    flex: 1,
+    flex: 0,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',

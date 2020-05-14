@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, Animated, Easing, View, TouchableOpacity, TouchableWithoutFeedback, Alert, Image } from 'react-native';
+import { Text, Animated, Easing, View, TouchableOpacity, TouchableWithoutFeedback, Alert, Image, Vibration } from 'react-native';
 import { CheckBox } from 'react-native-elements';
 import  { CardSection }  from './CardSection';
 import GestureRecognizer from 'react-native-swipe-gestures';
@@ -42,12 +42,14 @@ class ListItem extends Component {
   onCheckBoxPress = () => {
     if (this.props.isToDo) {
       this.props.updateToDo(this.props.id, !this.props.done, this.props.text, this.props.appointee);
+      Vibration.vibrate();
     };
 
     if (this.props.isShoppingItem) {
       !this.props.bought ? this.props.addToShoppingCart(this.props.id) : this.props.removeFromShoppingCart(this.props.item);
       
       this.props.updateShoppingItem(this.props.id, !this.props.bought, this.props.text);
+      Vibration.vibrate();
     }
   }
 
@@ -212,8 +214,9 @@ class ListItem extends Component {
 
 const styles = {
   titleStyle: (bought, textColor) => ({
+    flex: 1,
     paddingLeft: 10,
-    fontSize: 18,
+    fontSize: 15,
     width: 250,
     color: textColor ? textColor : colorPalette.secondary,
     textDecorationLine: bought ? 'line-through' : 'none'
@@ -266,7 +269,7 @@ const styles = {
   },
 
   listItemContainer: (backgroundColor) => ({
-    height: 100,
+    height: 70,
     backgroundColor: backgroundColor ? backgroundColor : 'white',
   }),
 

@@ -12,6 +12,8 @@ import { createExpense } from '../../graphql/Expenses/mutations';
 import { appSyncGraphQl } from '../../AWSClient';
 import { defaultId, dateTimeFormat } from '../../Helpers/magicNumbers';
 import { sortByCreatedAt } from '../../Helpers/sortByDate';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faCashRegister } from '@fortawesome/free-solid-svg-icons';
 import moment from 'moment';
 
 class ShoppingList extends Component {
@@ -330,10 +332,10 @@ class ShoppingList extends Component {
               }
             />
           </View>
-          <TouchableOpacity onPress={this.onShoppingBasketPress}>
-            <View style={styles.shoppingBasketWrapper}>
-              {this.getNotificationNumber()}
-              <Image source={require('../../../assets/images/shopping-basket.png')} style={styles.shoppingCartImageStyle} />
+          <TouchableOpacity onPress={this.onShoppingBasketPress} style={styles.shoppingBasketWrapper}>
+            {this.getNotificationNumber()}
+            <View style={styles.shoppingBasketCircle}>
+              <FontAwesomeIcon icon={faCashRegister} style={{ color: 'white', zIndex: 1 }} size={20} />
             </View>
           </TouchableOpacity>
           {shoppingCart}
@@ -412,7 +414,10 @@ const styles = {
   shoppingBasketWrapper: {
     position: 'absolute',
     bottom: 10,
-    right: 10,
+    right: 10
+  },
+
+  shoppingBasketCircle: {
     height: 35,
     width: 35,
     borderRadius: 35 / 2,
@@ -423,18 +428,11 @@ const styles = {
     shadowRadius: 2,
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 2
+    zIndex: 1
   },
 
   shoppingItemListWrapper: {
     flex: 1
-  },
-
-  shoppingCartImageStyle: {
-    height: 24,
-    width: 24,
-    marginTop: 4,
-    zIndex: 3
   },
 
   shoppingCartItem: {
@@ -457,7 +455,7 @@ const styles = {
 
   notificationWrapper: {
     position: 'absolute',
-    top: -5,
+    top: -10,
     right: -5,
     width: 20,
     height: 20,

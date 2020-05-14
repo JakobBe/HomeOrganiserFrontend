@@ -16,23 +16,6 @@ class UserCarousel extends React.Component {
     }
   }
 
-  componentDidMount = () => {
-    // setInterval(() => {
-    //   this.setState(
-    //     prev => ({
-    //       selectedIndex: prev.selectedIndex === this.props.images.length - 1 ? 0 : prev.selectedIndex + 1
-    //     }),
-    //     () => {
-    //       this.scrollRef.current.scrollTo({
-    //         animated: true,
-    //         y: 0,
-    //         x: deviceWidth * this.state.selectedIndex
-    //       });
-    //     }
-    //   );
-    // }, 10000);
-  };
-
   getProfileImageUrl = (userId) => {
     return `https://egg-planner-dev.s3.eu-central-1.amazonaws.com/${userId}/profile.jpg`;
   }
@@ -50,7 +33,6 @@ class UserCarousel extends React.Component {
   }
 
   setSelectedIndex = (event) => {
-    console.log('event', event);
     const viewSize = event.nativeEvent.layoutMeasurement.width;
     const contentOffset = event.nativeEvent.contentOffset.x;
 
@@ -63,33 +45,21 @@ class UserCarousel extends React.Component {
     return (
       <View style={styles.userCardContainer}>
         <View style={styles.userCardHeader}>
-          <View>
+          <View style={{ flex: 0, flexDirection: 'row', alignItems: 'center'}}>
+            <View style={styles.userLetterStyleContainer(user.color)}>
+              <Text style={{ color: 'black', textAlign: 'center'}}>
+                {user.name.charAt(0).toUpperCase()}
+              </Text>
+            </View>
             <Text style={textStyles.headerStyle}>
-              {user.name}
+              {user.name.slice(1)}
             </Text>
-            <View style={styles.userCardColorBlock(user.color)}></View>
+            {/* <View style={styles.userCardColorBlock(user.color)}></View> */}
           </View>
           <Image
-            // key={user}
             source={{ uri: this.getProfileImageUrl(user.id) }}
             style={styles.userCardImg}
           />
-        </View>
-      </View>
-    );
-  }
-
-  getHomeCard = (home) => {
-    return (
-      <View style={styles.userCardContainer}>
-        <View style={styles.userCardHeader}>
-          <View>
-            <Text style={textStyles.headerStyle}>
-              {home.name}
-            </Text>
-            <View style={styles.userCardColorBlock(colorPalette.primary)}></View>
-          </View>
-          {this.getQRCode(home.id)}
         </View>
       </View>
     );
@@ -106,17 +76,9 @@ class UserCarousel extends React.Component {
           pagingEnabled
           onMomentumScrollEnd={this.setSelectedIndex}
           ref={this.scrollRef}
-          // style={{ width: deviceWidth }}
         >
-          {userCarouselArray.map(item => {
-            if (item.isHome) {
-              return this.getHomeCard(item);
-            } else {
-              return this.getUserCard(item);
-            }
-          })}
+          {userCarouselArray.map(item => this.getUserCard(item))}
         </ScrollView>
-        {/* <View style={{ position: 'absolute', height: '100%', width: '100%', backgroundColor: 'rgba(50,50,50,.4)', zIndex: 1, top: 0 }}></View> */}
         <View style={styles.circleWrapper}>
           {userCarouselArray.map((item, i) => (
             <View
@@ -152,10 +114,8 @@ const styles = {
   },
 
   userCardContainer: {
-    // height: '100%',
     width: deviceWidth - 100,
     alignSelf: 'center',
-    // flex: 1,
     position: 'relative',
     padding: 10
   },
@@ -173,9 +133,17 @@ const styles = {
     borderRadius: 40
   },
 
+  userLetterStyleContainer: (color) => ({
+    width: 25,
+    height: 25,
+    borderRadius: 25 / 2,
+    backgroundColor: color,
+    justifyContent: 'center'
+  }),
+
   userCardColorBlock: (color) => ({
     backgroundColor: color,
-    height: 15,
+    height: 5,
     width: '110%'
   }),
 

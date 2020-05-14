@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, FlatList, RefreshControl, Animated, Text } from 'react-native';
+import { View, FlatList, RefreshControl, Animated, Text, Alert } from 'react-native';
 import { Calendar, CalendarList } from 'react-native-calendars';
 import { Footer, ListItem, AddButton } from '../Common';
 import { createEvent, deleteEvent, updateEvent } from '../../graphql/Events/mutations';
@@ -148,7 +148,36 @@ class CalendarEntry extends Component {
   }
 
   updateEvent = (id) => {
-    const { eventText, allDay, time } = this.state.calendarModalValues;
+    const { eventText, allDay, time, userId } = this.state.calendarModalValues;
+    if (userId !== this.props.homeContext.currentUser.id) {
+      Alert.alert("This is not your Event, are you sure you want to update it?", '', [
+        { text: 'Cancle', onPress: () => {return}, style: 'cancel' },
+        { text: 'Yes', onPress: () => {
+          const variables = {
+            input: {
+              id,
+              date: this.state.selectedDate,
+              text: eventText,
+              allDay,
+              time,
+              userId,
+              homeId: this.props.homeContext.id,
+              updatedAt: moment.utc().format('YYYY-MM-DD')
+            }
+          };
+      
+          appSyncGraphQl(updateEvent, variables)
+            .then((res) => {
+              if (res.status === 200) {
+                this.fetchEvents();
+              }
+            })
+          this.setState({
+            calendarModalPresented: false
+          });
+        }}
+      ]);
+    }
     const variables = {
       input: {
         id,
@@ -156,7 +185,7 @@ class CalendarEntry extends Component {
         text: eventText,
         allDay,
         time,
-        userId: this.props.homeContext.currentUser.id,
+        userId,
         homeId: this.props.homeContext.id,
         updatedAt: moment.utc().format('YYYY-MM-DD')
       }
@@ -170,7 +199,7 @@ class CalendarEntry extends Component {
       })
     this.setState({
       calendarModalPresented: false
-    }); 
+    });
   }
 
   createEvent = () => {
@@ -249,6 +278,7 @@ class CalendarEntry extends Component {
   }
 
   onModalOpen = (id) => {
+
     const event = this.state.events.find(event => event.id === id);
     const hour = moment.utc().format('HH');
     const minute = moment.utc().format('MM');
@@ -269,6 +299,7 @@ class CalendarEntry extends Component {
       calendarModalValues['allDay'] = event.allDay
       calendarModalValues['time'] = event.time
       calendarModalValues['eventId'] = event.id
+      calendarModalValues['userId'] = event.userId
     } 
 
     this.setState({
@@ -514,7 +545,11 @@ const styles = {
   addButtonStyle: {
     position: 'absolute',
     bottom: -4,
-    right: 10
+    right: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.8,
+    shadowRadius: 2,
   },
 
   dateHeader: {

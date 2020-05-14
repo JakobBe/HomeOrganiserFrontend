@@ -61,7 +61,7 @@ class Entry extends Component {
             <Text style={textStyles.headerStyle}>
               {name}
             </Text>
-            <View style={styles.homeColorBlock(colorPalette.primary)}></View>
+            {/* <View style={styles.homeColorBlock(colorPalette.primary)}></View> */}
             <Text style={textStyles.normalText}>
               You have {this.props.homeContext.users.length - 1} {mate}.
             </Text>
