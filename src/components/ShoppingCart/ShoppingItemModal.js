@@ -1,57 +1,38 @@
 import React, { Component } from 'react';
 import { Modal, Text, TouchableHighlight, View, numeric } from 'react-native';
-import { Button, Input } from '../Common';
+import { Button, Input, CloseButton } from '../Common';
 import { createExpense } from '../../RailsClient';
 import { colorPalette, layouts } from '../../Style';
 
 class ShoppingItemModal extends Component {
   state = {
-    item: undefined,
-    price: undefined
+    itemName: undefined
   };
 
-  onPriceInput = (price) => {
+  componentDidUpdate(prevProps) {
+    const { name, id } = this.props.modalItem;
+
+    if (id !== prevProps.modalItem.id) {
+      this.setState({
+        itemName: name
+      })
+    }
+  }
+
+  onTextChange = (itemName) => {
     this.setState({
-      price
+      itemName
     });
   };
 
-  onButtonPress = () => {
-    if (!this.state.item && !this.props.item) {
-      createExpense(this.props.currentUser.id, this.state.price, this.props.cartItems);
-      this.props.onModalClose();
-      return
-    };
-
-    const item = this.state.item || this.props.item
-    createExpense(this.props.currentUser.id, this.state.price, [item]);
-    this.setState({
-      price: ''
-    });
+  onSaveButtonPress = () => {
+    const itemName = this.state.itemName;
+    const id = this.props.modalItem.id;
+    this.props.updateShoppingItem({id, name: itemName});
   };
 
-  getLabelOrInput = () => {
-    if (this.state.item || this.props.item) {
-      return (
-        <Input
-          value={this.state.item || this.props.item || 'How much did you spend for the flat?'}
-          onChangeText={value => this.setState({ item: value })}
-        />
-      );
-    };
-
-    if (!this.state.item && !this.props.item) 
-      return (
-        <Text>
-          How much did you spend for the flat?
-        </Text>
-      );
-    };
 
   render() {
-    // const labelOrInput = this.getLabelOrInput();
-    const buttonLabel = !this.state.item && !this.props.item ? 'Save expenses' : 'Mark as bought';
-    const isCart = this.state.item && this.props.item
     return (
       <Modal
         animationType="slide"
@@ -60,32 +41,22 @@ class ShoppingItemModal extends Component {
       >
         <View style={styles.transparentBackground}>
           <View style={styles.modalContainer}>
-            <TouchableHighlight
-              onPress={() => this.props.onModalClose()}
-              style={{ top: 3, left: '85%' }}
-            >
-              <Text style={{ color: colorPalette.primary, fontWeight: 'bold' }}>Close</Text>
-            </TouchableHighlight>
-            {/* {labelOrInput} */}
+            <CloseButton onPress={() => this.props.onModalClose()}/>
             <View style={styles.priceInputWrapper}>
-              <Text style={styles.priceLable}>
-                Price:
-              </Text>
               <Input
-                value={this.state.price}
-                onChangeText={value => this.onPriceInput(value)}
-                placeholder={'0.00$'}
-                keyboardType={numeric}
-                additionalInputStyles={styles.additionalPriceInputStyles}
+                value={this.state.itemName}
+                onChangeText={value => this.onTextChange(value)}
+                placeholder={'Item'}
+                additionalInputStyles={styles.additionalInputStyles}
                 autoFocus={true}
               />
             </View>
             <View style={layouts.centerWrapper}>
               <Button
-                onPress={() => this.onButtonPress()}
+                onPress={() => this.onSaveButtonPress()}
                 additionalButtonStyles={styles.buttonStyle}
               >
-                {buttonLabel}
+                Save
               </Button>
             </View>
           </View>
@@ -128,10 +99,9 @@ const styles = {
     justifyContent: 'center'
   },
 
-  additionalPriceInputStyles: {
-    width: 100,
-    margin: 0,
-    marginBottom: 35
+  additionalInputStyles: {
+    flexGrow: 1,
+    marginBottom: 20
   },
 
   priceLable: {

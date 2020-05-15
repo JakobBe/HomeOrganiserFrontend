@@ -22,8 +22,10 @@ class ShoppingList extends Component {
     refreshing: false, 
     newShoppingItem: '', 
     itemModalPresented: false, 
-    pressedItem: undefined, 
-    pressedItemId: undefined,
+    modalItem: {
+      name: undefined,
+      id: undefined
+    }, 
     shoppingCart: [],
     isShoppingCartActive: false,
     cartModalPresented: false
@@ -34,7 +36,6 @@ class ShoppingList extends Component {
     let shoppingItems = shoppingItemsForFilter.filter(shoppingItem => shoppingItem.boughtBy === defaultId);
     const sortedShoppingItems = sortByCreatedAt(shoppingItems);
     let shoppingCart = sortedShoppingItems.filter(shoppingItem => shoppingItem.bought);
-    console.log('shoppingItems', shoppingItems);
     this.setState({
       shoppingItems: sortedShoppingItems,
       shoppingCart
@@ -79,11 +80,13 @@ class ShoppingList extends Component {
     };
   }
 
-  updateShoppingItem = async (id, bought, name, boughtBy) => {
+  updateShoppingItem = async ({ id, bought, name, boughtBy, inShoppingCart}) => {
     const variables = {
       input: {
         id,
         name,
+        inShoppingCart,
+        boughtBy,
         bought,
         updatedAt: moment.utc().format(dateTimeFormat)
       }
@@ -93,9 +96,9 @@ class ShoppingList extends Component {
       .then((res) => {
         if (res.status === 200) {
           this.fetchShoppingItems();
+          this.onModalClose();
         }
       })
-    // this.onModalClose();
   }
 
   deleteShoppingItem = (id) => {
@@ -143,7 +146,6 @@ class ShoppingList extends Component {
       });
 
     Promise.all(this.state.shoppingCart.map(shoppingItem => {
-      console.log('expense', expense);
       const variables = {
         input: {
           id: shoppingItem.id,
@@ -202,36 +204,12 @@ class ShoppingList extends Component {
     );
   };
 
-  renderShoppingCartItem = ({ item }) => {
-    return(
-      <View>
-        <GestureRecognizer onSwipeLeft={(state) => this.onCartItemSwipeLeft(state, item)}>
-          <View style={styles.shoppingCartItem}>
-            <Text style={styles.cartItemTextStyle}>
-              {item.name}
-            </Text>
-          </View>
-        </GestureRecognizer>
-      </View>
-    );
-  }
+  onItemPressed = (itemId) => {
+    const modalItem = this.state.shoppingItems.filter(item => item.id === itemId)[0];
 
-  onCartItemSwipeLeft = (state, item) => {
-    this.removeFromShoppingCart(item)
-  }
-
-  saveModalInput = (text, price, id) => {
-    updateShoppingItem(id, text, price, this.props.homeContext.currentUser.id);
     this.setState({
-      itemModalPresented: false
-    });
-  };
-
-  onItemPressed = (item, id) => {
-    this.setState({
+      modalItem,
       itemModalPresented: true,
-      pressedItem: item,
-      pressedItemId: id
     });
   };
 
@@ -241,34 +219,16 @@ class ShoppingList extends Component {
     });
   };
 
-  onModalCose = () => {
+  onModalClose = () => {
     this.setState({
       itemModalPresented: false,
-      pressedItem: undefined,
-      pressedItemId: undefined,
+      modalItem: {
+        name: undefined,
+        id: undefined
+      },
       cartModalPresented: false
     });
   };
-
-  getShoppingCart = () => {
-    const extractKey = ({ id }) => id
-    if (this.state.isShoppingCartActive) {
-      return (
-        <View style={styles.shoppingCartWrapper}>
-          <FlatList
-            style={styles.listWrapper}
-            data={this.state.shoppingCart}
-            renderItem={this.renderShoppingCartItem}
-            keyExtractor={extractKey}
-          />
-          <Button onPress={this.onCartButtonPress} additionalButtonStyles={styles.additionalCartButtonStyle}>
-            Complete Shopping
-          </Button>
-        </View>
-      )
-    };
-    return undefined;
-  }
 
   getNotificationNumber = () => {
     if (this.state.shoppingCart.length > 0) {
@@ -303,7 +263,6 @@ class ShoppingList extends Component {
 
   render() {
     const extractKey = ({ id }) => id
-    const shoppingCart = this.getShoppingCart()
     return (
       <View style={styles.shoppingListContainer}>
         <View style={styles.inputWrapper}>
@@ -338,19 +297,15 @@ class ShoppingList extends Component {
               <FontAwesomeIcon icon={faCashRegister} style={{ color: 'white', zIndex: 1 }} size={20} />
             </View>
           </TouchableOpacity>
-          {shoppingCart}
         </View>
         <ShoppingItemModal
           showModal={this.state.itemModalPresented}
-          saveInput={this.saveModalInput}
-          onModalClose={this.onModalCose}
-          item={this.state.pressedItem}
-          id={this.state.pressedItemId}
-          cartItems={this.state.shoppingCart}
-          currentUser={this.props.homeContext.currentUser}
+          updateShoppingItem={this.updateShoppingItem}
+          onModalClose={this.onModalClose}
+          modalItem={this.state.modalItem}
         />
         <ShoppingCartModal
-          onModalClose={this.onModalCose}           
+          onModalClose={this.onModalClose}           
           showModal={this.state.cartModalPresented}
           shoppingItems={this.state.shoppingCart}
           onClearWithoutExpense={this.onClearWithoutExpense}
