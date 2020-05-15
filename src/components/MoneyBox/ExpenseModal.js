@@ -1,11 +1,10 @@
-import React, { Component } from 'react';
-import { View, Picker, Modal, TouchableHighlight, Text, Alert, FlatList } from 'react-native';
-import { Input, AddButton, Footer, Button, CloseButton } from '../Common';
-import { HomeContext } from '../../contexts/HomeContextHolder';
+import React from 'react';
+import { View, Modal, Text, FlatList } from 'react-native';
+import { CloseButton } from '../Common';
 import { colorPalette, layouts } from '../../Style';
 import { valueFormatter } from '../../Helpers/valueFormatter';
 
-class ExpenseModal extends Component {
+const ExpenseModal = (props) => {
   getShoppingItemList = (relevantShoppingItems) => {
     const extractKey = ({ id }) => id;
     if (relevantShoppingItems.length === 0) {
@@ -57,24 +56,22 @@ class ExpenseModal extends Component {
     );
   }
 
-  render() {
-    const { relevantShoppingItems, expense, user } = this.props.expenseModalInfo;
+    const { relevantShoppingItems, expense, user } = props.expenseModalInfo;
     return (
       <Modal
         animationType="slide"
         transparent={true}
-        visible={this.props.isVisible}
+        visible={props.isVisible}
       >
         <View style={styles.transparentBackground}>
           <View style={styles.expenseModalContainer}>
-            <CloseButton onPress={this.props.onModalClose} />
-            {this.getInfo(expense, user)}
-            {this.getShoppingItemList(relevantShoppingItems)}
+            <CloseButton onPress={props.onModalClose} />
+            {getInfo(expense, user)}
+            {getShoppingItemList(relevantShoppingItems)}
           </View>
         </View>
       </Modal>
     )
-  }
 };
 
 const styles = {

@@ -32,7 +32,7 @@ class ToDoModal extends Component {
     const {id, done, task, appointee} = this.state;
 
     if (this.state.task.length === 0) {
-      Alert.alert("That does not seem like a ToDo ;)");
+      Alert.alert("You cant have a blank ToDo.");
       return;
     }
 
@@ -98,7 +98,7 @@ class ToDoModal extends Component {
                 <Input
                   value={this.state.task}
                   onChangeText={value => this.setState({ task: value })}
-                  placeholder={'Enter a new to-do'}
+                  placeholder={'Your ToDo'}
                   additionalInputStyles={styles.additionalInputStyles}
                   autoFocus={true}
                 />
