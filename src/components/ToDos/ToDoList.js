@@ -106,7 +106,7 @@ class ToDoList extends Component {
       }
     };
 
-    appSyncGraphQl(updateToDo, variables)
+    appSyncGraphQl({query: updateToDo, variables})
       .then((res) => {
         if (res.status === 200) {
           this.fetchToDos();
@@ -122,7 +122,7 @@ class ToDoList extends Component {
       }
     };
 
-    appSyncGraphQl(deleteToDo, variables)
+    appSyncGraphQl({query: deleteToDo, variables})
       .then((res) => {
         if (res.status === 200) {
           this.fetchToDos();
@@ -161,7 +161,7 @@ class ToDoList extends Component {
           updatedAt: moment.utc().format(dateTimeFormat)
         }
       };
-      appSyncGraphQl(createToDo, variables)
+      appSyncGraphQl({query: createToDo, variables})
         .then((res) => {
           if (res.status === 200) {
             this.fetchToDos();

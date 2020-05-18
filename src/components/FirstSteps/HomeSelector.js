@@ -9,7 +9,6 @@ import { colorPalette } from '../../Style/Colors';
 import { appSyncGraphQl } from '../../AWSClient';
 import { createHome } from '../../graphql/Homes/mutations';
 import { listHomes } from '../../graphql/Homes/queries';
-import ProfileCompletionModal from './ProfileCompletionModal';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faHammer, faDoorOpen } from '@fortawesome/free-solid-svg-icons';
 
@@ -18,12 +17,11 @@ class HomeSelector extends Component {
     homes: undefined,
     createModalPresented: false,
     joinModalPresented: false,
-    profileCompletionModalPresented: false,
     homeId: undefined
   }
 
   componentDidMount() {
-    appSyncGraphQl(listHomes)
+    appSyncGraphQl({query: listHomes})
       .then((res) => {
         if (res.status === 200) {
           this.setState({
@@ -37,7 +35,6 @@ class HomeSelector extends Component {
     this.setState({
       createModalPresented: false,
       joinModalPresented: false,
-      profileCompletionModalPresented: false
     })
   }
 
@@ -96,13 +93,6 @@ class HomeSelector extends Component {
           homes={this.state.homes}
           user={this.props.homeContext.currentUser}
           successfulHomeSelection={this.successfulHomeSelection}
-        />
-        <ProfileCompletionModal
-          profileCompletionModalPresented={this.state.profileCompletionModalPresented}
-          sub={this.props.homeContext.sub}
-          homeId={this.state.homeId}
-          onModalClose={this.onModalClose}
-          // completedSignUp={this.props.completedSignUp}
         />
       </View>
     );

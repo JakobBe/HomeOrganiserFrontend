@@ -71,7 +71,7 @@ class ShoppingList extends Component {
           updatedAt: moment.utc().format(dateTimeFormat)
         }
       };
-      appSyncGraphQl(createShoppingItem, variables)
+      appSyncGraphQl({query: createShoppingItem, variables})
         .then((res) => {
           if (res.status === 200) {
             this.fetchShoppingItems();
@@ -92,7 +92,7 @@ class ShoppingList extends Component {
       }
     };
 
-    appSyncGraphQl(updateShoppingItem, variables)
+    appSyncGraphQl({query: updateShoppingItem, variables})
       .then((res) => {
         if (res.status === 200) {
           this.fetchShoppingItems();
@@ -108,7 +108,7 @@ class ShoppingList extends Component {
       }
     };
 
-    appSyncGraphQl(deleteShoppingItem, variables)
+    appSyncGraphQl({query: deleteShoppingItem, variables})
       .then((res) => {
         if (res.status === 200) {
           this.fetchShoppingItems();
@@ -137,7 +137,7 @@ class ShoppingList extends Component {
       }
     };
 
-    const expense = await appSyncGraphQl(createExpense, expenseVariables)
+    const expense = await appSyncGraphQl({query: createExpense, expenseVariables})
       .then((res) => {
         if (res.status === 200) {
           this.props.homeContext.updateExpenses();
@@ -153,7 +153,7 @@ class ShoppingList extends Component {
           updatedAt: moment.utc().format(dateTimeFormat)
         }
       };
-      appSyncGraphQl(updateShoppingItem, variables);
+      appSyncGraphQl({query: updateShoppingItem, variables});
     })).then(() => {
       this.fetchShoppingItems().then(() => {
         this.setState({
@@ -175,7 +175,7 @@ class ShoppingList extends Component {
           updatedAt: moment.utc().format(dateTimeFormat)
         }
       };
-      appSyncGraphQl(updateShoppingItem, variables);
+      appSyncGraphQl({query: updateShoppingItem, variables});
     })).then(() => {
       this.fetchShoppingItems().then(() => {
         this.setState({ 

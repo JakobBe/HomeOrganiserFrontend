@@ -165,7 +165,7 @@ class Profile extends Component {
       }
     };
 
-    appSyncGraphQl(updateUser, variables)
+    appSyncGraphQl({query: updateUser, variables})
       .then((res) => {
         console.log('res from updating user', res);
         if (res.status === 200) {

@@ -149,7 +149,7 @@ class NewProfile extends Component {
         updatedAt: moment.utc().format('YYYY-MM-DD')
       }
     };
-    appSyncGraphQl(createUser, variables)
+    appSyncGraphQl({query: createUser, variables})
       .then((res) => {
         if (res.status === 200) {
           this.props.homeContext.updateCurrentUser(res.res.createUser).then(() => Actions.entry({ type: ActionConst.REPLACE }));

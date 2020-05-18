@@ -166,7 +166,7 @@ class CalendarEntry extends Component {
             }
           };
       
-          appSyncGraphQl(updateEvent, variables)
+          appSyncGraphQl({query: updateEvent, variables: variables})
             .then((res) => {
               if (res.status === 200) {
                 this.fetchEvents();
@@ -191,7 +191,7 @@ class CalendarEntry extends Component {
       }
     };
 
-    appSyncGraphQl(updateEvent, variables)
+    appSyncGraphQl({query: updateEvent, variables})
       .then((res) => {
         if (res.status === 200) {
           this.fetchEvents();
@@ -217,7 +217,7 @@ class CalendarEntry extends Component {
       }
     };
 
-    appSyncGraphQl(createEvent, variables)
+    appSyncGraphQl({query: createEvent, variables})
       .then((res) => {
         if (res.status === 200) {
           this.fetchEvents();
@@ -235,7 +235,7 @@ class CalendarEntry extends Component {
       }
     };
 
-    appSyncGraphQl(deleteEvent, variables)
+    appSyncGraphQl({query: deleteEvent, variables})
       .then((res) => {
         if (res.status === 200) {
           this.fetchEvents();
