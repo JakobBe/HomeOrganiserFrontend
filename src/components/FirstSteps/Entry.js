@@ -1,23 +1,25 @@
 import React, { Component } from 'react';
-import { Text, View, ImageBackground } from 'react-native';
-import { Footer, UserCarousel } from '../Common';
+import { Text, View, ImageBackground, Modal } from 'react-native';
+import { Footer, UserCarousel, Button, CloseButton, Input } from '../Common';
 import { UserContext } from '../../contexts/UserContextHolder';
 import { HomeContext } from '../../contexts/HomeContextHolder';
-import { colorPalette, deviceWidth, textStyles } from '../../Style';
+import { colorPalette, deviceWidth, textStyles, layouts } from '../../Style';
 import currentDate from '../../Helpers/currentDate';
 import QRCode from 'react-native-qrcode-svg';
+import InvitaionModal from './InvitaionModal';
 
 class Entry extends Component {
   state = {
-    homeModalActive: false,
+    modalActive: false,
+    isInviteModal: false
   }
 
   onModalClose = () => {
-    this.props.homeContext.profileModal.close();
-    // this.setState({
-    //   profileModalActive: false,
-    //   homeModalActive: false
-    // });
+    this.props.homeContext.updateInvitations();
+    this.setState({
+      modalActive: false,
+      isInviteModal: false
+    });
   }
 
   completedSignUp = () => {
@@ -29,8 +31,9 @@ class Entry extends Component {
   getQRCode = (id) => {
     return (
       <QRCode
-        level="Q"
-        style={styles.homeImg}
+        size={50}
+        logo={{uri: '../../../assets/images/eggplant_single.png'}}
+        logoSize={10}
         value={JSON.stringify(
           id
         )}
@@ -48,25 +51,56 @@ class Entry extends Component {
     return selectedDateEvents;
   }
 
-  renderMainContent = (currentUser, name, users, id) => {
-    const profileColor = currentUser.color
+  getPendingRequestButton = (invitations) => {
+    console.log('invitations', invitations);
+    if (invitations && invitations.length > 0) {
+      return (
+        <Button
+          onPress={() => this.setState({ modalActive: true })}
+        >
+          Pending Requests
+        </Button>
+      );
+    }
+  }
+
+  renderMainContent = (currentUser, name, users, id, invitations) => {
     let userCarouselArray = users.filter(user => user.id !== currentUser.id);
     userCarouselArray.unshift(currentUser);
     const mate = this.props.homeContext.users.length === 2 ? 'roommate' : 'rommates';
 
     return (
       <View style={styles.mainContentContainer}>
-        <View style={styles.homeWrapper}>
-          <View>
-            <Text style={textStyles.headerStyle}>
-              {name}
-            </Text>
-            {/* <View style={styles.homeColorBlock(colorPalette.primary)}></View> */}
-            <Text style={textStyles.normalText}>
-              You have {this.props.homeContext.users.length - 1} {mate}.
-            </Text>
+        <View style={styles.homeContainer}>
+          <View style={styles.homeInfoWrapper}>
+            <View>
+              <Text style={textStyles.headerStyle}>
+                {name}
+              </Text>
+              <Text style={textStyles.normalText}>
+                You have {this.props.homeContext.users.length - 1} {mate}.
+              </Text>
+            </View>
+            {this.getQRCode(id)}
           </View>
-          {this.getQRCode(id)}
+          <View style={layouts.centerWrapper}>
+            <Button 
+              onPress={() => this.setState({ modalActive: true, isInviteModal: true })}
+              additionalButtonStyles={{margin: 10}}
+            >
+              Invite friend
+            </Button>
+            <InvitaionModal
+              modalActive={this.state.modalActive}
+              isInviteModal={this.state.isInviteModal}
+              onModalClose={this.onModalClose}
+              creatorSub={currentUser.sub}
+              invitations={invitations}
+              homeId={id}
+              updateInvitations={this.props.homeContext.updateInvitations}
+            />
+            {this.getPendingRequestButton(invitations)}
+          </View>
         </View>
         <UserCarousel
           userCarouselArray={userCarouselArray}
@@ -76,15 +110,15 @@ class Entry extends Component {
   }
 
   render() {
-    const {currentUser, users, name, id} = this.props.homeContext
-
+    const {currentUser, users, name, id, invitations} = this.props.homeContext
+    console.log('users', users);
     return (
     <ImageBackground
       source={require('../../../assets/images/real-aubergine.jpg')}
       style={styles.backgroundImage}
     >
       <View style={styles.entryContainer}>
-        {this.renderMainContent(currentUser, name, users, id)}
+        {this.renderMainContent(currentUser, name, users, id, invitations)}
         <Footer isHomeActive={true} />
       </View>
     </ImageBackground>
@@ -98,37 +132,30 @@ const styles = {
     justifyContent: 'space-between',
   },
 
+  backgroundImage: {
+    width: '100%',
+    height: '100%'
+  },
+
   mainContentContainer: {
     flex: 1,
   },
 
-  homeWrapper: {
-    height: '20%', 
-    backgroundColor: 'rgba(255,255,255,.9)', 
-    padding: 30,
-    margin: 20, 
-    borderRadius: 10,
+  homeInfoWrapper: {
     flex: 0,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between'
   },
 
-  homeImg: {
-    height: 60,
-    width: 60,
-  },
-
-  homeColorBlock: (color) => ({
-    backgroundColor: color,
-    height: 15,
-    width: '40%',
-    marginBottom: 10
-  }),
-
-  backgroundImage: {
-    width: '100%',
-    height: '100%'
+  homeContainer: {
+    height: '30%',
+    backgroundColor: 'rgba(255,255,255,.9)',
+    padding: 30,
+    margin: 20,
+    borderRadius: 10,
+    flex: 0,
+    justifyContent: 'space-between'
   }
 };
 

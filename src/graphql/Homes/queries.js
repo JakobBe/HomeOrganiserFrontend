@@ -1,5 +1,5 @@
 export const getHome2 = /* GraphQL */ `
-  query GetHome($id: ID!) {
+  query GetHome($id: ID! $invitationFilter: TableInvitationFilterInput) {
     getHome(id: $id) {
       id
       name
@@ -12,6 +12,18 @@ export const getHome2 = /* GraphQL */ `
           imageUrl
         }
         nextToken
+      }
+      invitations(filter: $invitationFilter) {
+        items {
+          id
+          email
+          homeId
+          status
+          request
+          creatorSub
+          createdAt
+          updatedAt
+        }
       }
       events(limit: 100) {
         items {
