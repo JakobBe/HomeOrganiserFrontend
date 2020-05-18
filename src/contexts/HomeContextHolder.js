@@ -7,6 +7,8 @@ import { listEventsWithHomeId } from '../graphql/Events/queries';
 import { listToDosWithHomeId } from '../graphql/ToDos/queries';
 import { listShoppingItemsWithHomeId } from '../graphql/ShoppingItems/queries';
 import { listExpensesWithHomeId } from '../graphql/Expenses/queries';
+import { listPendingInvitationsWithHomeId } from '../graphql/Invitaions/queries';
+import { invitaionStatus } from '../Helpers/magicNumbers';
 
 const defaultValue = {};
 export const HomeContext = React.createContext(defaultValue);
@@ -19,6 +21,7 @@ class HomeContextHolder extends Component {
     events: undefined,
     shoppingItems: undefined,
     expenses: undefined,
+    invitations: undefined,
     name: undefined,
     id: undefined,
     sub: undefined,
@@ -36,7 +39,7 @@ class HomeContextHolder extends Component {
       const variables = {
         sub: info
       }
-      await appSyncGraphQl(getUserBySub, variables)
+      await appSyncGraphQl({query: getUserBySub, variables})
         .then((res) => {
           if (res.status === 200) {
             currentUser = res.res.listUsers.items[0];
@@ -61,7 +64,15 @@ class HomeContextHolder extends Component {
       id: homeId
     };
 
-    await appSyncGraphQl(getHome2, variables)
+    const filter = {
+      invitaionFilter: {
+        status: {
+          eq: invitaionStatus.pending
+        }
+      }
+    }
+
+    await appSyncGraphQl({query: getHome2, variables, filter})
       .then((res) => {
         if (res.status === 200) {
           const home = res.res.getHome;
@@ -71,6 +82,7 @@ class HomeContextHolder extends Component {
             events: home.events.items,
             shoppingItems: home.shoppingItems.items,
             expenses: home.expenses.items,
+            invitations: home.invitations.items,
             name: home.name,
             id: home.id
           });
@@ -103,7 +115,7 @@ class HomeContextHolder extends Component {
       homeId: this.state.id
     };
 
-    const toDos = await appSyncGraphQl(listToDosWithHomeId, variables)
+    const toDos = await appSyncGraphQl({query: listToDosWithHomeId, variables})
       .then((res) => {
         if (res.status === 200) {
           this.setState({
@@ -135,7 +147,7 @@ class HomeContextHolder extends Component {
 
     const limit = 1;
 
-    const shoppingItems = await appSyncGraphQl(listShoppingItemsWithHomeId, variables, limit)
+    const shoppingItems = await appSyncGraphQl({query: listShoppingItemsWithHomeId, variables, limit})
       .then((res) => {
         if (res.status === 200) {
           this.setState({
@@ -154,7 +166,7 @@ class HomeContextHolder extends Component {
       homeId: this.state.id
     };
   
-    const expenses = await appSyncGraphQl(listExpensesWithHomeId, variables)
+    const expenses = await appSyncGraphQl({query: listExpensesWithHomeId, variables})
       .then((res) => {
         if (res.status === 200) {
           this.setState({
@@ -168,6 +180,25 @@ class HomeContextHolder extends Component {
       return expenses;
   }
 
+  updateInvitations = async () => {
+    const variables = {
+      homeId: this.state.id,
+      status: invitaionStatus.pending
+    };
+
+    const invitations = await appSyncGraphQl({ query: listPendingInvitationsWithHomeId, variables})
+      .then((res) => {
+        if (res.status === 200) {
+          this.setState({
+            invitations: res.res.listInvitations.items
+          });
+          return res.res.listInvitations.items;
+        } else if (res.status === 400) {
+          return [];
+        }
+      })
+    return invitations;
+  }
 
   updateCurrentUser = async (currentUser) => {
     let users = this.state.users;
@@ -192,6 +223,7 @@ class HomeContextHolder extends Component {
       toDos: undefined,
       events: undefined,
       shoppingItems: undefined,
+      invitations: undefined,
       expenses: undefined,
       name: undefined,
       id: undefined,
@@ -200,6 +232,7 @@ class HomeContextHolder extends Component {
   }
 
   render() {
+    console.log('this.state', this.state);
     return (
       <HomeContext.Provider
         value={
@@ -221,6 +254,8 @@ class HomeContextHolder extends Component {
             updateShoppingItems: this.updateShoppingItems,
             updateExpenses: this.updateExpenses,
             buildHomeContext: this.buildHomeContext,
+            invitations: this.state.invitations,
+            updateInvitations: this.updateInvitations,
             logout: this.logout
           }
         }
