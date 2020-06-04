@@ -183,6 +183,14 @@ PODS:
     - React-cxxreact (= 0.61.5)
     - React-jsi (= 0.61.5)
   - React-jsinspector (0.61.5)
+  - react-native-camera (3.27.0):
+    - React
+    - react-native-camera/RCT (= 3.27.0)
+    - react-native-camera/RN (= 3.27.0)
+  - react-native-camera/RCT (3.27.0):
+    - React
+  - react-native-camera/RN (3.27.0):
+    - React
   - react-native-image-picker (0.28.0):
     - React
   - react-native-netinfo (5.8.0):
@@ -256,6 +264,7 @@ DEPENDENCIES:
   - React-jsi (from `../node_modules/react-native/ReactCommon/jsi`)
   - React-jsiexecutor (from `../node_modules/react-native/ReactCommon/jsiexecutor`)
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector`)
+  - react-native-camera (from `../node_modules/react-native-camera`)
   - react-native-image-picker (from `../node_modules/react-native-image-picker`)
   - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
   - "react-native-slider (from `../node_modules/@react-native-community/slider`)"
@@ -312,6 +321,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/jsiexecutor"
   React-jsinspector:
     :path: "../node_modules/react-native/ReactCommon/jsinspector"
+  react-native-camera:
+    :path: "../node_modules/react-native-camera"
   react-native-image-picker:
     :path: "../node_modules/react-native-image-picker"
   react-native-netinfo:
@@ -370,6 +381,7 @@ SPEC CHECKSUMS:
   React-jsi: cb2cd74d7ccf4cffb071a46833613edc79cdf8f7
   React-jsiexecutor: d5525f9ed5f782fdbacb64b9b01a43a9323d2386
   React-jsinspector: fa0ecc501688c3c4c34f28834a76302233e29dc0
+  react-native-camera: d1f927466e03b8cd7df06e6c21836599f7fd5ee2
   react-native-image-picker: e6e06d4315e3c85bad17e4b2002cd29f11d202c8
   react-native-netinfo: b9650ab1b8b4362b3c455b1274e4bc48223cc957
   react-native-slider: e51492f1264d882a8815b71c5870f8978e52887d
@@ -391,6 +403,6 @@ SPEC CHECKSUMS:
   RNVectorIcons: 0bb4def82230be1333ddaeee9fcba45f0b288ed4
   Yoga: f2a7cd4280bfe2cca5a7aed98ba0eb3d1310f18b
 
-PODFILE CHECKSUM: ddbc74cadea80d8266419af37761f97aa0b3e798
+PODFILE CHECKSUM: dfb2e7518185295ec6a9c76a6f86da2368ddc854
 
-COCOAPODS: 1.8.4
+COCOAPODS: 1.9.3
