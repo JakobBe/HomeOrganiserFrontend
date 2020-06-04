@@ -9,15 +9,19 @@ import { colorPalette } from '../../Style/Colors';
 import { appSyncGraphQl } from '../../AWSClient';
 import { createHome } from '../../graphql/Homes/mutations';
 import { listHomes } from '../../graphql/Homes/queries';
+import { listPendingInvitationsWithEmail } from '../../graphql/Invitaions/queries';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { invitationStatus } from '../../Helpers/magicNumbers';
 import { faHammer, faDoorOpen } from '@fortawesome/free-solid-svg-icons';
+import { NotificationNumber } from '../Common';
 
 class HomeSelector extends Component {
   state = {
     homes: undefined,
     createModalPresented: false,
     joinModalPresented: false,
-    homeId: undefined
+    homeId: undefined,
+    invitations: undefined,
   }
 
   componentDidMount() {
@@ -29,6 +33,24 @@ class HomeSelector extends Component {
           });
         }
       })
+
+    const variables = {
+      email: this.props.homeContext.currentUser.email,
+      status: invitationStatus.pending
+    };
+    appSyncGraphQl({ query: listPendingInvitationsWithEmail, variables })
+      .then((res) => {
+        if (res.status === 200) {
+          console.log('res from inivations for User', res.res.listInvitations);
+          this.setState({
+            invitations: res.res.listInvitations.items
+          });         
+        }
+      })
+  }
+
+  componentWillReceiveProps(props) {
+    console.log('new props', props);
   }
 
   onModalClose = () => {
@@ -56,6 +78,7 @@ class HomeSelector extends Component {
   }
 
   render() {
+    const notification = this.state.invitations && this.state.invitations.length > 0 ? <NotificationNumber invitations={this.state.invitations} /> : undefined;
     return (
       <View style={styles.homeSelectorContainer}>
         <View style={styles.textWrapper}>
@@ -69,7 +92,7 @@ class HomeSelector extends Component {
         <View style={styles.guideWrapper}>
           <View style={styles.navigationWrapper}>
           <TouchableOpacity style={styles.imageWrapper} onPress={this.onCreateHomePress}>
-              <FontAwesomeIcon icon={faHammer} style={{ color: colorPalette.secondary, marginBottom: 8 }} size={60} mask={['far', 'circle']} />
+              <FontAwesomeIcon icon={faHammer} style={{ color: colorPalette.primary, marginBottom: 8 }} size={60} mask={['far', 'circle']} />
             {/* <Image source={require('../../../assets/images/eggplant_single.png')} style={styles.imageStyle}/> */}
           </TouchableOpacity>
           <Text style={styles.navigationText}>
@@ -77,13 +100,14 @@ class HomeSelector extends Component {
           </Text>
           </View>
           <View style={styles.navigationWrapper}>
-          <TouchableOpacity style={styles.imageWrapper} onPress={this.onJoinHomePress}>
-            <FontAwesomeIcon icon={faDoorOpen} style={{ color: colorPalette.secondary, marginBottom: 8 }} size={60} mask={['far', 'circle']} />
-            {/* <Image source={require('../../../assets/images/eggplant_double.png')} style={styles.imageStyle} /> */}
-          </TouchableOpacity>
-          <Text style={styles.navigationText}>
-            Join
-          </Text>
+            <TouchableOpacity style={styles.imageWrapper} onPress={this.onJoinHomePress}>
+              <FontAwesomeIcon icon={faDoorOpen} style={{ color: colorPalette.primary, marginBottom: 8 }} size={60} mask={['far', 'circle']} />
+              {/* <Image source={require('../../../assets/images/eggplant_double.png')} style={styles.imageStyle} /> */}
+            </TouchableOpacity>
+            <Text style={styles.navigationText}>
+              Join
+            </Text>
+            {notification}
           </View>
         </View>
         <HomeSelectorModal 
@@ -93,6 +117,7 @@ class HomeSelector extends Component {
           homes={this.state.homes}
           user={this.props.homeContext.currentUser}
           successfulHomeSelection={this.successfulHomeSelection}
+          invitations={this.state.invitations}
         />
       </View>
     );
@@ -143,12 +168,13 @@ const styles = {
 
   navigationWrapper: {
     flex: 0,
-    alignItems: 'center'
+    alignItems: 'center',
+    position: 'relative'
   },
 
   navigationText: {
     fontSize: 18,
-    color: colorPalette.primary
+    color: colorPalette.secondary
   }
 }
 

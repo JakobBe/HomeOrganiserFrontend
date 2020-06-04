@@ -3,7 +3,7 @@ import { View, Modal, Alert, FlatList, Text } from 'react-native';
 import { colorPalette, deviceWidth, textStyles, layouts } from '../../Style';
 import { Button, CloseButton, Input } from '../Common';
 import { createInvitation, updateInvitation } from '../../graphql/Invitaions/mutations';
-import { dateTimeFormat, invitaionStatus } from '../../Helpers/magicNumbers';
+import { dateTimeFormat, invitationStatus } from '../../Helpers/magicNumbers';
 import { appSyncGraphQl } from '../../AWSClient';
 import moment from 'moment';
 
@@ -26,7 +26,7 @@ class InvitaionModal extends React.Component {
   onInviteSendPress = () => {
     const {inviteEmail} = this.state;
 
-    const inviteCheckStatus = this.inviteCheck(inviteEmail);
+    const inviteCheckStatus = this.inviteCheck(inviteEmail.toLowerCase());
 
     if (inviteCheckStatus === inviteExceptions.PendingInvitaionExsist) {
       Alert.alert("There already is a pending invitaion for this email.");
@@ -38,8 +38,8 @@ class InvitaionModal extends React.Component {
         creatorSub: this.props.creatorSub,
         homeId: this.props.homeId,
         request: false,
-        status: invitaionStatus.pending,
-        email: inviteEmail,
+        status: invitationStatus.pending,
+        email: inviteEmail.toLowerCase(),
         createdAt: moment.utc().format(dateTimeFormat),
         updatedAt: moment.utc().format(dateTimeFormat)
       }
@@ -64,7 +64,7 @@ class InvitaionModal extends React.Component {
     const variables = {
       input: {
         id: itemId,
-        status: invitaionStatus.declined,
+        status: invitationStatus.declined,
         updatedAt: moment.utc().format(dateTimeFormat)
       }
     };
@@ -73,6 +73,29 @@ class InvitaionModal extends React.Component {
       .then((res) => {
         if (res.status === 200) {
           Alert.alert("Invitaion removed successfully.", '', [
+            {
+              text: 'Ok', onPress: () => {
+                this.props.onModalClose();
+              }
+            }
+          ]);
+        }
+      })
+  }
+
+  onAcceptPress = (itemId) => {
+    const variables = {
+      input: {
+        id: itemId,
+        status: invitationStatus.accepted,
+        updatedAt: moment.utc().format(dateTimeFormat)
+      }
+    };
+
+    appSyncGraphQl({ query: updateInvitation, variables })
+      .then((res) => {
+        if (res.status === 200) {
+          Alert.alert("Invitaion accepted.", '', [
             {
               text: 'Ok', onPress: () => {
                 this.props.onModalClose();
@@ -95,6 +118,7 @@ class InvitaionModal extends React.Component {
         </Button>
         <Button
           additionalButtonStyles={{ width: '30%', padding: 0 }}
+          onPress={() => this.onRemovePress(item.id)}
         >
           Decline
         </Button>
@@ -102,7 +126,7 @@ class InvitaionModal extends React.Component {
     ) : (
       <View style={styles.modalButtonsWrapper}>
         <Button
-            additionalButtonStyles={{ backgroundColor: colorPalette.red, width: '30%', padding: 0}}
+          additionalButtonStyles={{ backgroundColor: colorPalette.red, width: '30%', padding: 0}}
           onPress={() => this.onRemovePress(item.id)}
         >
           Remove

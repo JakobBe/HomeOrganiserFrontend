@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, View, ImageBackground, Modal } from 'react-native';
+import { Text, View, ImageBackground, Modal, TouchableOpacity } from 'react-native';
 import { Footer, UserCarousel, Button, CloseButton, Input } from '../Common';
 import { UserContext } from '../../contexts/UserContextHolder';
 import { HomeContext } from '../../contexts/HomeContextHolder';
@@ -11,7 +11,8 @@ import InvitaionModal from './InvitaionModal';
 class Entry extends Component {
   state = {
     modalActive: false,
-    isInviteModal: false
+    isInviteModal: false,
+    isQRCodeEnhanced: false
   }
 
   onModalClose = () => {
@@ -30,14 +31,16 @@ class Entry extends Component {
 
   getQRCode = (id) => {
     return (
-      <QRCode
-        size={50}
-        logo={{uri: '../../../assets/images/eggplant_single.png'}}
-        logoSize={10}
-        value={JSON.stringify(
-          id
-        )}
-      />
+      <View style={{ position: this.state.isQRCodeEnhanced ? 'absolute' : 'relative', top: 360, left: -300, zIndex: 10 }}>
+        <QRCode
+          size={this.state.isQRCodeEnhanced ? 300: 50}
+          logo={{uri: 'assets/images/eggplant_single.png'}}
+          logoSize={10}
+          value={JSON.stringify(
+            id
+          )}
+        />
+      </View>
     )
   }
 
@@ -51,15 +54,29 @@ class Entry extends Component {
     return selectedDateEvents;
   }
 
+
+  getNotificationNumber = (invitations) => {
+    return (
+      <View style={styles.notificationWrapper}>
+        <Text style={styles.notificationNumberStyle}>
+          {invitations.length}
+        </Text>
+      </View>
+    );
+  }
+
   getPendingRequestButton = (invitations) => {
-    console.log('invitations', invitations);
     if (invitations && invitations.length > 0) {
       return (
-        <Button
-          onPress={() => this.setState({ modalActive: true })}
-        >
-          Pending Requests
-        </Button>
+        <View style={{ position: 'relative' }}>
+          <Button
+            onPress={() => this.setState({ modalActive: true })}
+            additionalButtonStyles={{ zIndex: 1 }}
+          >
+            Pending Requests
+          </Button>
+          {this.getNotificationNumber(invitations)}
+        </View>
       );
     }
   }
@@ -81,7 +98,9 @@ class Entry extends Component {
                 You have {this.props.homeContext.users.length - 1} {mate}.
               </Text>
             </View>
-            {this.getQRCode(id)}
+            <TouchableOpacity onPress={() => this.setState({isQRCodeEnhanced: true})}>
+              {this.getQRCode(id)}
+            </TouchableOpacity>
           </View>
           <View style={layouts.centerWrapper}>
             <Button 
@@ -111,7 +130,7 @@ class Entry extends Component {
 
   render() {
     const {currentUser, users, name, id, invitations} = this.props.homeContext
-    console.log('users', users);
+
     return (
     <ImageBackground
       source={require('../../../assets/images/real-aubergine.jpg')}
@@ -156,6 +175,24 @@ const styles = {
     borderRadius: 10,
     flex: 0,
     justifyContent: 'space-between'
+  },
+
+  notificationWrapper: {
+    position: 'absolute',
+    top: -6,
+    right: -6,
+    width: 20,
+    height: 20,
+    borderRadius: 20 / 2,
+    backgroundColor: 'orangered',
+    justifyContent: 'center',
+    zIndex: 0
+  },
+
+  notificationNumberStyle: {
+    color: 'white',
+    textAlign: 'center',
+    fontWeight: 'bold'
   }
 };
 
